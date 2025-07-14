@@ -1,0 +1,78 @@
+# Logs
+*.log
+install.log
+update.log
+uninstall.log
+
+# Backup directories
+backup/
+backups/
+*.backup
+*.bak
+
+# Local configuration
+*.local
+.env
+.env.*
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Personal data
+secrets/
+private/
+credentials/
+
+# System specific
+.directory
+.Trash-*
+.nfs*
+
+# Project specific
+/test-install/
+/scratch/
