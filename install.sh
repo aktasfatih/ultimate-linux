@@ -101,14 +101,17 @@ parse_arguments() {
 check_prerequisites() {
     log INFO "Checking prerequisites..."
     
-    # Check for sudo access
-    if ! sudo -n true 2>/dev/null; then
-        if [[ "$NON_INTERACTIVE" == "true" ]]; then
-            log ERROR "Sudo access required. Please run with sudo or authenticate first."
-            exit 1
+    # Skip sudo check for dry run
+    if [[ "$DRY_RUN" == "false" ]]; then
+        # Check for sudo access
+        if ! sudo -n true 2>/dev/null; then
+            if [[ "$NON_INTERACTIVE" == "true" ]]; then
+                log ERROR "Sudo access required. Please run with sudo or authenticate first."
+                exit 1
+            fi
+            log INFO "Sudo access required. Please enter your password."
+            sudo true
         fi
-        log INFO "Sudo access required. Please enter your password."
-        sudo true
     fi
     
     # Check internet connectivity
