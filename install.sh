@@ -400,8 +400,8 @@ install_neovim() {
     fi
     
     # Deploy Neovim configuration
-    mkdir -p "$HOME/.config/nvim"
-    deploy_config "config/nvim/" "$HOME/.config/nvim/"
+    mkdir -p "$HOME/.config"
+    deploy_config "config/nvim" "$HOME/.config/nvim"
     
     # Install language servers and tools
     install_language_servers
@@ -591,19 +591,13 @@ deploy_config() {
         fi
     fi
     
-    # Deploy using GNU Stow if available, otherwise use symlinks
-    if command -v stow &> /dev/null; then
-        # Use stow for deployment
-        local stow_pkg=$(basename "$source")
-        local stow_dir=$(dirname "$source")
-        (cd "$stow_dir" && stow -t "$HOME" "$stow_pkg")
+    # Copy the configuration files
+    if [[ -d "$source" ]]; then
+        # For directories, copy contents
+        cp -r "$source"/* "$target/" 2>/dev/null || cp -r "$source"/. "$target/"
     else
-        # Fall back to creating symlinks manually
-        if [[ -d "$source" ]]; then
-            ln -sf "$source" "$target"
-        else
-            ln -sf "$source" "$target"
-        fi
+        # For files, copy directly
+        cp "$source" "$target"
     fi
     
     log INFO "Deployed $source to $target"

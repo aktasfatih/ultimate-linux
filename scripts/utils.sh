@@ -139,6 +139,12 @@ install_from_github() {
     local binary_name="${2:-$(basename "$repo")}"
     local install_path="${3:-/usr/local/bin}"
     
+    # Check if already installed
+    if command -v "$binary_name" &> /dev/null; then
+        log INFO "$binary_name is already installed"
+        return 0
+    fi
+    
     local os=$(get_os)
     local arch=$(get_arch)
     
@@ -148,24 +154,28 @@ install_from_github() {
     local release_url="https://api.github.com/repos/$repo/releases/latest"
     local download_url
     
-    # Try to find appropriate asset
-    download_url=$(curl -s "$release_url" | grep -E "browser_download_url.*${os}.*${arch}" | cut -d '"' -f 4 | head -1)
+    # Try to find appropriate asset with timeout
+    download_url=$(curl -s --connect-timeout 10 --max-time 30 "$release_url" 2>/dev/null | grep -E "browser_download_url.*${os}.*${arch}" | cut -d '"' -f 4 | head -1)
     
     if [[ -z "$download_url" ]]; then
         # Try alternative patterns
-        download_url=$(curl -s "$release_url" | grep -E "browser_download_url.*${os}" | grep -i "${arch}" | cut -d '"' -f 4 | head -1)
+        download_url=$(curl -s --connect-timeout 10 --max-time 30 "$release_url" 2>/dev/null | grep -E "browser_download_url.*${os}" | grep -i "${arch}" | cut -d '"' -f 4 | head -1)
     fi
     
     if [[ -z "$download_url" ]]; then
-        log ERROR "Could not find release for $os/$arch"
-        return 1
+        log WARN "Could not find release for $binary_name ($os/$arch), skipping"
+        return 0
     fi
     
     local temp_dir=$(mktemp -d)
     local filename=$(basename "$download_url")
     
-    # Download the file
-    download_file "$download_url" "$temp_dir/$filename"
+    # Download the file with error handling
+    if ! download_file "$download_url" "$temp_dir/$filename"; then
+        log WARN "Failed to download $binary_name, skipping"
+        rm -rf "$temp_dir"
+        return 0
+    fi
     
     # Extract if needed
     if [[ "$filename" =~ \.(tar\.gz|tgz|zip|tar\.bz2|tar\.xz)$ ]]; then
@@ -180,19 +190,25 @@ install_from_github() {
         fi
         
         if [[ -n "$binary" ]]; then
-            sudo install -m 755 "$binary" "$install_path/$binary_name"
+            if sudo install -m 755 "$binary" "$install_path/$binary_name"; then
+                log SUCCESS "Installed $binary_name to $install_path"
+            else
+                log WARN "Failed to install $binary_name"
+            fi
         else
-            log ERROR "Could not find binary $binary_name in archive"
-            rm -rf "$temp_dir"
-            return 1
+            log WARN "Could not find binary $binary_name in archive"
         fi
     else
         # Assume it's the binary itself
-        sudo install -m 755 "$temp_dir/$filename" "$install_path/$binary_name"
+        if sudo install -m 755 "$temp_dir/$filename" "$install_path/$binary_name"; then
+            log SUCCESS "Installed $binary_name to $install_path"
+        else
+            log WARN "Failed to install $binary_name"
+        fi
     fi
     
     rm -rf "$temp_dir"
-    log SUCCESS "Installed $binary_name to $install_path"
+    return 0
 }
 
 install_via_cargo() {
