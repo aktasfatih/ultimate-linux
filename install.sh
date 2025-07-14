@@ -288,7 +288,16 @@ install_modern_cli_tools() {
         case $tool in
             eza)
                 if ! command -v eza &> /dev/null; then
-                    install_via_cargo "eza" || install_from_github "eza-community/eza"
+                    # Try package manager first for eza
+                    if [[ "$DISTRO_FAMILY" == "debian" ]] && [[ "$DISTRO" == "ubuntu" ]]; then
+                        # eza is in Ubuntu 22.10+
+                        install_packages "eza" || {
+                            log INFO "eza not in repos, trying exa as fallback"
+                            install_packages "exa" || log WARN "Could not install eza/exa"
+                        }
+                    else
+                        install_via_cargo "eza" || log WARN "Could not install eza"
+                    fi
                 fi
                 ;;
             bat)

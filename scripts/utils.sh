@@ -44,9 +44,9 @@ download_file() {
     local output="${2:-$(basename "$url")}"
     
     if command_exists curl; then
-        curl -fsSL "$url" -o "$output"
+        curl -fsSL --connect-timeout 30 --max-time 300 "$url" -o "$output"
     elif command_exists wget; then
-        wget -q "$url" -O "$output"
+        wget --timeout=30 --tries=2 -q "$url" -O "$output"
     else
         log ERROR "Neither curl nor wget found. Cannot download files."
         return 1
