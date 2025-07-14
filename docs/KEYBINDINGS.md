@@ -129,6 +129,10 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `Shift+h` | Previous buffer |
 | `Shift+l` | Next buffer |
 | `<leader>bd` | Delete buffer |
+| `:bnext` or `:bn` | Next buffer |
+| `:bprevious` or `:bp` | Previous buffer |
+| `:b<number>` | Jump to specific buffer |
+| `:buffers` or `:ls` | List all buffers |
 
 ### File Navigation (Telescope)
 | Key | Action |
@@ -145,11 +149,79 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `<leader>fm` | Marks |
 
 ### Git Integration
+
+#### Gitsigns (Hunks & Blame)
+| Key | Action |
+|-----|--------|
+| `]c` | Next hunk |
+| `[c` | Previous hunk |
+| `<leader>hs` | Stage hunk |
+| `<leader>hr` | Reset hunk |
+| `<leader>hS` | Stage buffer |
+| `<leader>hu` | Undo stage hunk |
+| `<leader>hR` | Reset buffer |
+| `<leader>hp` | Preview hunk |
+| `<leader>hb` | Blame line (full) |
+| `<leader>tb` | Toggle current line blame |
+| `<leader>hd` | Diff this |
+| `<leader>hD` | Diff this against ~ |
+| `<leader>td` | Toggle deleted |
+| `ih` | Select hunk (text object) |
+
+#### Git Operations (Leader + g)
+| Key | Action |
+|-----|--------|
+| `<leader>gg` | Open Lazygit |
+| `<leader>gj` | Next hunk |
+| `<leader>gk` | Previous hunk |
+| `<leader>gl` | Blame line |
+| `<leader>gp` | Preview hunk |
+| `<leader>gr` | Reset hunk |
+| `<leader>gR` | Reset buffer |
+| `<leader>gs` | Stage hunk |
+| `<leader>gu` | Undo stage hunk |
+| `<leader>gd` | Diff against HEAD |
+
+#### Telescope Git
 | Key | Action |
 |-----|--------|
 | `<leader>gc` | Git commits |
 | `<leader>gb` | Git branches |
-| `<leader>gs` | Git status |
+| `<leader>go` | Git status (changed files) |
+
+#### Fugitive Commands
+| Command | Action |
+|---------|--------|
+| `:Git` or `:G` | Git status |
+| `:Git add %` | Stage current file |
+| `:Git commit` | Commit |
+| `:Git push` | Push |
+| `:Git pull` | Pull |
+| `:Git blame` | Blame |
+| `:Git log` | Log |
+| `:Gdiffsplit` | 3-way merge conflict resolution |
+| `:Gwrite` | Choose current buffer version |
+| `:Gread` | Choose other version |
+
+#### Diffview Commands
+| Command | Action |
+|---------|--------|
+| `:DiffviewOpen` | Open diff view |
+| `:DiffviewClose` | Close diff view |
+| `:DiffviewToggleFiles` | Toggle file panel |
+| `:DiffviewFileHistory` | File history |
+
+#### Conflict Resolution (Fugitive)
+| Key/Command | Action |
+|-------------|--------|
+| `:Gdiffsplit` | Open 3-way merge |
+| `]c` | Next conflict |
+| `[c` | Previous conflict |
+| `:diffget //2` | Get from left (target) |
+| `:diffget //3` | Get from right (merge) |
+| `:Gwrite` | Save and stage |
+| `do` | Obtain diff (take theirs) |
+| `dp` | Put diff (give ours) |
 
 ### LSP Functions
 | Key | Action |
@@ -183,10 +255,63 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `<leader>lw` | Workspace symbols |
 
 ### File Explorer (NvimTree)
+
+#### Opening/Closing
 | Key | Action |
 |-----|--------|
 | `<leader>e` | Toggle file explorer |
-| `<leader>nf` | Find current file |
+| `<leader>nf` | Find current file in tree |
+
+#### Navigation (Inside NvimTree)
+| Key | Action |
+|-----|--------|
+| `j`/`k` or `↑`/`↓` | Move up/down |
+| `h`/`l` or `←`/`→` | Close/open folders |
+| `Enter` or `o` | Open file/folder |
+| `Tab` | Open file but stay in tree |
+| `-` | Go to parent directory |
+| `Backspace` | Close current folder |
+
+#### Window Switching
+| Key | Action |
+|-----|--------|
+| `Ctrl+w h` or `Ctrl+h` | Move to left window (tree → editor) |
+| `Ctrl+w l` or `Ctrl+l` | Move to right window (editor → tree) |
+| `Ctrl+w w` | Cycle through windows |
+
+#### File Operations
+| Key | Action |
+|-----|--------|
+| `a` | Create file/folder (add `/` for folder) |
+| `r` | Rename |
+| `d` | Delete |
+| `x` | Cut |
+| `c` | Copy |
+| `p` | Paste |
+| `y` | Copy name |
+| `Y` | Copy relative path |
+| `gy` | Copy absolute path |
+
+#### Opening Methods
+| Key | Action |
+|-----|--------|
+| `Enter` or `o` | Open in current window |
+| `Ctrl+v` | Open in vertical split |
+| `Ctrl+s` | Open in horizontal split |
+| `Ctrl+t` | Open in new tab |
+| `Tab` | Preview (open but stay in tree) |
+
+#### View Options
+| Key | Action |
+|-----|--------|
+| `H` | Toggle hidden files |
+| `I` | Toggle ignored files |
+| `R` | Refresh tree |
+| `W` | Collapse all |
+| `E` | Expand all |
+| `S` | Search |
+| `f` | Filter (live) |
+| `F` | Clear filter |
 
 ### Text Manipulation
 | Key | Action |
@@ -196,11 +321,20 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `Alt+j` | Move line down |
 | `Alt+k` | Move line up |
 | `p` | Paste without yanking (visual) |
+| `Y` | Yank to end of line |
 
 ### Search and Replace
 | Key | Action |
 |-----|--------|
 | `<leader>s` | Replace word under cursor |
+
+### Clipboard Operations
+| Key | Action |
+|-----|--------|
+| `<leader>y` | Copy to system clipboard (normal/visual) |
+| `<leader>Y` | Copy line to system clipboard |
+| `<leader>p` | Paste from system clipboard |
+| `<leader>P` | Paste before from system clipboard |
 
 ### Terminal
 | Key | Action |
@@ -319,3 +453,48 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 - Type partial command and press `↑` to search history
 - Use `z <partial-path>` to jump to frequently used directories
 - `Ctrl+x Ctrl+e` to edit command in editor
+
+## Git Workflow Best Practices
+
+### Interactive Rebase
+1. **Using Lazygit** (Recommended):
+   - `<leader>gg` to open Lazygit
+   - Press `r` on a commit to start rebase
+   - Use `e` to edit, `s` to squash, `f` to fixup
+   - Much easier than command line!
+
+2. **Using Fugitive**:
+   - `:Git rebase -i HEAD~3` to rebase last 3 commits
+   - Edit in Vim's buffer with full power
+   - Save and close to continue
+
+### Resolving Conflicts
+1. **Quick Resolution**:
+   - When conflict occurs, open file
+   - `:Gdiffsplit` for 3-way merge view
+   - Navigate conflicts with `]c` and `[c`
+   - Use `:diffget //2` or `:diffget //3` to choose version
+   - `:Gwrite` to save and stage
+
+2. **Visual Resolution with Lazygit**:
+   - `<leader>gg` to open Lazygit
+   - Navigate to conflicted file
+   - Press `Enter` to see conflict
+   - Choose resolution visually
+
+### Staging Workflow
+1. **Partial Staging**:
+   - Review changes with `<leader>gp` (preview hunk)
+   - Stage individual hunks with `<leader>gs`
+   - Or use Lazygit for visual staging
+
+2. **Quick Commands**:
+   - `:Git add %` - Stage current file
+   - `:Git reset %` - Unstage current file
+   - `:Git checkout %` - Discard changes
+
+### Recommended Plugins to Add
+For enhanced Git workflow, consider adding:
+- **git-conflict.nvim** - Better conflict markers visualization
+- **git-rebase-auto-diff.nvim** - Auto diff during rebase
+- **neogit** - Magit-like interface for Neovim

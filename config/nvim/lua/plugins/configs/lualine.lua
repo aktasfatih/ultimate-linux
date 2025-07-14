@@ -60,6 +60,72 @@ local spaces = function()
   return "spaces: " .. vim.api.nvim_buf_get_option(0, "shiftwidth")
 end
 
+-- Custom components
+local filename = {
+  "filename",
+  file_status = true,
+  newfile_status = false,
+  path = 1,
+  symbols = {
+    modified = "  ",
+    readonly = "",
+    unnamed = "",
+    newfile = "",
+  },
+}
+
+-- LSP clients
+local lsp = {
+  function()
+    local msg = ""
+    local buf_ft = vim.api.nvim_buf_get_option(0, "filetype")
+    local clients = vim.lsp.get_active_clients()
+    if next(clients) == nil then
+      return msg
+    end
+    for _, client in ipairs(clients) do
+      local filetypes = client.config.filetypes
+      if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
+        return client.name
+      end
+    end
+    return msg
+  end,
+  icon = " LSP:",
+  color = { fg = "#ffffff", gui = "bold" },
+}
+
+-- Battery status (if available)
+local battery = {
+  function()
+    local handle = io.popen("cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1")
+    local result = handle:read("*a")
+    handle:close()
+    if result and result ~= "" then
+      local level = tonumber(result:gsub("%s+", ""))
+      if level then
+        local icon = ""
+        if level > 80 then
+          icon = ""
+        elseif level > 60 then
+          icon = ""
+        elseif level > 40 then
+          icon = ""
+        elseif level > 20 then
+          icon = ""
+        else
+          icon = ""
+        end
+        return icon .. " " .. level .. "%%"
+      end
+    end
+    return ""
+  end,
+  cond = function()
+    return vim.fn.isdirectory("/sys/class/power_supply") == 1
+  end,
+}
+
 lualine.setup({
   options = {
     icons_enabled = true,
@@ -68,12 +134,28 @@ lualine.setup({
     section_separators = { left = "", right = "" },
     disabled_filetypes = { "alpha", "dashboard", "NvimTree", "Outline" },
     always_divide_middle = true,
+    globalstatus = true,
   },
   sections = {
-    lualine_a = { branch, diagnostics },
-    lualine_b = { mode },
-    lualine_c = {},
-    lualine_x = { diff, spaces, "encoding", filetype },
+    lualine_a = { mode },
+    lualine_b = { branch, diagnostics },
+    lualine_c = { 
+      filename,
+      -- Only show navic if available
+      vim.fn.has('nvim-0.10') == 1 and {
+        "navic",
+        color_correction = nil,
+        navic_opts = nil
+      } or nil
+    },
+    lualine_x = { 
+      lsp,
+      battery,
+      diff, 
+      spaces, 
+      "encoding", 
+      filetype 
+    },
     lualine_y = { location },
     lualine_z = { progress },
   },
@@ -86,5 +168,6 @@ lualine.setup({
     lualine_z = {},
   },
   tabline = {},
-  extensions = {},
+  winbar = {},
+  extensions = { "nvim-tree", "toggleterm", "quickfix" },
 })

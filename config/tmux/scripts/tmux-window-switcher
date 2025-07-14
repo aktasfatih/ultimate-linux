@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# tmux-window-switcher - Interactive window switcher with preview
+
+# Get all windows across all sessions
+windows=$(tmux list-windows -a -F '#S:#I:#W #{pane_current_path}' | column -t -s ':')
+
+# Use fzf to select a window
+selected=$(echo "$windows" | fzf \
+    --prompt="Select window: " \
+    --preview 'tmux capture-pane -pt {1}:{2} | head -50' \
+    --preview-window=right:60%:wrap \
+    --header="SESSION:WINDOW:NAME PATH")
+
+if [[ -n $selected ]]; then
+    # Extract session and window
+    session=$(echo "$selected" | awk '{print $1}')
+    window=$(echo "$selected" | awk '{print $2}')
+    
+    # Switch to the selected window
+    if [[ -z $TMUX ]]; then
+        tmux attach-session -t "$session:$window"
+    else
+        tmux switch-client -t "$session:$window"
+    fi
+fi

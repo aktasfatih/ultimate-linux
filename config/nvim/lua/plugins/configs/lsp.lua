@@ -30,6 +30,9 @@ require("mason-lspconfig").setup({
     "yamlls",
     "dockerls",
     "taplo",
+    "tailwindcss",  -- For Next.js Tailwind CSS
+    "eslint",       -- For Next.js linting
+    "prismals",     -- For Prisma (often used with Supabase)
   },
   automatic_installation = true,
 })
@@ -41,6 +44,14 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local opts = { noremap = true, silent = true }
+  
+  -- Attach navic if available and Neovim is 0.10+
+  if vim.fn.has('nvim-0.10') == 1 and client.server_capabilities.documentSymbolProvider then
+    local navic_ok, navic = pcall(require, "nvim-navic")
+    if navic_ok then
+      navic.attach(client, bufnr)
+    end
+  end
 
   -- LSP keymaps
   buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
@@ -149,8 +160,8 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
--- Null-ls setup
-local null_ls = require("null-ls")
+-- None-ls setup (successor to null-ls)
+local none_ls = require("null-ls")
 require("mason-null-ls").setup({
   ensure_installed = {
     "prettier",
@@ -164,18 +175,34 @@ require("mason-null-ls").setup({
   automatic_installation = true,
 })
 
-null_ls.setup({
+none_ls.setup({
   sources = {
     -- Formatting
-    null_ls.builtins.formatting.prettier,
-    null_ls.builtins.formatting.stylua,
-    null_ls.builtins.formatting.black,
-    null_ls.builtins.formatting.isort,
-    null_ls.builtins.formatting.shfmt,
+    none_ls.builtins.formatting.prettier.with({
+      filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact", "json", "css", "scss", "html", "markdown" },
+    }),
+    none_ls.builtins.formatting.stylua,
+    none_ls.builtins.formatting.black,
+    none_ls.builtins.formatting.isort,
+    none_ls.builtins.formatting.shfmt,
+    none_ls.builtins.formatting.gofmt,       -- Go formatting
+    none_ls.builtins.formatting.goimports,   -- Go imports
     
     -- Diagnostics
-    null_ls.builtins.diagnostics.shellcheck,
-    null_ls.builtins.diagnostics.hadolint,
+    none_ls.builtins.diagnostics.shellcheck,
+    none_ls.builtins.diagnostics.hadolint,
+    none_ls.builtins.diagnostics.eslint,     -- JavaScript/TypeScript linting
+    none_ls.builtins.diagnostics.flake8,     -- Python linting
+    none_ls.builtins.diagnostics.golangci_lint, -- Go linting
   },
-  on_attach = on_attach,
+  on_attach = function(client, bufnr)
+    on_attach(client, bufnr)
+    -- Attach navic if available and Neovim is 0.10+
+    if vim.fn.has('nvim-0.10') == 1 and client.server_capabilities.documentSymbolProvider then
+      local navic_ok, navic = pcall(require, "nvim-navic")
+      if navic_ok then
+        navic.attach(client, bufnr)
+      end
+    end
+  end,
 })

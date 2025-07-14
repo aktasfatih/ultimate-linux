@@ -57,3 +57,17 @@ opt.shadafile = vim.fn.stdpath("data") .. "/shada/main.shada"
 -- Disable netrw
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
+
+-- Clipboard configuration
+vim.g.clipboard = {
+  name = 'ultimate-linux-clipboard',
+  copy = {
+    ['+'] = {'xclip', '-selection', 'clipboard'},
+    ['*'] = {'xclip', '-selection', 'primary'},
+  },
+  paste = {
+    ['+'] = {'xclip', '-selection', 'clipboard', '-o'},
+    ['*'] = {'xclip', '-selection', 'primary', '-o'},
+  },
+  cache_enabled = 1,
+}

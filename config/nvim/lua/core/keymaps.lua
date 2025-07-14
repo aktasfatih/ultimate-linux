@@ -58,3 +58,14 @@ keymap("t", "<C-h>", "<C-\\><C-N><C-w>h", opts)
 keymap("t", "<C-j>", "<C-\\><C-N><C-w>j", opts)
 keymap("t", "<C-k>", "<C-\\><C-N><C-w>k", opts)
 keymap("t", "<C-l>", "<C-\\><C-N><C-w>l", opts)
+
+-- Clipboard operations
+keymap("n", "<leader>y", '"+y', opts) -- copy to system clipboard
+keymap("v", "<leader>y", '"+y', opts) -- copy to system clipboard
+keymap("n", "<leader>Y", '"+Y', opts) -- copy line to system clipboard
+keymap("n", "<leader>p", '"+p', opts) -- paste from system clipboard
+keymap("n", "<leader>P", '"+P', opts) -- paste before from system clipboard
+keymap("v", "<leader>p", '"+p', opts) -- paste from system clipboard
+
+-- Better yank behavior (don't move cursor)
+keymap("n", "Y", "y$", opts)

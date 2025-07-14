@@ -76,3 +76,4 @@ credentials/
 # Project specific
 /test-install/
 /scratch/
+.claude/settings.local.json

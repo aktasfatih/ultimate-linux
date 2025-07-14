@@ -46,6 +46,22 @@ check_command() {
     fi
 }
 
+check_shell_startup() {
+    local shell=$1
+    echo -e "\n${GREEN}Testing $shell startup:${NC}"
+    
+    if command -v "$shell" &> /dev/null; then
+        local test_output=$($shell -l -c 'echo "OK"' 2>&1)
+        if [[ "$test_output" == *"OK"* ]] && [[ "$test_output" != *"command not found"* ]] && [[ "$test_output" != *"setopt"* ]] && [[ "$test_output" != *"shopt"* ]]; then
+            success "$shell starts without errors"
+        else
+            error "$shell has startup errors"
+        fi
+    else
+        warning "$shell is not installed"
+    fi
+}
+
 check_file() {
     local file=$1
     local type=${2:-"exists"}
@@ -240,10 +256,26 @@ run_health_checks() {
     fi
     
     # Check current shell
-    if [[ "$SHELL" == */zsh ]]; then
-        success "Default shell is zsh"
+    local default_shell=$(basename "$SHELL")
+    local current_shell=""
+    if [[ -n "${BASH_VERSION:-}" ]]; then
+        current_shell="bash"
+    elif [[ -n "${ZSH_VERSION:-}" ]]; then
+        current_shell="zsh"
     else
-        warning "Default shell is not zsh (current: $SHELL)"
+        current_shell=$(ps -p $$ -o comm= | sed 's/^-//')
+    fi
+    
+    success "Default shell: $default_shell, Current shell: $current_shell"
+    
+    # Check for shell configuration issues
+    if [[ -f "$DOTFILES_DIR/scripts/shell-validator.sh" ]]; then
+        echo -e "\n${GREEN}Shell Configuration:${NC}"
+        if "$DOTFILES_DIR/scripts/shell-validator.sh" validate > /dev/null 2>&1; then
+            success "Shell configuration is valid"
+        else
+            error "Shell configuration has issues - run './scripts/shell-validator.sh fix'"
+        fi
     fi
     
     # Check if in SSH session
@@ -279,8 +311,12 @@ generate_report() {
             echo "  - Run: ./install.sh to install missing components"
         fi
         
-        if [[ "$SHELL" != */zsh ]]; then
-            echo "  - Change default shell: chsh -s \$(which zsh)"
+        if [[ -f "$DOTFILES_DIR/scripts/shell-validator.sh" ]] && ! "$DOTFILES_DIR/scripts/shell-validator.sh" validate > /dev/null 2>&1; then
+            echo "  - Fix shell configuration: ./scripts/shell-validator.sh fix"
+        fi
+        
+        if [[ "$SHELL" != */zsh ]] && [[ "$SHELL" != */bash ]]; then
+            echo "  - Change default shell: ./migrate-shell.sh [bash|zsh]"
         fi
         
         if ! command -v nvim &> /dev/null; then
@@ -302,6 +338,11 @@ main() {
     verify_fonts
     verify_permissions
     run_health_checks
+    
+    # Check shell startups
+    echo -e "\n${GREEN}Shell Startup Tests:${NC}"
+    check_shell_startup bash
+    check_shell_startup zsh
     
     generate_report
     

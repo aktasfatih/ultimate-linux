@@ -59,16 +59,28 @@ extract_archive() {
     
     case "$file" in
         *.tar.gz|*.tgz)
-            tar -xzf "$file" -C "$dest"
+            tar -xzf "$file" -C "$dest" 2>/dev/null || {
+                log ERROR "Failed to extract $file - file may be corrupted or not a valid archive"
+                return 1
+            }
             ;;
         *.tar.bz2)
-            tar -xjf "$file" -C "$dest"
+            tar -xjf "$file" -C "$dest" 2>/dev/null || {
+                log ERROR "Failed to extract $file"
+                return 1
+            }
             ;;
         *.tar.xz)
-            tar -xJf "$file" -C "$dest"
+            tar -xJf "$file" -C "$dest" 2>/dev/null || {
+                log ERROR "Failed to extract $file"
+                return 1
+            }
             ;;
         *.zip)
-            unzip -q "$file" -d "$dest"
+            unzip -q "$file" -d "$dest" 2>/dev/null || {
+                log ERROR "Failed to extract $file"
+                return 1
+            }
             ;;
         *.gz)
             gunzip "$file"
@@ -152,19 +164,105 @@ install_from_github() {
     
     # Get latest release URL
     local release_url="https://api.github.com/repos/$repo/releases/latest"
-    local download_url
+    local api_response
     
-    # Try to find appropriate asset with timeout
-    download_url=$(curl -s --connect-timeout 10 --max-time 30 "$release_url" 2>/dev/null | grep -E "browser_download_url.*${os}.*${arch}" | cut -d '"' -f 4 | head -1)
+    # Try to get release info with proper error handling
+    api_response=$(curl -s --connect-timeout 10 --max-time 30 "$release_url" 2>/dev/null)
+    
+    # Check for rate limit error
+    if echo "$api_response" | grep -q "rate limit exceeded"; then
+        log WARN "GitHub API rate limit exceeded. Skipping $binary_name"
+        log INFO "Install manually with: cargo install $binary_name"
+        return 0
+    fi
+    
+    # Check if we got a valid response
+    if [[ -z "$api_response" ]] || ! echo "$api_response" | grep -q "browser_download_url"; then
+        log WARN "Could not fetch release info for $binary_name. Skipping."
+        return 0
+    fi
+    
+    # Try to find appropriate asset
+    local download_url
+    download_url=$(echo "$api_response" | grep -E "browser_download_url.*${os}.*${arch}" | cut -d '"' -f 4 | head -1 || true)
     
     if [[ -z "$download_url" ]]; then
-        # Try alternative patterns
-        download_url=$(curl -s --connect-timeout 10 --max-time 30 "$release_url" 2>/dev/null | grep -E "browser_download_url.*${os}" | grep -i "${arch}" | cut -d '"' -f 4 | head -1)
+        # Try alternative patterns including x86_64 for amd64
+        if [[ "$arch" == "amd64" ]]; then
+            download_url=$(echo "$api_response" | grep -E "browser_download_url.*${os}" | grep -i "amd64\|x86_64" | cut -d '"' -f 4 | head -1 || true)
+        else
+            download_url=$(echo "$api_response" | grep -E "browser_download_url.*${os}" | grep -i "${arch}" | cut -d '"' -f 4 | head -1 || true)
+        fi
+    fi
+    
+    # Special handling for specific tools
+    if [[ -z "$download_url" ]]; then
+        case "$binary_name" in
+            lazygit)
+                # Lazygit uses Linux_x86_64 format
+                download_url=$(echo "$api_response" | grep -E "browser_download_url.*Linux_x86_64" | cut -d '"' -f 4 | head -1 || true)
+                ;;
+            bat)
+                # Bat uses x86_64-unknown-linux-musl format
+                download_url=$(echo "$api_response" | grep -E "browser_download_url.*x86_64-unknown-linux" | cut -d '"' -f 4 | head -1 || true)
+                ;;
+            fd)
+                # fd uses x86_64-unknown-linux-musl format
+                download_url=$(echo "$api_response" | grep -E "browser_download_url.*x86_64-unknown-linux" | cut -d '"' -f 4 | head -1 || true)
+                ;;
+            *)
+                # Try more generic patterns
+                download_url=$(echo "$api_response" | grep -E "browser_download_url.*[._-]${os}[._-]" | grep -i "${arch}\|x86_64" | cut -d '"' -f 4 | head -1 || true)
+                ;;
+        esac
     fi
     
     if [[ -z "$download_url" ]]; then
-        log WARN "Could not find release for $binary_name ($os/$arch), skipping"
-        return 0
+        log WARN "No compatible binary found for $binary_name ($os/$arch)"
+        
+        # Try fallback installation methods
+        case "$binary_name" in
+            lazygit)
+                log INFO "Attempting to install lazygit via package manager..."
+                if install_packages "lazygit"; then
+                    log SUCCESS "lazygit installed via package manager"
+                    return 0
+                fi
+                ;;
+            bat)
+                log INFO "Attempting to install bat via package manager..."
+                if install_packages "bat" || install_packages "batcat"; then
+                    log SUCCESS "bat installed via package manager"
+                    return 0
+                fi
+                ;;
+            fd)
+                log INFO "Attempting to install fd via package manager..."
+                if install_packages "fd-find" || install_packages "fd"; then
+                    log SUCCESS "fd installed via package manager"
+                    return 0
+                fi
+                ;;
+            *)
+                log INFO "Attempting to install $binary_name via package manager..."
+                if install_packages "$binary_name"; then
+                    log SUCCESS "$binary_name installed via package manager"
+                    return 0
+                fi
+                ;;
+        esac
+        
+        # If package manager fails, try cargo if available
+        if command -v cargo &> /dev/null; then
+            log INFO "Attempting to install $binary_name via cargo..."
+            if cargo install "$binary_name" --quiet 2>/dev/null; then
+                log SUCCESS "$binary_name installed via cargo"
+                return 0
+            fi
+        fi
+        
+        log WARN "All installation methods failed for $binary_name"
+        return 1
     fi
     
     local temp_dir=$(mktemp -d)
@@ -177,9 +275,21 @@ install_from_github() {
         return 0
     fi
     
+    # Check if we got an HTML error page instead of a binary
+    if file "$temp_dir/$filename" 2>/dev/null | grep -q "HTML\|ASCII text"; then
+        log WARN "Downloaded file appears to be HTML/text, not a binary. GitHub API may have rate limited us."
+        log WARN "Skipping installation of $binary_name"
+        rm -rf "$temp_dir"
+        return 0
+    fi
+    
     # Extract if needed
     if [[ "$filename" =~ \.(tar\.gz|tgz|zip|tar\.bz2|tar\.xz)$ ]]; then
-        extract_archive "$temp_dir/$filename" "$temp_dir"
+        if ! extract_archive "$temp_dir/$filename" "$temp_dir"; then
+            log WARN "Failed to extract archive for $binary_name, skipping"
+            rm -rf "$temp_dir"
+            return 0
+        fi
         
         # Find the binary
         local binary=$(find "$temp_dir" -name "$binary_name" -type f -executable | head -1)

@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+
+# tmux-project-template - Create predefined project layouts
+
+create_web_project() {
+    local session_name="$1"
+    
+    # Create new session with editor window
+    tmux new-session -d -s "$session_name" -n editor
+    
+    # Split for terminal
+    tmux split-window -h -p 30 -t "$session_name:editor"
+    
+    # Create server window
+    tmux new-window -t "$session_name" -n server
+    
+    # Create logs window
+    tmux new-window -t "$session_name" -n logs
+    tmux split-window -h -t "$session_name:logs"
+    
+    # Select editor window
+    tmux select-window -t "$session_name:editor"
+    tmux select-pane -t "$session_name:editor.0"
+}
+
+create_python_project() {
+    local session_name="$1"
+    
+    # Create new session with editor window
+    tmux new-session -d -s "$session_name" -n editor
+    
+    # Split for REPL
+    tmux split-window -h -p 35 -t "$session_name:editor"
+    tmux send-keys -t "$session_name:editor.1" "python3" Enter
+    
+    # Create test window
+    tmux new-window -t "$session_name" -n tests
+    
+    # Create debug window
+    tmux new-window -t "$session_name" -n debug
+    
+    # Select editor window
+    tmux select-window -t "$session_name:editor"
+    tmux select-pane -t "$session_name:editor.0"
+}
+
+create_go_project() {
+    local session_name="$1"
+    
+    # Create new session with editor window
+    tmux new-session -d -s "$session_name" -n editor
+    
+    # Split for terminal
+    tmux split-window -h -p 30 -t "$session_name:editor"
+    
+    # Create build window
+    tmux new-window -t "$session_name" -n build
+    
+    # Create test window
+    tmux new-window -t "$session_name" -n tests
+    tmux send-keys -t "$session_name:tests" "go test -v ./..." 
+    
+    # Select editor window
+    tmux select-window -t "$session_name:editor"
+    tmux select-pane -t "$session_name:editor.0"
+}
+
+create_devops_project() {
+    local session_name="$1"
+    
+    # Create new session with editor window
+    tmux new-session -d -s "$session_name" -n editor
+    
+    # Create monitoring window with splits
+    tmux new-window -t "$session_name" -n monitor
+    tmux split-window -h -t "$session_name:monitor"
+    tmux split-window -v -t "$session_name:monitor.0"
+    tmux split-window -v -t "$session_name:monitor.2"
+    
+    # Send monitoring commands
+    tmux send-keys -t "$session_name:monitor.0" "btm" Enter
+    tmux send-keys -t "$session_name:monitor.1" "watch kubectl get pods" 
+    tmux send-keys -t "$session_name:monitor.2" "docker ps" 
+    
+    # Create logs window
+    tmux new-window -t "$session_name" -n logs
+    
+    # Select editor window
+    tmux select-window -t "$session_name:editor"
+}
+
+# Main
+choice="$1"
+echo -n "Enter project name: "
+read -r project_name
+
+case "$choice" in
+    1) create_web_project "$project_name" ;;
+    2) create_python_project "$project_name" ;;
+    3) create_go_project "$project_name" ;;
+    4) create_devops_project "$project_name" ;;
+    *) echo "Invalid choice" && exit 1 ;;
+esac
+
+# Attach to the new session
+if [[ -z $TMUX ]]; then
+    tmux attach-session -t "$project_name"
+else
+    tmux switch-client -t "$project_name"
+fi

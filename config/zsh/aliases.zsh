@@ -1,55 +1,32 @@
 # Ultimate Linux Development Setup - Zsh Aliases
+#
+# This file contains Zsh-specific aliases and overrides.
+# It is sourced AFTER shell/aliases.sh, so definitions here will override universal ones.
+# Only include aliases that are:
+#   1. Zsh-specific (using Zsh features)
+#   2. Overrides with different behavior for Zsh
+#   3. Extensions to universal aliases
+#
+# Avoid duplicating aliases that work the same in both shells.
 
-# Navigation
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ~='cd ~'
-alias -- -='cd -'
-
-# Directory operations
-alias md='mkdir -p'
-alias rd='rmdir'
-alias tree='tree -C'
-
-# List directory contents
-alias l='ls -lah'
-alias la='ls -lAh'
-alias ll='ls -lh'
-alias ls='ls --color=tty'
-alias lsa='ls -lah'
-
-# File operations
-alias cp='cp -iv'
-alias mv='mv -iv'
+# Enhanced file operations with more safety flags
 alias rm='rm -Iv --preserve-root'
-alias ln='ln -i'
-
-# Permissions
 alias chown='chown --preserve-root'
 alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 
-# System info
-alias df='df -h'
-alias du='du -h'
-alias free='free -h'
-alias ps='ps auxf'
-alias psg='ps aux | grep -v grep | grep -i -e VSZ -e'
-
-# Network
-alias myip='curl -s https://api.ipify.org && echo'
+# Network utilities
 alias localip='hostname -I | awk "{print $1}"'
-alias ports='netstat -tulanp'
 alias listening='lsof -P -i -n'
 alias ping='ping -c 5'
 
-# Package management
-alias update='sudo apt update && sudo apt upgrade'
-alias install='sudo apt install'
-alias search='apt search'
-alias installed='dpkg --get-selections | grep -v deinstall'
+# Package management (Debian/Ubuntu specific - override in ~/.zshrc.local for other distros)
+if command -v apt &>/dev/null; then
+    alias update='sudo apt update && sudo apt upgrade'
+    alias install='sudo apt install'
+    alias search='apt search'
+    alias installed='dpkg --get-selections | grep -v deinstall'
+fi
 
 # Git
 alias g='git'
@@ -72,7 +49,7 @@ alias gbsb='git bisect bad'
 alias gbsg='git bisect good'
 alias gbsr='git bisect reset'
 alias gbss='git bisect start'
-alias gc='git commit -v'
+alias gc='git commit -v'  # Note: overrides gc='git commit' from universal aliases
 alias gc!='git commit -v --amend'
 alias gcn!='git commit -v --no-edit --amend'
 alias gca='git commit -v -a'
@@ -119,7 +96,7 @@ alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias git-svn-dcommit-push='git svn dcommit && git push github $(git_main_branch):svntrunk'
 alias gk='\gitk --all --branches'
 alias gke='\gitk --all $(git log -g --pretty=%h)'
-alias gl='git pull'
+alias gl='git pull'  # Note: overrides gl='git log ...' from universal aliases
 alias glg='git log --stat'
 alias glgp='git log --stat -p'
 alias glgg='git log --graph'
@@ -210,17 +187,9 @@ alias gams='git am --skip'
 alias gama='git am --abort'
 alias gamscp='git am --show-current-patch'
 
-# Docker
-alias d='docker'
-alias dc='docker-compose'
-alias dps='docker ps'
-alias dpsa='docker ps -a'
-alias di='docker images'
-alias drm='docker rm'
-alias drmi='docker rmi'
+# Docker extensions (base aliases in shell/aliases.sh)
 alias drmf='docker rm -f'
 alias dlog='docker logs -f'
-alias dex='docker exec -it'
 alias drun='docker run -it --rm'
 alias dstop='docker stop $(docker ps -q)'
 alias dclean='docker system prune -af'
@@ -257,19 +226,9 @@ alias vim='nvim'
 alias sv='sudo nvim'
 alias edit='${EDITOR}'
 
-# Utilities
-alias h='history'
-alias help='man'
-alias p='ps -f'
-alias sortnr='sort -n -r'
-alias unexport='unset'
-alias whereami='pwd'
+# Zsh-specific utilities
 alias path='echo -e ${PATH//:/\\n}'
 alias libpath='echo -e ${LD_LIBRARY_PATH//:/\\n}'
-alias now='date +"%T"'
-alias nowtime=now
-alias nowdate='date +"%d-%m-%Y"'
-alias week='date +%V'
 
 # Reload
 alias reload='source ~/.zshrc'
@@ -279,7 +238,7 @@ alias bashrc='${EDITOR} ~/.bashrc'
 # Fun
 alias please='sudo'
 alias fucking='sudo'
-alias weather='curl wttr.in'
+# alias weather='curl wttr.in'  # Function defined in shell/aliases.sh
 alias moon='curl wttr.in/Moon'
 alias crypto='curl rate.sx'
 
@@ -292,10 +251,7 @@ alias cpv="rsync -ah --info=progress2"
 # Create parent directories on demand
 alias mkdir='mkdir -pv'
 
-# Colorize output
-alias grep='grep --color=auto'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
+# These are already in shell/aliases.sh, removed to avoid duplication
 
 # Resume wget by default
 alias wget='wget -c'
@@ -315,9 +271,6 @@ alias cleanup='find . -type f -name "*.DS_Store" -ls -delete'
 # Empty trash
 alias emptytrash='rm -rf ~/.local/share/Trash/*'
 
-# URL encode/decode
-alias urlencode='python3 -c "import sys, urllib.parse as ul; print(ul.quote_plus(sys.argv[1]))"'
-alias urldecode='python3 -c "import sys, urllib.parse as ul; print(ul.unquote_plus(sys.argv[1]))"'
 
 # Get week number
 alias week='date +%V'
@@ -365,3 +318,6 @@ done
 
 # Battery status
 alias battery='upower -i $(upower -e | grep BAT) | grep --color=never -E "state|to\ full|to\ empty|percentage"'
+
+# Claude Code
+alias claude-yolo='claude --dangerously-skip-permissions'

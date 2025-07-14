@@ -41,7 +41,11 @@ require("toggleterm").setup({
 -- Terminal keymaps
 function _G.set_terminal_keymaps()
   local opts = { buffer = 0 }
-  vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
+  -- Check if this is lazygit and skip escape mapping
+  local bufname = vim.api.nvim_buf_get_name(0)
+  if not string.match(bufname, "lazygit") then
+    vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
+  end
   vim.keymap.set("t", "jk", [[<C-\><C-n>]], opts)
   vim.keymap.set("t", "<C-h>", [[<Cmd>wincmd h<CR>]], opts)
   vim.keymap.set("t", "<C-j>", [[<Cmd>wincmd j<CR>]], opts)

@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# tmux-sessionizer - Quick project switcher for tmux
+# Based on ThePrimeagen's sessionizer
+
+# Define project directories to search
+PROJECT_DIRS=(
+    "$HOME/projects"
+    "$HOME/work"
+    "$HOME/personal"
+    "$HOME/.config"
+    "$HOME/repos"
+    "$HOME/dev"
+    "$HOME"
+)
+
+# Find all git repositories and directories
+find_projects() {
+    local dirs=()
+    
+    # Add existing directories from PROJECT_DIRS
+    for dir in "${PROJECT_DIRS[@]}"; do
+        [[ -d "$dir" ]] && dirs+=("$dir")
+    done
+    
+    # Find git repositories (up to 3 levels deep)
+    if (( ${#dirs[@]} > 0 )); then
+        find "${dirs[@]}" -maxdepth 3 -type d -name ".git" 2>/dev/null | xargs -I {} dirname {} | sort -u
+        # Also include the base directories themselves
+        printf '%s\n' "${dirs[@]}" | sort -u
+    fi
+}
+
+# Main logic
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    selected=$(find_projects | fzf --prompt="Select project: " --preview 'ls -la {}' --preview-window=right:50%:wrap)
+fi
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+selected_name=$(basename "$selected" | tr . _)
+tmux_running=$(pgrep tmux)
+
+# If not in tmux and tmux is not running
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+    tmux new-session -s "$selected_name" -c "$selected"
+    exit 0
+fi
+
+# Create session if it doesn't exist
+if ! tmux has-session -t="$selected_name" 2> /dev/null; then
+    tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+# Switch to session
+if [[ -z $TMUX ]]; then
+    tmux attach-session -t "$selected_name"
+else
+    tmux switch-client -t "$selected_name"
+fi
