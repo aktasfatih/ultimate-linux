@@ -29,20 +29,20 @@ Before installing, ensure you have:
 ### Method 1: One-Line Installation (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yourusername/ultimate-linux/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aktasfatih/ultimate-linux/main/install.sh | bash
 ```
 
 Or using wget:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/yourusername/ultimate-linux/main/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/aktasfatih/ultimate-linux/main/install.sh | bash
 ```
 
 ### Method 2: Clone and Install
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ultimate-linux.git ~/.dotfiles
+git clone https://github.com/aktasfatih/ultimate-linux.git ~/.dotfiles
 
 # Navigate to the directory
 cd ~/.dotfiles
@@ -60,7 +60,7 @@ For users who prefer more control:
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/ultimate-linux.git ~/.dotfiles
+git clone https://github.com/aktasfatih/ultimate-linux.git ~/.dotfiles
 cd ~/.dotfiles
 
 # Review install script

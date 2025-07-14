@@ -10,10 +10,10 @@ A comprehensive, production-ready dotfiles repository that provides a complete d
 
 ```bash
 # One-line installation
-curl -fsSL https://raw.githubusercontent.com/yourusername/ultimate-linux/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aktasfatih/ultimate-linux/main/install.sh | bash
 
 # Or clone and install
-git clone https://github.com/yourusername/ultimate-linux.git ~/.dotfiles
+git clone https://github.com/aktasfatih/ultimate-linux.git ~/.dotfiles
 cd ~/.dotfiles && ./install.sh
 ```
 
