@@ -2,6 +2,18 @@
 
 local nvim_tree = require("nvim-tree")
 
+-- Define diagnostic signs for NvimTree
+local signs = {
+  { name = "NvimTreeDiagnosticErrorIcon", text = "" },
+  { name = "NvimTreeDiagnosticWarnIcon", text = "" },
+  { name = "NvimTreeDiagnosticInfoIcon", text = "" },
+  { name = "NvimTreeDiagnosticHintIcon", text = "" },
+}
+
+for _, sign in ipairs(signs) do
+  vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
+end
+
 nvim_tree.setup({
   disable_netrw = true,
   hijack_netrw = true,

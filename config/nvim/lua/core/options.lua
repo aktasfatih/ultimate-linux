@@ -49,7 +49,7 @@ opt.ignorecase = true
 opt.smartcase = true
 
 -- Performance
-opt.lazyredraw = true
+opt.lazyredraw = false -- Disabled for Noice compatibility
 
 -- Neovim specific
 opt.shadafile = vim.fn.stdpath("data") .. "/shada/main.shada"
