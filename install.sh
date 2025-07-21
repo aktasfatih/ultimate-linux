@@ -535,7 +535,11 @@ install_language_servers() {
     fi
 
     # JavaScript/TypeScript
+    # TypeScript/JavaScript development tools
     sudo npm install -g typescript typescript-language-server prettier eslint || true
+    sudo npm install -g @fsouza/prettierd eslint_d || true  # Faster formatters
+    sudo npm install -g tsx || true  # TypeScript execute
+    sudo npm install -g npm-check-updates || true  # Update dependencies
 
     # Rust
     if command -v rustup &> /dev/null; then

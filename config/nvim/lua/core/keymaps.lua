@@ -69,3 +69,34 @@ keymap("v", "<leader>p", '"+p', opts) -- paste from system clipboard
 
 -- Better yank behavior (don't move cursor)
 keymap("n", "Y", "y$", opts)
+
+-- TypeScript/JavaScript specific
+keymap("n", "<leader>lo", function()
+  vim.lsp.buf.code_action({
+    apply = true,
+    context = {
+      only = {"source.organizeImports"},
+      diagnostics = {},
+    },
+  })
+end, { desc = "Organize Imports" })
+
+keymap("n", "<leader>lu", function()
+  vim.lsp.buf.code_action({
+    apply = true,
+    context = {
+      only = {"source.removeUnused"},
+      diagnostics = {},
+    },
+  })
+end, { desc = "Remove Unused Imports" })
+
+-- Toggle format on save
+keymap("n", "<leader>tf", function()
+  vim.g.format_on_save = not vim.g.format_on_save
+  if vim.g.format_on_save then
+    vim.notify("Format on save: ENABLED", vim.log.levels.INFO)
+  else
+    vim.notify("Format on save: DISABLED", vim.log.levels.INFO)
+  end
+end, { desc = "Toggle Format on Save" })

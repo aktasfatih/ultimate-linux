@@ -364,7 +364,7 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `<leader>wl` | List workspace folders |
 | `<leader>D` | Type definition |
 | `<leader>rn` | Rename symbol |
-| `<leader>ca` | Code action |
+| `<leader>ca` | Code action (see TypeScript section) |
 | `gr` | Find references |
 | `<leader>e` | Show diagnostics |
 | `[d` | Previous diagnostic |
@@ -381,6 +381,99 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `<leader>lt` | LSP type definitions |
 | `<leader>ls` | Document symbols |
 | `<leader>lw` | Workspace symbols |
+
+### TypeScript/JavaScript Specific
+
+#### Core Navigation
+| Key | Action | Notes |
+|-----|--------|-------|
+| `gd` | Go to definition | Works with imports, functions, components |
+| `gr` | Find all references | See where a component/function is used |
+| `gi` | Go to implementation | Jump to actual implementation |
+| `<leader>D` | Type definition | See TypeScript type definitions |
+| `K` | Hover info | Shows type info, JSDoc comments |
+
+#### Code Actions (`<leader>ca`)
+When you press `<leader>ca`, you'll see context-specific actions:
+- **Organize imports** - Sort and remove unused imports
+- **Add missing imports** - Auto-import unresolved symbols
+- **Fix all auto-fixable problems** - Apply ESLint fixes
+- **Remove unused variables**
+- **Add missing function return type**
+- **Convert to arrow function**
+- **Extract to function/variable**
+- **Move to new file**
+
+#### TypeScript Commands
+| Command | Action |
+|---------|--------|
+| `:TSC` | Run TypeScript compiler check |
+| `:EslintFixAll` | Fix all ESLint issues |
+| `:Prettier` | Format with Prettier |
+
+#### Import Management Tips
+```vim
+" Quick import organization (add to your config)
+vim.keymap.set('n', '<leader>lo', function()
+  vim.lsp.buf.code_action({
+    apply = true,
+    context = {
+      only = {"source.organizeImports"},
+      diagnostics = {},
+    },
+  })
+end, { desc = "Organize Imports" })
+
+" Remove unused imports
+vim.keymap.set('n', '<leader>lu', function()
+  vim.lsp.buf.code_action({
+    apply = true,
+    context = {
+      only = {"source.removeUnused"},
+      diagnostics = {},
+    },
+  })
+end, { desc = "Remove Unused" })
+```
+
+#### Next.js Specific Tips
+1. **Component Navigation**:
+   - `gd` on a component jumps to its definition
+   - `gr` shows all pages using that component
+   - Use `<leader>ls` to see all components in current file
+
+2. **Quick Actions**:
+   - On import errors: `<leader>ca` → "Add missing import"
+   - On type errors: `K` to see expected types
+   - `<leader>rn` to rename components across files
+
+3. **Debugging TypeScript Errors**:
+   - Errors are translated to plain English (ts-error-translator)
+   - Use `<leader>e` to see full error
+   - `[d` / `]d` to jump between errors
+
+#### React/JSX Snippets
+While coding, these snippets expand:
+- `rafce` → React Arrow Function Component
+- `useState` → `const [state, setState] = useState()`
+- `useEffect` → Full useEffect block
+
+#### File Navigation for Next.js
+| Key | Action | Example |
+|-----|--------|--------|
+| `<leader>ff` | Find files | Quick jump to pages/components |
+| `<leader>fg` | Grep in files | Search for component usage |
+| `<leader>fb` | Browse buffers | Switch between open files |
+
+#### Format & Lint
+| Key | Action |
+|-----|--------|
+| `<leader>f` | Format file (Prettier) |
+| `<leader>ca` → "Fix all" | Apply ESLint fixes |
+| `:w` | Auto-formats on save (if enabled) |
+| `<leader>tf` | Toggle format on save |
+| `<leader>lo` | Organize imports |
+| `<leader>lu` | Remove unused imports |
 
 ### File Explorer (NvimTree)
 
@@ -581,6 +674,15 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 - Type partial command and press `↑` to search history
 - Use `z <partial-path>` to jump to frequently used directories
 - `Ctrl+x Ctrl+e` to edit command in editor
+
+### TypeScript Development
+- **Auto-imports**: Start typing a component name and use `<C-n>` for completion
+- **Quick info**: Hover over any variable with `K` to see its type
+- **Error navigation**: Use `]d` to jump to next error, `[d` for previous
+- **Rename everywhere**: `<leader>rn` on a component renames it in all files
+- **Find usages**: `gr` on a function/component to see where it's used
+- **Quick fix**: `<leader>ca` offers contextual fixes (missing imports, etc.)
+- **Type checking**: Errors appear as you type, no need to run `npm run build`
 
 ## Git Workflow Best Practices
 
