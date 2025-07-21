@@ -199,16 +199,47 @@ install_from_github() {
     if [[ -z "$download_url" ]]; then
         case "$binary_name" in
             lazygit)
-                # Lazygit uses Linux_x86_64 format
-                download_url=$(echo "$api_response" | grep -E "browser_download_url.*Linux_x86_64" | cut -d '"' -f 4 | head -1 || true)
+                if [[ "$os" == "darwin" ]]; then
+                    # macOS patterns for lazygit
+                    if [[ "$arch" == "arm64" ]]; then
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Darwin_arm64" | cut -d '"' -f 4 | head -1 || true)
+                    else
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Darwin_x86_64" | cut -d '"' -f 4 | head -1 || true)
+                    fi
+                else
+                    # Linux patterns for lazygit
+                    download_url=$(echo "$api_response" | grep -E "browser_download_url.*Linux_x86_64" | cut -d '"' -f 4 | head -1 || true)
+                fi
                 ;;
             bat)
-                # Bat uses x86_64-unknown-linux-musl format
-                download_url=$(echo "$api_response" | grep -E "browser_download_url.*x86_64-unknown-linux" | cut -d '"' -f 4 | head -1 || true)
+                if [[ "$os" == "darwin" ]]; then
+                    # macOS patterns for bat
+                    if [[ "$arch" == "arm64" ]]; then
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*apple-darwin.*aarch64" | cut -d '"' -f 4 | head -1 || true)
+                        [[ -z "$download_url" ]] && download_url=$(echo "$api_response" | grep -E "browser_download_url.*darwin.*arm64" | cut -d '"' -f 4 | head -1 || true)
+                    else
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*apple-darwin.*x86_64" | cut -d '"' -f 4 | head -1 || true)
+                        [[ -z "$download_url" ]] && download_url=$(echo "$api_response" | grep -E "browser_download_url.*darwin.*x86_64" | cut -d '"' -f 4 | head -1 || true)
+                    fi
+                else
+                    # Linux patterns for bat
+                    download_url=$(echo "$api_response" | grep -E "browser_download_url.*x86_64-unknown-linux" | cut -d '"' -f 4 | head -1 || true)
+                fi
                 ;;
             fd)
-                # fd uses x86_64-unknown-linux-musl format
-                download_url=$(echo "$api_response" | grep -E "browser_download_url.*x86_64-unknown-linux" | cut -d '"' -f 4 | head -1 || true)
+                if [[ "$os" == "darwin" ]]; then
+                    # macOS patterns for fd
+                    if [[ "$arch" == "arm64" ]]; then
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*apple-darwin.*aarch64" | cut -d '"' -f 4 | head -1 || true)
+                        [[ -z "$download_url" ]] && download_url=$(echo "$api_response" | grep -E "browser_download_url.*darwin.*arm64" | cut -d '"' -f 4 | head -1 || true)
+                    else
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*apple-darwin.*x86_64" | cut -d '"' -f 4 | head -1 || true)
+                        [[ -z "$download_url" ]] && download_url=$(echo "$api_response" | grep -E "browser_download_url.*darwin.*x86_64" | cut -d '"' -f 4 | head -1 || true)
+                    fi
+                else
+                    # Linux patterns for fd
+                    download_url=$(echo "$api_response" | grep -E "browser_download_url.*x86_64-unknown-linux" | cut -d '"' -f 4 | head -1 || true)
+                fi
                 ;;
             *)
                 # Try more generic patterns
@@ -291,19 +322,54 @@ install_from_github() {
             return 0
         fi
         
-        # Find the binary
-        local binary=$(find "$temp_dir" -name "$binary_name" -type f -executable | head -1)
-        
-        if [[ -z "$binary" ]]; then
-            # Try without extension
-            binary=$(find "$temp_dir" -name "${binary_name%.*}" -type f -executable | head -1)
+        # Find the binary - use cross-platform method
+        local binary
+        if [[ "$(uname)" == "Darwin" ]]; then
+            # macOS/BSD find doesn't support -executable, use -perm instead
+            binary=$(find "$temp_dir" -name "$binary_name" -type f -perm +111 | head -1)
+            if [[ -z "$binary" ]]; then
+                # Try without extension
+                binary=$(find "$temp_dir" -name "${binary_name%.*}" -type f -perm +111 | head -1)
+            fi
+        else
+            # Linux/GNU find supports -executable
+            binary=$(find "$temp_dir" -name "$binary_name" -type f -executable | head -1)
+            if [[ -z "$binary" ]]; then
+                # Try without extension
+                binary=$(find "$temp_dir" -name "${binary_name%.*}" -type f -executable | head -1)
+            fi
         fi
         
         if [[ -n "$binary" ]]; then
-            if sudo install -m 755 "$binary" "$install_path/$binary_name"; then
-                log SUCCESS "Installed $binary_name to $install_path"
+            # Create install directory if it doesn't exist
+            mkdir -p "$install_path" 2>/dev/null || sudo mkdir -p "$install_path"
+            
+            # Copy and set permissions - cross-platform method
+            if [[ "$(uname)" == "Darwin" ]]; then
+                # macOS - avoid sudo if possible, use ~/.local/bin
+                if [[ "$install_path" == "/usr/local/bin" ]] && [[ ! -w "$install_path" ]]; then
+                    # Use ~/.local/bin instead for macOS to avoid sudo
+                    local_install_path="$HOME/.local/bin"
+                    mkdir -p "$local_install_path"
+                    if cp "$binary" "$local_install_path/$binary_name" && chmod +x "$local_install_path/$binary_name"; then
+                        log SUCCESS "Installed $binary_name to $local_install_path"
+                    else
+                        log WARN "Failed to install $binary_name"
+                    fi
+                else
+                    if cp "$binary" "$install_path/$binary_name" && chmod +x "$install_path/$binary_name"; then
+                        log SUCCESS "Installed $binary_name to $install_path"
+                    else
+                        log WARN "Failed to install $binary_name"
+                    fi
+                fi
             else
-                log WARN "Failed to install $binary_name"
+                # Linux - use sudo install
+                if sudo install -m 755 "$binary" "$install_path/$binary_name"; then
+                    log SUCCESS "Installed $binary_name to $install_path"
+                else
+                    log WARN "Failed to install $binary_name"
+                fi
             fi
         else
             log WARN "Could not find binary $binary_name in archive"

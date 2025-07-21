@@ -73,6 +73,11 @@ install_packages() {
         fi
     done
     
+    # If all packages were filtered out, nothing to install
+    if [[ ${#mapped_packages[@]} -eq 0 ]]; then
+        return 0
+    fi
+    
     case "$PACKAGE_MANAGER" in
         apt)
             sudo apt-get install -y "${mapped_packages[@]}"
@@ -102,7 +107,25 @@ install_packages() {
             nix-env -i "${mapped_packages[@]}"
             ;;
         brew)
-            brew install "${mapped_packages[@]}"
+            # Add retry logic for macOS package installation
+            local max_retries=3
+            local retry_count=0
+            while [[ $retry_count -lt $max_retries ]]; do
+                if brew install "${mapped_packages[@]}"; then
+                    break
+                else
+                    retry_count=$((retry_count + 1))
+                    if [[ $retry_count -lt $max_retries ]]; then
+                        log WARN "Homebrew installation failed, cleaning cache and retrying ($retry_count/$max_retries)..."
+                        brew cleanup --prune-prefix >/dev/null 2>&1 || true
+                        brew cleanup -s >/dev/null 2>&1 || true
+                        sleep 2
+                    else
+                        log ERROR "Homebrew installation failed after $max_retries attempts"
+                        return 1
+                    fi
+                fi
+            done
             ;;
         *)
             log ERROR "Unknown package manager: $PACKAGE_MANAGER"
@@ -225,6 +248,7 @@ map_package_name() {
                 arch) echo "python-pip" ;;
                 suse) echo "python3-pip" ;;
                 alpine) echo "py3-pip" ;;
+                macos) echo "" ;;  # pip comes with Python3 on macOS
                 *) echo "python3-pip" ;;
             esac
             ;;
@@ -336,6 +360,24 @@ map_package_name() {
         "python3-venv"|"python3-full")
             case "$DISTRO_FAMILY" in
                 macos) echo "" ;;  # Python3 on macOS includes venv
+                *) echo "$package" ;;
+            esac
+            ;;
+        "tar"|"unzip"|"gzip")
+            case "$DISTRO_FAMILY" in
+                macos) echo "" ;;  # Built into macOS
+                *) echo "$package" ;;
+            esac
+            ;;
+        "ca-certificates")
+            case "$DISTRO_FAMILY" in
+                macos) echo "ca-certificates" ;;  # Available in Homebrew
+                *) echo "$package" ;;
+            esac
+            ;;
+        "gnupg")
+            case "$DISTRO_FAMILY" in
+                macos) echo "gnupg" ;;  # Available as 'gnupg' in Homebrew
                 *) echo "$package" ;;
             esac
             ;;

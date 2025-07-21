@@ -85,6 +85,92 @@ cd ~/.dotfiles && ./install.sh
 | Clipboard | xclip/xsel | pbcopy/pbpaste |
 | Font Management | fontconfig | Native |
 | System Tools | GNU coreutils | BSD utils |
+| Find Command | GNU find (-executable) | BSD find (-perm +111) |
+
+## 📦 What Gets Installed
+
+<details>
+<summary><b>🐧 Linux Packages & Tools</b></summary>
+
+### Base Packages
+- **Core**: git, curl, wget, build-essential, cmake, unzip, tar, gzip
+- **Security**: ca-certificates, gnupg
+- **Clipboard**: xclip, xsel (for terminal clipboard integration)
+
+### Shell Environment
+- **Zsh**: zsh + Oh My Zsh framework
+- **Plugins**: zsh-autosuggestions, zsh-syntax-highlighting
+- **Prompt**: Starship cross-shell prompt
+
+### Modern CLI Tools
+- **File Operations**: eza (ls replacement), bat (cat replacement)
+- **Search**: ripgrep (grep replacement), fd-find (find replacement)
+- **Navigation**: fzf (fuzzy finder), zoxide (cd replacement)
+- **Git**: delta (diff tool), lazygit (TUI)
+- **System**: dust (du replacement), procs (ps replacement), bottom (htop replacement)
+
+### Development Environment
+- **Terminal**: tmux + TPM (plugin manager)
+- **Editor**: Neovim (latest) + lazy.nvim plugin manager
+- **Languages**: Python 3 (with pip included) + pipx, Node.js + npm
+- **Version Managers**: fnm (Node), pyenv (Python), rustup (Rust)
+
+### Language Servers (for Neovim)
+- **Python**: pyright, black, flake8
+- **JavaScript/TypeScript**: typescript-language-server, prettier, eslint
+- **Bash**: bash-language-server
+- **Lua**: lua-language-server
+- **Rust**: rust-analyzer (if Rust is installed)
+- **Go**: gopls (if Go is installed)
+
+### Fonts
+- Nerd Fonts: FiraCode, JetBrainsMono, Hack, SourceCodePro
+
+</details>
+
+<details>
+<summary><b>🍎 macOS Packages & Tools</b></summary>
+
+### Prerequisites (Auto-installed)
+- **Homebrew**: Package manager for macOS
+- **Xcode Command Line Tools**: Development essentials
+
+### Base Packages
+- **Core**: git, curl, wget, cmake
+- **Security**: ca-certificates, gnupg
+- **Note**: Built-in tools (tar, unzip, gzip) not installed via Homebrew; No build-essential (Xcode tools handle this), no xclip (uses pbcopy/pbpaste)
+
+### Shell Environment
+- **Zsh**: Already included in macOS + Oh My Zsh framework
+- **Plugins**: zsh-autosuggestions, zsh-syntax-highlighting
+- **Prompt**: Starship cross-shell prompt
+
+### Modern CLI Tools
+- **File Operations**: eza (ls replacement), bat (cat replacement)
+- **Search**: ripgrep (grep replacement), fd (find replacement)
+- **Navigation**: fzf (fuzzy finder), zoxide (cd replacement)
+- **Git**: delta (diff tool), lazygit (TUI)
+- **System**: dust (du replacement), procs (ps replacement), bottom (htop replacement)
+
+### Development Environment
+- **Terminal**: tmux + TPM (plugin manager)
+- **Editor**: Neovim (latest) + lazy.nvim plugin manager
+- **Languages**: Python 3 (with pip included) + pipx, Node.js + npm
+- **Version Managers**: fnm (Node), pyenv (Python), rustup (Rust)
+
+### Language Servers (for Neovim)
+- **Python**: pyright, black, flake8
+- **JavaScript/TypeScript**: typescript-language-server, prettier, eslint
+- **Bash**: bash-language-server
+- **Lua**: lua-language-server
+- **Rust**: rust-analyzer (if Rust is installed)
+- **Go**: gopls (if Go is installed)
+
+### Fonts
+- Nerd Fonts: FiraCode, JetBrainsMono, Hack, SourceCodePro
+- **Note**: Fonts installed to `~/.local/share/fonts` (works with macOS font system)
+
+</details>
 
 ## 📦 Installation
 

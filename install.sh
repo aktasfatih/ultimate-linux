@@ -125,7 +125,18 @@ check_prerequisites() {
     fi
 
     # Check disk space (need at least 1GB)
-    available_space=$(df -BG "$HOME" | awk 'NR==2 {print $4}' | sed 's/G//')
+    if [[ "$(uname)" == "Darwin" ]]; then
+        # macOS df doesn't support -B flag, use -h and convert
+        available_space=$(df -h "$HOME" | awk 'NR==2 {print $4}' | sed 's/[A-Za-z]//g' | cut -d'.' -f1)
+        # Simple conversion - if it shows in MB, treat as < 1GB
+        if [[ "$available_space" =~ ^[0-9]+$ ]] && [[ $available_space -lt 1 ]]; then
+            available_space=0
+        else
+            available_space=1  # Assume sufficient space if parsing fails
+        fi
+    else
+        available_space=$(df -BG "$HOME" | awk 'NR==2 {print $4}' | sed 's/G//')
+    fi
     if [[ $available_space -lt 1 ]]; then
         log WARN "Less than 1GB of free space available. Installation may fail."
         if [[ "$NON_INTERACTIVE" == "false" ]] && [[ "$FORCE_INSTALL" == "false" ]]; then
@@ -157,6 +168,14 @@ install_homebrew_if_needed() {
         elif [[ -f "/usr/local/bin/brew" ]]; then
             eval "$(/usr/local/bin/brew shellenv)"
         fi
+    fi
+}
+
+fix_homebrew_cache() {
+    if [[ "$DISTRO_FAMILY" == "macos" ]] && command -v brew &> /dev/null; then
+        log INFO "Cleaning Homebrew cache to prevent download issues..."
+        brew cleanup --prune-prefix >/dev/null 2>&1 || true
+        brew cleanup -s >/dev/null 2>&1 || true
     fi
 }
 
@@ -201,11 +220,18 @@ install_base_packages() {
     fi
 
     # Common packages for all modes
-    local common_packages=(
-        "git" "curl" "wget" "build-essential" "cmake"
-        "unzip" "tar" "gzip" "ca-certificates" "gnupg"
-        "xclip" "xsel"
-    )
+    if [[ "$DISTRO_FAMILY" == "macos" ]]; then
+        local common_packages=(
+            "git" "curl" "wget" "cmake"
+            "unzip" "tar" "gzip" "ca-certificates" "gnupg"
+        )
+    else
+        local common_packages=(
+            "git" "curl" "wget" "build-essential" "cmake"
+            "unzip" "tar" "gzip" "ca-certificates" "gnupg"
+            "xclip" "xsel"
+        )
+    fi
 
     # Mode-specific packages
     case $INSTALL_MODE in
@@ -470,13 +496,18 @@ install_neovim() {
         return
     fi
 
-    # Install Neovim - always use AppImage for latest version (0.10+)
+    # Install Neovim - platform-specific installation
     local current_version=$(nvim --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+' | head -1 || echo "0.0")
     
     # Check if we need to update (require at least 0.10)
     if ! command -v nvim &> /dev/null || [[ "$(echo -e "$current_version\n0.10" | sort -V | head -1)" != "0.10" ]]; then
-        log INFO "Installing latest Neovim (0.10+) via AppImage for all features..."
-        install_neovim_appimage
+        if [[ "$DISTRO_FAMILY" == "macos" ]]; then
+            log INFO "Installing latest Neovim via Homebrew..."
+            brew install neovim
+        else
+            log INFO "Installing latest Neovim (0.10+) via AppImage for all features..."
+            install_neovim_appimage
+        fi
     else
         log SUCCESS "Neovim $current_version is already installed and up to date"
     fi
@@ -558,10 +589,18 @@ install_language_servers() {
 
     # JavaScript/TypeScript
     # TypeScript/JavaScript development tools
-    sudo npm install -g typescript typescript-language-server prettier eslint || true
-    sudo npm install -g @fsouza/prettierd eslint_d || true  # Faster formatters
-    sudo npm install -g tsx || true  # TypeScript execute
-    sudo npm install -g npm-check-updates || true  # Update dependencies
+    if [[ "$DISTRO_FAMILY" == "macos" ]]; then
+        # On macOS, avoid sudo with npm to prevent permission issues
+        npm install -g typescript typescript-language-server prettier eslint || true
+        npm install -g @fsouza/prettierd eslint_d || true  # Faster formatters
+        npm install -g tsx || true  # TypeScript execute
+        npm install -g npm-check-updates || true  # Update dependencies
+    else
+        sudo npm install -g typescript typescript-language-server prettier eslint || true
+        sudo npm install -g @fsouza/prettierd eslint_d || true  # Faster formatters
+        sudo npm install -g tsx || true  # TypeScript execute
+        sudo npm install -g npm-check-updates || true  # Update dependencies
+    fi
 
     # Rust
     if command -v rustup &> /dev/null; then
@@ -574,7 +613,11 @@ install_language_servers() {
     fi
 
     # Bash
-    sudo npm install -g bash-language-server || true
+    if [[ "$DISTRO_FAMILY" == "macos" ]]; then
+        npm install -g bash-language-server || true
+    else
+        sudo npm install -g bash-language-server || true
+    fi
 
     # Lua
     if [[ ! -f "$HOME/.local/bin/lua-language-server" ]]; then
@@ -975,6 +1018,8 @@ main() {
             # Install Homebrew on macOS if needed
             if [[ "$DISTRO_FAMILY" == "macos" ]]; then
                 install_homebrew_if_needed
+                # Clean Homebrew cache to prevent download issues
+                fix_homebrew_cache
                 # Install Xcode Command Line Tools if needed
                 if ! xcode-select -p &> /dev/null; then
                     log INFO "Installing Xcode Command Line Tools..."
