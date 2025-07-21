@@ -150,6 +150,14 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 
 ### Git Integration
 
+#### Quick Reference
+| Tool | Launch Command | Description |
+|------|----------------|-------------|
+| **Lazygit** | `<leader>gg` | Full-featured Git UI (recommended) |
+| **Fugitive** | `:Git` or `:G` | Vim-based Git interface |
+| **Diffview** | `:DiffviewOpen` | Advanced diff viewer |
+| **Gitsigns** | Built-in | Inline Git indicators |
+
 #### Gitsigns (Hunks & Blame)
 | Key | Action |
 |-----|--------|
@@ -178,38 +186,158 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `<leader>gp` | Preview hunk |
 | `<leader>gr` | Reset hunk |
 | `<leader>gR` | Reset buffer |
-| `<leader>gs` | Stage hunk |
+| `<leader>gs` | Git status (Telescope) |
 | `<leader>gu` | Undo stage hunk |
 | `<leader>gd` | Diff against HEAD |
 
 #### Telescope Git
 | Key | Action |
 |-----|--------|
-| `<leader>gc` | Git commits |
-| `<leader>gb` | Git branches |
-| `<leader>go` | Git status (changed files) |
+| `<leader>gc` | Git commits (browse history) |
+| `<leader>gb` | Git branches (switch/create) |
+| `<leader>gs` | Git status (changed files) |
 
-#### Fugitive Commands
+#### Fugitive - Core Commands
 | Command | Action |
 |---------|--------|
-| `:Git` or `:G` | Git status |
+| `:Git` or `:G` | Open Git status window |
 | `:Git add %` | Stage current file |
-| `:Git commit` | Commit |
-| `:Git push` | Push |
-| `:Git pull` | Pull |
-| `:Git blame` | Blame |
-| `:Git log` | Log |
-| `:Gdiffsplit` | 3-way merge conflict resolution |
-| `:Gwrite` | Choose current buffer version |
-| `:Gread` | Choose other version |
+| `:Git add .` | Stage all files |
+| `:Git commit` | Commit staged changes |
+| `:Git commit --amend` | Amend last commit |
+| `:Git push` | Push to remote |
+| `:Git pull` | Pull from remote |
+| `:Git fetch` | Fetch from remote |
+| `:Git blame` | Show blame for current file |
+| `:Git log` | Show commit log |
+| `:Git log --oneline` | Compact log view |
+| `:Gwrite` or `:Gw` | Stage current file |
+| `:Gread` or `:Gr` | Checkout file (discard changes) |
+| `:GMove <path>` | Rename/move file |
+| `:GDelete` | Delete file and stage |
+| `:GBrowse` | Open file in web browser |
 
-#### Diffview Commands
+#### Fugitive - Status Window (`:Git`)
+| Key | Action |
+|-----|--------|
+| `s` | Stage file/hunk |
+| `u` | Unstage file/hunk |
+| `-` | Toggle stage/unstage |
+| `=` | Toggle inline diff |
+| `dd` | Open file diff |
+| `dv` | Open diff in vertical split |
+| `ds` | Open diff in horizontal split |
+| `dp` | Open diff in preview window |
+| `<Enter>` | Open file |
+| `o` | Open in horizontal split |
+| `O` | Open in new tab |
+| `gO` | Open in vertical split |
+| `cc` | Commit |
+| `ca` | Commit amend |
+| `ce` | Commit amend without editing |
+| `cw` | Reword last commit |
+| `X` | Discard change |
+| `gq` | Close status window |
+| `R` | Refresh status |
+| `.` | Enter command line with `:Git` |
+
+#### Fugitive - Diff and Merge
 | Command | Action |
 |---------|--------|
-| `:DiffviewOpen` | Open diff view |
+| `:Gdiffsplit` or `:Gds` | Open 3-way diff (merge conflicts) |
+| `:Gdiffsplit!` | Open 3-way diff (force) |
+| `:Ghdiffsplit` | Horizontal diff split |
+| `:Gvdiffsplit` | Vertical diff split (default) |
+| `:Git mergetool` | Launch merge tool |
+
+#### Fugitive - In Diff Mode
+| Key | Action |
+|-----|--------|
+| `]c` | Jump to next change |
+| `[c` | Jump to previous change |
+| `do` | Diff obtain (take other version) |
+| `dp` | Diff put (use current version) |
+| `:diffget //2` | Get from target branch (left) |
+| `:diffget //3` | Get from merge branch (right) |
+| `:diffget` | Get from other window |
+| `:diffput` | Put to other window |
+| `:diffupdate` | Re-scan for differences |
+| `zo` | Open fold |
+| `zc` | Close fold |
+| `zr` | Open all folds |
+| `zm` | Close all folds |
+
+#### Fugitive - Blame Mode (`:Git blame`)
+| Key | Action |
+|-----|--------|
+| `<Enter>` | Open commit |
+| `o` | Open commit in split |
+| `O` | Open commit in tab |
+| `-` | Reblame at parent commit |
+| `P` | Reblame at parent commit (in new tab) |
+| `~` | Reblame at [count]th first grandparent |
+| `g?` | Show help |
+| `q` | Close blame |
+| `A` | Resize to author column |
+| `C` | Resize to commit column |
+| `D` | Resize to date column |
+
+#### Diffview - Commands
+| Command | Action |
+|---------|--------|
+| `:DiffviewOpen` | Open diff view of working changes |
+| `:DiffviewOpen HEAD~2` | View changes from 2 commits ago |
+| `:DiffviewOpen HEAD~2..HEAD` | View range of commits |
+| `:DiffviewOpen <branch>` | Compare with branch |
 | `:DiffviewClose` | Close diff view |
 | `:DiffviewToggleFiles` | Toggle file panel |
-| `:DiffviewFileHistory` | File history |
+| `:DiffviewRefresh` | Refresh the diff |
+| `:DiffviewFileHistory` | View file history |
+| `:DiffviewFileHistory %` | History of current file |
+| `:DiffviewFileHistory path/` | History of directory |
+| `:DiffviewFocusFiles` | Focus file panel |
+| `:DiffviewLog` | Show Diffview log |
+
+#### Diffview - Keybindings (In Diffview)
+| Key | Action | Context |
+|-----|--------|--------|
+| `Tab` | Select next entry | File panel |
+| `Shift+Tab` | Select previous entry | File panel |
+| `gf` | Open file in new tab | File panel |
+| `<C-w>gf` | Open file in split | File panel |
+| `<C-w><C-f>` | Open file in split | File panel |
+| `<C-t>` | Open in new tab | File panel |
+| `<C-v>` | Open in vertical split | File panel |
+| `<C-x>` | Open in horizontal split | File panel |
+| `-` | Toggle stage/unstage | File panel |
+| `S` | Stage all | File panel |
+| `U` | Unstage all | File panel |
+| `X` | Restore entry | File panel |
+| `L` | Open commit log | File panel |
+| `zo` | Expand fold | File panel |
+| `zc` | Collapse fold | File panel |
+| `za` | Toggle fold | File panel |
+| `zR` | Expand all folds | File panel |
+| `zM` | Collapse all folds | File panel |
+| `<leader>e` | Focus files | Diff view |
+| `<leader>b` | Toggle files | Diff view |
+| `]x` | Jump to next conflict | Diff view |
+| `[x` | Jump to previous conflict | Diff view |
+| `g?` | Show help | Any |
+
+#### Diffview - File History View
+| Key | Action |
+|-----|--------|
+| `<C-n>` or `j` | Next entry |
+| `<C-p>` or `k` | Previous entry |
+| `<Enter>` | Open commit |
+| `o` | Open in horizontal split |
+| `O` | Open in new tab |
+| `gO` | Open in vertical split |
+| `y` | Copy commit hash |
+| `zR` | Open all folds |
+| `zM` | Close all folds |
+| `q` | Close file history |
 
 #### Conflict Resolution (Fugitive)
 | Key/Command | Action |
@@ -456,45 +584,153 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 
 ## Git Workflow Best Practices
 
-### Interactive Rebase
-1. **Using Lazygit** (Recommended):
-   - `<leader>gg` to open Lazygit
-   - Press `r` on a commit to start rebase
-   - Use `e` to edit, `s` to squash, `f` to fixup
-   - Much easier than command line!
+### Choosing the Right Tool
 
-2. **Using Fugitive**:
-   - `:Git rebase -i HEAD~3` to rebase last 3 commits
-   - Edit in Vim's buffer with full power
-   - Save and close to continue
+#### Use Lazygit (`<leader>gg`) when:
+- You want a full visual Git interface
+- Doing complex operations (rebase, cherry-pick)
+- Managing multiple files/commits
+- You prefer interactive UI
 
-### Resolving Conflicts
-1. **Quick Resolution**:
-   - When conflict occurs, open file
-   - `:Gdiffsplit` for 3-way merge view
-   - Navigate conflicts with `]c` and `[c`
-   - Use `:diffget //2` or `:diffget //3` to choose version
-   - `:Gwrite` to save and stage
+#### Use Fugitive (`:Git`) when:
+- You want to stay in Vim
+- Quick commits and staging
+- Resolving merge conflicts
+- You know exact Git commands
 
-2. **Visual Resolution with Lazygit**:
-   - `<leader>gg` to open Lazygit
-   - Navigate to conflicted file
-   - Press `Enter` to see conflict
-   - Choose resolution visually
+#### Use Diffview (`:DiffviewOpen`) when:
+- Reviewing large sets of changes
+- Comparing branches or commits
+- Exploring file history
+- Need side-by-side diffs
 
-### Staging Workflow
-1. **Partial Staging**:
-   - Review changes with `<leader>gp` (preview hunk)
-   - Stage individual hunks with `<leader>gs`
-   - Or use Lazygit for visual staging
+#### Use Gitsigns (inline) when:
+- Reviewing changes while coding
+- Quick hunk staging/unstaging
+- Inline blame information
+- Navigating changes in current file
 
-2. **Quick Commands**:
-   - `:Git add %` - Stage current file
-   - `:Git reset %` - Unstage current file
-   - `:Git checkout %` - Discard changes
+### Common Workflows
 
-### Recommended Plugins to Add
-For enhanced Git workflow, consider adding:
-- **git-conflict.nvim** - Better conflict markers visualization
-- **git-rebase-auto-diff.nvim** - Auto diff during rebase
-- **neogit** - Magit-like interface for Neovim
+#### 1. Making a Commit
+```
+Method A - Lazygit (Visual):
+1. <leader>gg                    # Open Lazygit
+2. Space to stage files          # Stage what you want
+3. c to commit                   # Write commit message
+
+Method B - Fugitive (Vim-style):
+1. :Git                          # Open status
+2. Navigate to file, press s     # Stage files
+3. cc                           # Commit
+
+Method C - Gitsigns (Quick):
+1. <leader>hs                    # Stage hunks as you review
+2. :Git commit                   # Commit when ready
+```
+
+#### 2. Interactive Rebase
+```
+Method A - Lazygit (Recommended):
+1. <leader>gg                    # Open Lazygit
+2. Navigate to commit
+3. r                            # Start rebase
+4. e/s/f/d for edit/squash/fixup/drop
+
+Method B - Fugitive:
+1. :Git rebase -i HEAD~3         # Start rebase
+2. Edit in Vim buffer            # Change pick to edit/squash/etc
+3. :wq                          # Save and start rebase
+4. :Git rebase --continue        # After making changes
+```
+
+#### 3. Resolving Conflicts
+```
+Method A - Fugitive 3-way merge:
+1. Open conflicted file
+2. :Gdiffsplit                   # Opens 3-way view
+3. ]c / [c                       # Navigate conflicts
+4. :diffget //2 or //3           # Choose version
+5. :Gwrite                       # Save and stage
+
+Method B - Lazygit:
+1. <leader>gg                    # Open Lazygit
+2. Enter on conflicted file      # See conflicts
+3. Space to pick chunks          # Choose what to keep
+
+Method C - Diffview:
+1. :DiffviewOpen                 # See all conflicts
+2. Navigate with ]x / [x         # Jump between conflicts
+3. Use do/dp or manual edit      # Resolve
+```
+
+#### 4. Reviewing Changes
+```
+Before commit:
+:DiffviewOpen                    # See all changes
+<leader>gp                       # Preview specific hunk
+
+Compare branches:
+:DiffviewOpen main...feature     # See branch differences
+
+File history:
+:DiffviewFileHistory %           # Current file history
+```
+
+#### 5. Branch Operations
+```
+Switch branches:
+<leader>gb                       # Telescope branch picker
+:Git checkout -b new-feature     # Create new branch
+
+Merge:
+:Git merge feature-branch        # Merge branch
+:Gdiffsplit                      # If conflicts arise
+```
+
+### Advanced Tips
+
+#### Fugitive Power User
+- In `:Git` status, use `.` to populate command line
+- Use `dv` on a file to see diff in vertical split
+- `X` on a file discards all changes (careful!)
+- In blame view, `-` goes to parent commit
+
+#### Diffview Navigation
+- Use `Tab`/`Shift+Tab` to quickly navigate files
+- `gf` opens file in new tab from file panel
+- `L` shows commit log for selected file
+- `g?` shows context-sensitive help
+
+#### Quick Commands
+```vim
+" Quick amend
+:Git commit --amend --no-edit
+
+" Stash operations
+:Git stash
+:Git stash pop
+
+" Reset operations
+:Git reset --soft HEAD^
+:Git reset --hard HEAD
+
+" Quick push
+:Git push origin HEAD
+```
+
+### Recommended Keybinding Additions
+
+Add these to your Neovim config for more power:
+
+```lua
+-- Quick Diffview bindings
+vim.keymap.set('n', '<leader>do', ':DiffviewOpen<CR>')
+vim.keymap.set('n', '<leader>dc', ':DiffviewClose<CR>')
+vim.keymap.set('n', '<leader>dh', ':DiffviewFileHistory %<CR>')
+
+-- Quick Fugitive bindings  
+vim.keymap.set('n', '<leader>G', ':Git<CR>')
+vim.keymap.set('n', '<leader>gP', ':Git push<CR>')
+vim.keymap.set('n', '<leader>gp', ':Git pull<CR>')
+```

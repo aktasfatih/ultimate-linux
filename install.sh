@@ -9,9 +9,7 @@ INSTALL_MODE="full"
 FORCE_INSTALL=false
 DRY_RUN=false
 NON_INTERACTIVE=false
-PREFERRED_SHELL="auto"
 ACTION="install"
-MIGRATE_SHELL=""
 
 BOLD='\033[1m'
 RED='\033[0;31m'
@@ -48,10 +46,6 @@ Options:
     --minimal           Basic setup (shell + git only)
     --server            Server-optimized (no GUI dependencies)
     --dev-only          Just development tools
-    --shell=SHELL       Preferred shell (bash|zsh|auto, default: auto)
-    --migrate-shell=SHELL  Migrate to different shell (bash|zsh)
-    --validate-shell    Check shell configuration for issues
-    --fix-shell         Fix detected shell configuration issues
     --dry-run           Show what would be installed without executing
     --force             Overwrite existing configs without prompting
     --backup-dir=PATH   Specify custom backup location
@@ -61,9 +55,6 @@ Examples:
     ./install.sh                    # Full interactive installation
     ./install.sh --minimal --force  # Minimal setup, overwrite existing
     ./install.sh --dry-run          # Preview installation
-    ./install.sh --migrate-shell=zsh  # Migrate to Zsh
-    ./install.sh --validate-shell   # Check shell configuration
-    ./install.sh --fix-shell        # Fix shell issues
 
 EOF
 }
@@ -98,35 +89,6 @@ parse_arguments() {
                 ;;
             --non-interactive)
                 NON_INTERACTIVE=true
-                ;;
-            --shell=*)
-                PREFERRED_SHELL="${1#*=}"
-                case $PREFERRED_SHELL in
-                    bash|zsh|auto) ;;
-                    *)
-                        log ERROR "Invalid shell option: $PREFERRED_SHELL"
-                        echo "Valid options: bash, zsh, auto"
-                        exit 1
-                        ;;
-                esac
-                ;;
-            --migrate-shell=*)
-                ACTION="migrate"
-                MIGRATE_SHELL="${1#*=}"
-                case $MIGRATE_SHELL in
-                    bash|zsh) ;;
-                    *)
-                        log ERROR "Invalid shell option: $MIGRATE_SHELL"
-                        echo "Valid options: bash, zsh"
-                        exit 1
-                        ;;
-                esac
-                ;;
-            --validate-shell)
-                ACTION="validate"
-                ;;
-            --fix-shell)
-                ACTION="fix"
                 ;;
             *)
                 log ERROR "Unknown option: $1"
@@ -180,320 +142,6 @@ source_utils() {
     source "${DOTFILES_DIR}/scripts/utils.sh"
     source "${DOTFILES_DIR}/scripts/distro-detect.sh"
     source "${DOTFILES_DIR}/scripts/package-managers.sh"
-}
-
-# Shell detection and validation functions
-detect_current_shell() {
-    local current_shell=""
-    if [[ -n "${BASH_VERSION:-}" ]]; then
-        current_shell="bash"
-    elif [[ -n "${ZSH_VERSION:-}" ]]; then
-        current_shell="zsh"
-    else
-        current_shell=$(ps -p $$ -o comm= | sed 's/^-//')
-    fi
-    echo "$current_shell"
-}
-
-detect_default_shell() {
-    local default_shell=$(getent passwd "$USER" | cut -d: -f7)
-    echo "$(basename "$default_shell")"
-}
-
-check_shell_config_errors() {
-    local shell_type=$1
-    local config_file=$2
-    local errors=()
-
-    if [[ ! -f "$config_file" ]]; then
-        return 0
-    fi
-
-    case "$shell_type" in
-        bash)
-            # Check for Zsh-specific commands in Bash configs
-            local zsh_commands=("setopt" "zstyle" "compdef" "autoload" "zmodload" "bindkey -v" "precmd_functions" "chpwd_functions")
-            for cmd in "${zsh_commands[@]}"; do
-                if grep -q "^[[:space:]]*$cmd\|[[:space:]]$cmd[[:space:]]" "$config_file" 2>/dev/null; then
-                    errors+=("Found Zsh command '$cmd' in $config_file")
-                fi
-            done
-            ;;
-        zsh)
-            # Check for Bash-specific syntax in Zsh configs
-            local bash_only=("shopt" "complete -" "bind " "PROMPT_COMMAND")
-            for cmd in "${bash_only[@]}"; do
-                if grep -q "^[[:space:]]*$cmd\|[[:space:]]$cmd[[:space:]]" "$config_file" 2>/dev/null; then
-                    errors+=("Found Bash command '$cmd' in $config_file")
-                fi
-            done
-            ;;
-    esac
-
-    # Check for sourcing wrong shell configs
-    if [[ "$shell_type" == "bash" ]]; then
-        if grep -q "source.*\.zshrc\|\..*\.zshrc" "$config_file" 2>/dev/null; then
-            errors+=("Bash config sources Zsh configuration")
-        fi
-    elif [[ "$shell_type" == "zsh" ]]; then
-        if grep -q "source.*\.bashrc\|\..*\.bashrc" "$config_file" 2>/dev/null; then
-            errors+=("Zsh config sources Bash configuration")
-        fi
-    fi
-
-    printf '%s\n' "${errors[@]}"
-}
-
-validate_shell_environment() {
-    log INFO "Validating shell environment..."
-
-    local current_shell=$(detect_current_shell)
-    local default_shell=$(detect_default_shell)
-    local issues_found=false
-
-    # Check for mismatches
-    if [[ "$current_shell" != "$default_shell" ]]; then
-        log WARN "Current shell ($current_shell) differs from default shell ($default_shell)"
-        issues_found=true
-    fi
-
-    # Check shell configurations
-    if [[ -f "$HOME/.bashrc" ]]; then
-        local bash_errors=($(check_shell_config_errors "bash" "$HOME/.bashrc"))
-        if [[ ${#bash_errors[@]} -gt 0 ]]; then
-            log ERROR "Issues in ~/.bashrc:"
-            printf '  - %s\n' "${bash_errors[@]}"
-            issues_found=true
-        fi
-    fi
-
-    if [[ -f "$HOME/.zshrc" ]]; then
-        local zsh_errors=($(check_shell_config_errors "zsh" "$HOME/.zshrc"))
-        if [[ ${#zsh_errors[@]} -gt 0 ]]; then
-            log ERROR "Issues in ~/.zshrc:"
-            printf '  - %s\n' "${zsh_errors[@]}"
-            issues_found=true
-        fi
-    fi
-
-    # Test shell initialization
-    if command -v bash &>/dev/null; then
-        local bash_test=$(bash -l -c 'echo "test"' 2>&1)
-        if [[ "$bash_test" == *"command not found"* ]] || [[ "$bash_test" == *"setopt"* ]]; then
-            log ERROR "Bash initialization has errors"
-            issues_found=true
-        fi
-    fi
-
-    if command -v zsh &>/dev/null; then
-        local zsh_test=$(zsh -l -c 'echo "test"' 2>&1)
-        if [[ "$zsh_test" == *"command not found"* ]] || [[ "$zsh_test" == *"shopt"* ]]; then
-            log ERROR "Zsh initialization has errors"
-            issues_found=true
-        fi
-    fi
-
-    return $([ "$issues_found" = true ] && echo 1 || echo 0)
-}
-
-fix_shell_config() {
-    local config_file=$1
-    local shell_type=$2
-    local backup_file="${config_file}.backup.$(date +%Y%m%d_%H%M%S)"
-
-    log INFO "Fixing $config_file for $shell_type..."
-
-    # Create backup
-    cp "$config_file" "$backup_file"
-    log INFO "Backup created: $backup_file"
-
-    # Add shell guard at the beginning
-    local temp_file=$(mktemp)
-
-    case "$shell_type" in
-        bash)
-            cat > "$temp_file" << 'EOF'
-# Shell guard - ensure this is only executed in Bash
-if [ -z "${BASH_VERSION:-}" ]; then
-    return 0 2>/dev/null || exit 0
-fi
-
-EOF
-            ;;
-        zsh)
-            cat > "$temp_file" << 'EOF'
-# Shell guard - ensure this is only executed in Zsh
-if [ -z "${ZSH_VERSION:-}" ]; then
-    return 0 2>/dev/null || exit 0
-fi
-
-EOF
-            ;;
-    esac
-
-    # Append original content
-    cat "$config_file" >> "$temp_file"
-
-    # Move back
-    mv "$temp_file" "$config_file"
-
-    log SUCCESS "Added shell guard to $config_file"
-}
-
-clean_mixed_configs() {
-    log INFO "Cleaning mixed shell configurations..."
-
-    local cleaned=false
-
-    # Remove Zsh commands from Bash configs
-    if [[ -f "$HOME/.bashrc" ]]; then
-        local temp_file=$(mktemp)
-        grep -v -E "^[[:space:]]*(setopt|zstyle|compdef|autoload|zmodload|precmd_functions|chpwd_functions)" "$HOME/.bashrc" > "$temp_file" || true
-        if ! diff -q "$HOME/.bashrc" "$temp_file" >/dev/null; then
-            cp "$HOME/.bashrc" "$HOME/.bashrc.mixed-backup.$(date +%Y%m%d_%H%M%S)"
-            mv "$temp_file" "$HOME/.bashrc"
-            log SUCCESS "Cleaned Zsh commands from ~/.bashrc"
-            cleaned=true
-        else
-            rm "$temp_file"
-        fi
-    fi
-
-    # Remove Bash commands from Zsh configs
-    if [[ -f "$HOME/.zshrc" ]]; then
-        local temp_file=$(mktemp)
-        grep -v -E "^[[:space:]]*(shopt|complete -|bind |PROMPT_COMMAND)" "$HOME/.zshrc" > "$temp_file" || true
-        if ! diff -q "$HOME/.zshrc" "$temp_file" >/dev/null; then
-            cp "$HOME/.zshrc" "$HOME/.zshrc.mixed-backup.$(date +%Y%m%d_%H%M%S)"
-            mv "$temp_file" "$HOME/.zshrc"
-            log SUCCESS "Cleaned Bash commands from ~/.zshrc"
-            cleaned=true
-        else
-            rm "$temp_file"
-        fi
-    fi
-
-    [[ "$cleaned" = true ]] && log SUCCESS "Shell configurations cleaned" || log INFO "No mixed configurations found"
-}
-
-migrate_to_shell() {
-    local target_shell=$1
-
-    log INFO "Migrating to $target_shell..."
-
-    # Create backup
-    local backup_dir="$HOME/.shell_migration_backup_$(date +%Y%m%d_%H%M%S)"
-    log INFO "Creating backup at $backup_dir..."
-
-    mkdir -p "$backup_dir"
-
-    # Backup shell configs
-    for file in .bashrc .bash_profile .zshrc .zshenv .zprofile; do
-        if [[ -f "$HOME/$file" ]]; then
-            cp "$HOME/$file" "$backup_dir/"
-            log INFO "Backed up $file"
-        fi
-    done
-
-    # Backup shell-related configs
-    [[ -d "$HOME/.config/shell" ]] && cp -r "$HOME/.config/shell" "$backup_dir/"
-    [[ -f "$HOME/.config/starship.toml" ]] && cp "$HOME/.config/starship.toml" "$backup_dir/"
-
-    # Install target shell if needed
-    if ! command -v "$target_shell" &>/dev/null; then
-        log INFO "Installing $target_shell..."
-        install_packages "$target_shell"
-    fi
-
-    # Deploy appropriate configuration
-    case $target_shell in
-        bash)
-            # Deploy Bash config
-            deploy_config "$DOTFILES_DIR/config/bash/.bashrc" "$HOME/.bashrc"
-
-            # Ensure starship is configured for bash
-            if command -v starship &>/dev/null; then
-                if ! grep -q "starship init bash" "$HOME/.bashrc"; then
-                    echo "" >> "$HOME/.bashrc"
-                    echo "# Starship prompt" >> "$HOME/.bashrc"
-                    echo 'eval "$(starship init bash)"' >> "$HOME/.bashrc"
-                fi
-            fi
-            ;;
-
-        zsh)
-            # Install Oh My Zsh if not present
-            if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-                log INFO "Installing Oh My Zsh..."
-                RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-            fi
-
-            # Deploy Zsh configs
-            deploy_config "$DOTFILES_DIR/config/zsh/.zshrc" "$HOME/.zshrc"
-            deploy_config "$DOTFILES_DIR/config/zsh/.zshenv" "$HOME/.zshenv"
-
-            # Install Zsh plugins
-            local ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-
-            if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]]; then
-                git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
-            fi
-
-            if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]]; then
-                git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
-            fi
-            ;;
-    esac
-
-    # Deploy universal configs
-    mkdir -p "$HOME/.config/shell"
-    deploy_config "$DOTFILES_DIR/config/shell/aliases.sh" "$HOME/.config/shell/aliases.sh"
-
-    # Update tmux default shell
-    local shell_path=$(which "$target_shell")
-    if [[ -f "$HOME/.tmux.conf" ]]; then
-        if grep -q "set-option -g default-shell" "$HOME/.tmux.conf"; then
-            sed -i "s|set-option -g default-shell.*|set-option -g default-shell $shell_path|" "$HOME/.tmux.conf"
-        else
-            echo "set-option -g default-shell $shell_path" >> "$HOME/.tmux.conf"
-        fi
-        log SUCCESS "Updated tmux configuration"
-    fi
-
-    # Test new shell
-    local test_output=$("$target_shell" -l -c 'echo "Shell test successful"' 2>&1)
-    if [[ "$test_output" == *"Shell test successful"* ]] && [[ "$test_output" != *"command not found"* ]]; then
-        log SUCCESS "$target_shell starts without errors"
-    else
-        log WARN "$target_shell may have startup errors"
-    fi
-
-    # Change default shell
-    local current_shell=$(basename "$SHELL")
-    if [[ "$current_shell" != "$target_shell" ]]; then
-        if [[ "$NON_INTERACTIVE" == "false" ]]; then
-            read -p "$(echo -e "${BLUE}Change default login shell to $target_shell? [Y/n]${NC} ")" -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-                # Ensure shell is in /etc/shells
-                if ! grep -q "^$shell_path$" /etc/shells; then
-                    log WARN "$shell_path not in /etc/shells, adding it..."
-                    echo "$shell_path" | sudo tee -a /etc/shells >/dev/null
-                fi
-
-                chsh -s "$shell_path"
-                log SUCCESS "Default shell changed to $target_shell"
-                log INFO "You'll need to log out and back in for this to take effect"
-            fi
-        fi
-    fi
-
-    log SUCCESS "Migration to $target_shell completed!"
-    echo
-    echo -e "${BLUE}What's next:${NC}"
-    echo "  1. Restart your terminal or run: source ~/.$( [[ "$target_shell" == "bash" ]] && echo "bashrc" || echo "zshrc" )"
-    echo "  2. If using tmux, restart tmux for changes to take effect"
-    echo "  3. Your backup is at: $backup_dir"
 }
 
 create_backup() {
@@ -561,60 +209,47 @@ install_shell_environment() {
 
     log INFO "Installing shell environment..."
 
-    # Determine which shell to use
-    local target_shell="$PREFERRED_SHELL"
-    if [[ "$target_shell" == "auto" ]]; then
-        # Check current shell
-        if [[ -n "${BASH_VERSION:-}" ]]; then
-            target_shell="bash"
-        elif [[ -n "${ZSH_VERSION:-}" ]]; then
-            target_shell="zsh"
-        else
-            # Default to user's login shell
-            target_shell=$(basename "$SHELL")
-        fi
-        log INFO "Auto-detected shell: $target_shell"
-    fi
-
     if [[ "$DRY_RUN" == "true" ]]; then
-        log INFO "[DRY RUN] Would configure $target_shell shell environment"
+        log INFO "[DRY RUN] Would configure shell environments"
         return
     fi
 
-    # Install chosen shell if not present
-    if [[ "$target_shell" == "zsh" ]] && ! command -v zsh &> /dev/null; then
-        install_packages "zsh"
-    elif [[ "$target_shell" == "bash" ]] && ! command -v bash &> /dev/null; then
+    # Install both shells if not present
+    if ! command -v bash &> /dev/null; then
         install_packages "bash"
     fi
+    if ! command -v zsh &> /dev/null; then
+        install_packages "zsh"
+    fi
 
-    # Install shell-specific components
-    if [[ "$target_shell" == "zsh" ]]; then
-        # Install Oh My Zsh
-        if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-            log INFO "Installing Oh My Zsh..."
-            RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || {
-                log ERROR "Failed to install Oh My Zsh"
-                return 1
-            }
-        fi
+    # Configure both shells to ensure compatibility
+    log INFO "Configuring both Bash and Zsh for maximum compatibility..."
 
-        # Install Zsh plugins
-        local ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+    # Install Zsh components
+    # Install Oh My Zsh
+    if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+        log INFO "Installing Oh My Zsh..."
+        RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || {
+            log ERROR "Failed to install Oh My Zsh"
+            return 1
+        }
+    fi
 
-        # zsh-autosuggestions
-        if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]]; then
-            git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" || {
-                log WARN "Failed to install zsh-autosuggestions plugin"
-            }
-        fi
+    # Install Zsh plugins
+    local ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
-        # zsh-syntax-highlighting
-        if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]]; then
-            git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" || {
-                log WARN "Failed to install zsh-syntax-highlighting plugin"
-            }
-        fi
+    # zsh-autosuggestions
+    if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]]; then
+        git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" || {
+            log WARN "Failed to install zsh-autosuggestions plugin"
+        }
+    fi
+
+    # zsh-syntax-highlighting
+    if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]]; then
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" || {
+            log WARN "Failed to install zsh-syntax-highlighting plugin"
+        }
     fi
 
     # Install Starship prompt
@@ -634,23 +269,27 @@ install_shell_environment() {
         source "$DOTFILES_DIR/scripts/install-productivity-tools.sh" || true
     fi
 
-    # Deploy shell-specific configuration
-    if [[ "$target_shell" == "zsh" ]]; then
-        deploy_config "config/zsh/.zshrc" "$HOME/.zshrc"
-        deploy_config "config/zsh/.zshenv" "$HOME/.zshenv"
-        # Deploy Zsh-specific configurations
-        mkdir -p "$HOME/.config/zsh"
-        deploy_config "config/zsh/aliases.zsh" "$HOME/.config/zsh/aliases.zsh"
-        deploy_config "config/zsh/functions.zsh" "$HOME/.config/zsh/functions.zsh"
-        deploy_config "config/zsh/completions.zsh" "$HOME/.config/zsh/completions.zsh"
-        deploy_config "config/zsh/key-bindings.zsh" "$HOME/.config/zsh/key-bindings.zsh"
+    # Deploy configurations for BOTH shells
+    log INFO "Deploying Bash configuration..."
+    deploy_config "config/bash/.bashrc" "$HOME/.bashrc"
+    
+    log INFO "Deploying Zsh configuration..."
+    deploy_config "config/zsh/.zshrc" "$HOME/.zshrc"
+    deploy_config "config/zsh/.zshenv" "$HOME/.zshenv"
+    
+    # Deploy Zsh-specific configurations
+    mkdir -p "$HOME/.config/zsh"
+    deploy_config "config/zsh/aliases.zsh" "$HOME/.config/zsh/aliases.zsh"
+    deploy_config "config/zsh/functions.zsh" "$HOME/.config/zsh/functions.zsh"
+    deploy_config "config/zsh/completions.zsh" "$HOME/.config/zsh/completions.zsh"
+    deploy_config "config/zsh/key-bindings.zsh" "$HOME/.config/zsh/key-bindings.zsh"
 
-        # Create cache directories
-        mkdir -p "$HOME/.cache/zsh/completion"
-        
-        # Create .zshrc.local with fixes for common issues
-        if [[ ! -f "$HOME/.zshrc.local" ]]; then
-            cat > "$HOME/.zshrc.local" << 'EOF'
+    # Create cache directories
+    mkdir -p "$HOME/.cache/zsh/completion"
+    
+    # Create .zshrc.local with fixes for common issues
+    if [[ ! -f "$HOME/.zshrc.local" ]]; then
+        cat > "$HOME/.zshrc.local" << 'EOF'
 # Local Zsh customizations
 
 # Fix: Unalias cd to restore normal behavior (some Oh My Zsh plugins alias cd to z)
@@ -659,18 +298,14 @@ unalias cd 2>/dev/null || true
 # If you find z's tab completion interfering with normal file completion, uncomment:
 # ZSHZ_COMPLETION=none
 EOF
-            log INFO "Created .zshrc.local with common fixes"
-        fi
-    else
-        # Deploy Bash configuration
-        deploy_config "config/bash/.bashrc" "$HOME/.bashrc"
+        log INFO "Created .zshrc.local with common fixes"
     fi
 
     # Deploy universal shell configuration
     mkdir -p "$HOME/.config/shell"
     deploy_config "config/shell/aliases.sh" "$HOME/.config/shell/aliases.sh"
 
-    log SUCCESS "Shell environment installed for $target_shell"
+    log SUCCESS "Shell environment installed for both Bash and Zsh"
 }
 
 install_modern_cli_tools() {
@@ -1206,37 +841,10 @@ finalize_installation() {
         sudo apt autoremove -y 2>/dev/null || true
     fi
 
-    # Validate shell configuration
-    if ! validate_shell_environment; then
-        log WARN "Shell configuration issues detected"
-        if [[ "$NON_INTERACTIVE" == "false" ]]; then
-            read -p "$(echo -e "${YELLOW}Would you like to fix shell configuration issues? [Y/n]${NC} ")" -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-                # Clean mixed configs first
-                clean_mixed_configs
+    # Ask about changing default shell to zsh if not already
+    local current_shell=$(basename "$SHELL")
 
-                # Add shell guards
-                [[ -f "$HOME/.bashrc" ]] && fix_shell_config "$HOME/.bashrc" "bash"
-                [[ -f "$HOME/.zshrc" ]] && fix_shell_config "$HOME/.zshrc" "zsh"
-
-                log SUCCESS "Shell configuration fixes applied"
-            fi
-        fi
-    fi
-
-    # Ask about changing default shell
-    local target_shell="${PREFERRED_SHELL}"
-    if [[ "$target_shell" == "auto" ]]; then
-        # Default to zsh if it's installed, otherwise keep current shell
-        if command -v zsh >/dev/null 2>&1; then
-            target_shell="zsh"
-        else
-            target_shell=$(basename "$SHELL")
-        fi
-    fi
-
-    if [[ "$target_shell" == "zsh" ]] && [[ "$SHELL" != "$(which zsh)" ]] && [[ "$INSTALL_MODE" != "dev-only" ]]; then
+    if [[ "$current_shell" != "zsh" ]] && [[ "$INSTALL_MODE" != "dev-only" ]]; then
         if [[ "$NON_INTERACTIVE" == "false" ]]; then
             read -p "$(echo -e "${BLUE}Change default shell to Zsh? [Y/n]${NC} ")" -n 1 -r
             echo
@@ -1250,23 +858,6 @@ finalize_installation() {
                     fi
                 else
                     log WARN "chsh command not found. To change your default shell manually, run: sudo usermod -s $(which zsh) $USER"
-                fi
-            fi
-        fi
-    elif [[ "$target_shell" == "bash" ]] && [[ "$SHELL" != "$(which bash)" ]] && [[ "$INSTALL_MODE" != "dev-only" ]]; then
-        if [[ "$NON_INTERACTIVE" == "false" ]]; then
-            read -p "$(echo -e "${BLUE}Change default shell to Bash? [Y/n]${NC} ")" -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-                if command -v chsh >/dev/null 2>&1; then
-                    if chsh -s "$(which bash)"; then
-                        log SUCCESS "Default shell changed to Bash"
-                        log INFO "Please log out and back in for the change to take effect"
-                    else
-                        log WARN "Failed to change shell. You may need to run: sudo chsh -s $(which bash) $USER"
-                    fi
-                else
-                    log WARN "chsh command not found. To change your default shell manually, run: sudo usermod -s $(which bash) $USER"
                 fi
             fi
         fi
@@ -1346,43 +937,6 @@ main() {
 
     # Handle different actions
     case "$ACTION" in
-        validate)
-            log INFO "Running shell validation..."
-            if validate_shell_environment; then
-                log SUCCESS "No shell configuration issues found"
-            else
-                log ERROR "Shell configuration issues detected"
-                echo
-                echo "To fix these issues, run: $0 --fix-shell"
-                exit 1
-            fi
-            ;;
-
-        fix)
-            log INFO "Fixing shell configuration issues..."
-            if ! validate_shell_environment; then
-                # Clean mixed configs first
-                clean_mixed_configs
-
-                # Add shell guards
-                [[ -f "$HOME/.bashrc" ]] && fix_shell_config "$HOME/.bashrc" "bash"
-                [[ -f "$HOME/.zshrc" ]] && fix_shell_config "$HOME/.zshrc" "zsh"
-
-                log SUCCESS "Shell configuration fixes applied"
-                echo
-                echo "Please restart your terminal or run: source ~/.$(basename $SHELL)rc"
-            else
-                log SUCCESS "No issues to fix"
-            fi
-            ;;
-
-        migrate)
-            log INFO "Shell migration mode"
-            # Detect distribution for package installation
-            detect_distro
-            migrate_to_shell "$MIGRATE_SHELL"
-            ;;
-
         install)
             # Normal installation flow
             # Check prerequisites
