@@ -1,6 +1,6 @@
-# Ultimate Linux Development Setup
+# Ultimate Development Setup
 
-A comprehensive, production-ready dotfiles repository that provides a complete development environment for Linux systems. This setup includes a modern shell environment, terminal multiplexer, Neovim IDE configuration, and essential development tools.
+A comprehensive, production-ready dotfiles repository that provides a complete development environment for Linux and macOS systems. This setup includes a modern shell environment, terminal multiplexer, Neovim IDE configuration, and essential development tools.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Shell](https://img.shields.io/badge/shell-zsh-green.svg)
@@ -19,10 +19,18 @@ cd ~/.dotfiles && ./install.sh
 
 ## 📋 Prerequisites
 
+### Linux
 - Linux-based operating system (Ubuntu, Fedora, Arch, etc.)
 - `sudo` access for package installation
-- Internet connection for downloading components
 - Git (will be installed if not present)
+
+### macOS
+- macOS 10.15 (Catalina) or later
+- Xcode Command Line Tools (will be installed if not present)
+- Homebrew (will be installed if not present)
+
+### Both Platforms
+- Internet connection for downloading components
 - At least 1GB of free disk space
 
 ## ✨ Features
@@ -54,6 +62,29 @@ cd ~/.dotfiles && ./install.sh
 - Language version managers: `fnm` (Node.js), `pyenv` (Python), `rustup` (Rust)
 - Docker and docker-compose support
 - Comprehensive `.gitignore` templates
+
+## 💻 Platform Support
+
+### Linux Distributions
+- **Ubuntu/Debian**: 18.04+
+- **Fedora/RHEL/CentOS**: 8+
+- **Arch/Manjaro**: Current
+- **openSUSE**: Leap 15+
+- **Alpine**: 3.12+
+- And many more!
+
+### macOS
+- **macOS**: 10.15 (Catalina) and later
+- **Apple Silicon**: Full native support
+- **Intel Macs**: Full support
+
+### Key Differences by Platform
+| Feature | Linux | macOS |
+|---------|-------|-------|
+| Package Manager | apt/yum/pacman/etc. | Homebrew |
+| Clipboard | xclip/xsel | pbcopy/pbpaste |
+| Font Management | fontconfig | Native |
+| System Tools | GNU coreutils | BSD utils |
 
 ## 📦 Installation
 
@@ -178,6 +209,22 @@ ultimate-linux/
    ```
 
 See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for more solutions.
+
+## 🍎 macOS-Specific Notes
+
+1. **Homebrew Installation**: The installer will automatically install Homebrew if it's not present.
+
+2. **Xcode Command Line Tools**: Required for compilation. The installer will prompt you to install them if needed.
+
+3. **Font Installation**: After installation, manually install Nerd Fonts:
+   ```bash
+   brew tap homebrew/cask-fonts
+   brew install --cask font-fira-code-nerd-font
+   ```
+
+4. **Terminal App**: For best results, use [iTerm2](https://iterm2.com/) or [Alacritty](https://alacritty.org/) instead of Terminal.app.
+
+5. **System Integrity Protection**: Some features may require disabling SIP for full functionality (not recommended for most users).
 
 ## 🤝 Contributing
 

@@ -205,6 +205,7 @@ map_package_name() {
                 arch) echo "base-devel" ;;
                 suse) echo "devel_basis" ;;
                 alpine) echo "build-base" ;;
+                macos) echo "" ;;  # Xcode Command Line Tools handle this
                 *) echo "gcc make" ;;
             esac
             ;;
@@ -213,6 +214,7 @@ map_package_name() {
                 debian|fedora|suse) echo "python3" ;;
                 arch) echo "python" ;;
                 alpine) echo "python3" ;;
+                macos) echo "python3" ;;
                 *) echo "python3" ;;
             esac
             ;;
@@ -278,12 +280,14 @@ map_package_name() {
                     ;;
                 fedora|arch) echo "bat" ;;
                 alpine) echo "bat" ;;
+                macos) echo "bat" ;;
                 *) echo "" ;;
             esac
             ;;
         "ripgrep")
             case "$DISTRO_FAMILY" in
                 debian|fedora|arch|alpine) echo "ripgrep" ;;
+                macos) echo "ripgrep" ;;
                 *) echo "" ;;
             esac
             ;;
@@ -293,6 +297,7 @@ map_package_name() {
                 fedora) echo "fd-find" ;;
                 arch) echo "fd" ;;
                 alpine) echo "fd" ;;
+                macos) echo "fd" ;;
                 *) echo "" ;;
             esac
             ;;
@@ -306,7 +311,32 @@ map_package_name() {
             case "$DISTRO_FAMILY" in
                 debian|fedora|arch|suse) echo "fontconfig" ;;
                 alpine) echo "fontconfig" ;;
+                macos) echo "" ;;  # macOS handles fonts differently
                 *) echo "fontconfig" ;;
+            esac
+            ;;
+        "xclip"|"xsel")
+            case "$DISTRO_FAMILY" in
+                macos) echo "" ;;  # macOS uses pbcopy/pbpaste
+                *) echo "$package" ;;
+            esac
+            ;;
+        "fzf")
+            case "$DISTRO_FAMILY" in
+                debian|fedora|arch|suse|alpine|macos) echo "fzf" ;;
+                *) echo "fzf" ;;
+            esac
+            ;;
+        "pipx")
+            case "$DISTRO_FAMILY" in
+                macos) echo "pipx" ;;
+                *) echo "$package" ;;
+            esac
+            ;;
+        "python3-venv"|"python3-full")
+            case "$DISTRO_FAMILY" in
+                macos) echo "" ;;  # Python3 on macOS includes venv
+                *) echo "$package" ;;
             esac
             ;;
         *)

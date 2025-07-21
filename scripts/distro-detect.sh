@@ -9,7 +9,13 @@ PACKAGE_MANAGER=""
 INIT_SYSTEM=""
 
 detect_distro() {
-    if [[ -f /etc/os-release ]]; then
+    # Check for macOS first
+    if [[ "$(uname)" == "Darwin" ]]; then
+        DISTRO="macos"
+        DISTRO_FAMILY="macos"
+        # Get macOS version
+        DISTRO_VERSION=$(sw_vers -productVersion 2>/dev/null || echo "unknown")
+    elif [[ -f /etc/os-release ]]; then
         . /etc/os-release
         DISTRO="$ID"
         DISTRO_VERSION="$VERSION_ID"
@@ -115,7 +121,9 @@ detect_package_manager() {
 }
 
 detect_init_system() {
-    if [[ -d /run/systemd/system ]]; then
+    if [[ "$(uname)" == "Darwin" ]]; then
+        INIT_SYSTEM="launchd"
+    elif [[ -d /run/systemd/system ]]; then
         INIT_SYSTEM="systemd"
     elif command -v openrc &> /dev/null; then
         INIT_SYSTEM="openrc"

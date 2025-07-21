@@ -59,15 +59,32 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 -- Clipboard configuration
-vim.g.clipboard = {
-  name = 'ultimate-linux-clipboard',
-  copy = {
-    ['+'] = {'xclip', '-selection', 'clipboard'},
-    ['*'] = {'xclip', '-selection', 'primary'},
-  },
-  paste = {
-    ['+'] = {'xclip', '-selection', 'clipboard', '-o'},
-    ['*'] = {'xclip', '-selection', 'primary', '-o'},
-  },
-  cache_enabled = 1,
-}
+if vim.fn.has('mac') == 1 then
+  -- macOS clipboard
+  vim.g.clipboard = {
+    name = 'macOS-clipboard',
+    copy = {
+      ['+'] = 'pbcopy',
+      ['*'] = 'pbcopy',
+    },
+    paste = {
+      ['+'] = 'pbpaste',
+      ['*'] = 'pbpaste',
+    },
+    cache_enabled = 1,
+  }
+else
+  -- Linux clipboard
+  vim.g.clipboard = {
+    name = 'ultimate-linux-clipboard',
+    copy = {
+      ['+'] = {'xclip', '-selection', 'clipboard'},
+      ['*'] = {'xclip', '-selection', 'primary'},
+    },
+    paste = {
+      ['+'] = {'xclip', '-selection', 'clipboard', '-o'},
+      ['*'] = {'xclip', '-selection', 'primary', '-o'},
+    },
+    cache_enabled = 1,
+  }
+end

@@ -105,14 +105,16 @@ check_prerequisites() {
 
     # Skip sudo check for dry run
     if [[ "$DRY_RUN" == "false" ]]; then
-        # Check for sudo access
-        if ! sudo -n true 2>/dev/null; then
-            if [[ "$NON_INTERACTIVE" == "true" ]]; then
-                log ERROR "Sudo access required. Please run with sudo or authenticate first."
-                exit 1
+        # Check for sudo access (not required on macOS for Homebrew)
+        if [[ "$(uname)" != "Darwin" ]]; then
+            if ! sudo -n true 2>/dev/null; then
+                if [[ "$NON_INTERACTIVE" == "true" ]]; then
+                    log ERROR "Sudo access required. Please run with sudo or authenticate first."
+                    exit 1
+                fi
+                log INFO "Sudo access required. Please enter your password."
+                sudo true
             fi
-            log INFO "Sudo access required. Please enter your password."
-            sudo true
         fi
     fi
 
@@ -136,6 +138,26 @@ check_prerequisites() {
     fi
 
     log SUCCESS "Prerequisites check passed"
+}
+
+install_homebrew_if_needed() {
+    if [[ "$(uname)" == "Darwin" ]] && ! command -v brew &> /dev/null; then
+        log INFO "Installing Homebrew..."
+        if [[ "$DRY_RUN" == "true" ]]; then
+            log INFO "[DRY RUN] Would install Homebrew"
+            return
+        fi
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || {
+            log ERROR "Failed to install Homebrew"
+            exit 1
+        }
+        # Add Homebrew to PATH for the current session
+        if [[ -f "/opt/homebrew/bin/brew" ]]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        elif [[ -f "/usr/local/bin/brew" ]]; then
+            eval "$(/usr/local/bin/brew shellenv)"
+        fi
+    fi
 }
 
 source_utils() {
@@ -949,6 +971,18 @@ main() {
             # Detect distribution
             detect_distro
             log INFO "Detected distribution: $DISTRO ($DISTRO_FAMILY)"
+
+            # Install Homebrew on macOS if needed
+            if [[ "$DISTRO_FAMILY" == "macos" ]]; then
+                install_homebrew_if_needed
+                # Install Xcode Command Line Tools if needed
+                if ! xcode-select -p &> /dev/null; then
+                    log INFO "Installing Xcode Command Line Tools..."
+                    if [[ "$DRY_RUN" == "false" ]]; then
+                        xcode-select --install
+                    fi
+                fi
+            fi
 
             # Create backup
             create_backup
