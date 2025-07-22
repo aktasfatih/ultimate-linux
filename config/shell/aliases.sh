@@ -83,8 +83,23 @@ fi
 # Modern CLI tool replacements (if installed)
 command -v bat &>/dev/null && alias cat='bat'
 command -v batcat &>/dev/null && alias cat='batcat'
-command -v eza &>/dev/null && alias ls='eza' && alias tree='eza --tree'
-command -v exa &>/dev/null && ! command -v eza &>/dev/null && alias ls='exa' && alias tree='exa --tree'
+if command -v eza &>/dev/null; then
+    alias ls='eza'
+    alias tree='eza --tree'
+    # Override common aliases to use eza-compatible flags
+    alias ll='eza -alF'
+    alias la='eza -a'
+    alias l='eza -F'
+    alias lt='eza -al --sort=modified'
+elif command -v exa &>/dev/null; then
+    alias ls='exa'
+    alias tree='exa --tree'
+    # Override common aliases to use exa-compatible flags
+    alias ll='exa -alF'
+    alias la='exa -a'
+    alias l='exa -F'
+    alias lt='exa -al --sort=modified'
+fi
 command -v rg &>/dev/null && alias grep='rg'
 command -v fd &>/dev/null && alias find='fd'
 command -v procs &>/dev/null && alias ps='procs'

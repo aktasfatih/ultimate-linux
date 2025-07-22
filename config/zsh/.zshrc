@@ -208,14 +208,27 @@ zstyle ':completion:*' accept-exact '*(N)'
 zstyle ':completion:*' use-compctl false
 
 # Auto-notify for long running commands
-if command -v notify-send &> /dev/null; then
+# Check for notification command (Linux: notify-send, macOS: osascript)
+if command -v notify-send &> /dev/null || [[ "$(uname)" == "Darwin" ]]; then
     bgnotify_threshold=10
+    
+    function bgnotify_begin {
+        bgnotify_timestamp=$EPOCHSECONDS
+        bgnotify_lastcmd="$1"
+        bgnotify_appid="$TERM_SESSION_ID"
+    }
     
     function bgnotify_end {
         elapsed=$(( EPOCHSECONDS - bgnotify_timestamp ))
         past_threshold=$(( elapsed >= bgnotify_threshold ))
         if [[ $bgnotify_appid == "$TERM_SESSION_ID" ]] && [[ $past_threshold -eq 1 ]]; then
-            notify-send "Command completed in ${elapsed}s" "$bgnotify_lastcmd"
+            if [[ "$(uname)" == "Darwin" ]]; then
+                # macOS notification
+                osascript -e "display notification \"$bgnotify_lastcmd\" with title \"Command completed in ${elapsed}s\""
+            else
+                # Linux notification
+                notify-send "Command completed in ${elapsed}s" "$bgnotify_lastcmd"
+            fi
         fi
     }
     

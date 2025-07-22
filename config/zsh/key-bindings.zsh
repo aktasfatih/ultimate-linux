@@ -112,6 +112,9 @@ if command -v fzf &> /dev/null; then
 fi
 
 # Quick command widgets
+# Unalias run-help if it exists (Oh My Zsh may define it)
+unalias run-help 2>/dev/null || true
+
 run-help() {
     if [[ -n "$BUFFER" ]]; then
         BUFFER="man $BUFFER"

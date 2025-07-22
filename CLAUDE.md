@@ -16,9 +16,31 @@ When adding new features:
 3. Avoid creating new executable scripts unless absolutely necessary
 4. Document new options in the script's help text
 
+## CRITICAL: Fix Issues in Source Scripts, Not Deployed Files
+
+**NEVER modify deployed configuration files directly (e.g., ~/.zshrc, ~/.bashrc).** All fixes must be made in:
+1. The source configuration files in the `config/` directory
+2. The installation scripts that deploy these configurations
+3. The utility scripts in `scripts/` that are sourced by the installers
+
+This ensures:
+- The fix will work on fresh installations
+- The repository remains the single source of truth
+- Updates can be deployed cleanly without manual intervention
+- Other users benefit from the fixes
+
+Example:
+- ❌ BAD: Editing `~/.zshrc` directly
+- ✅ GOOD: Editing `config/zsh/.zshrc` and/or fixing the deployment logic in `install.sh`
+
 ## Repository Overview
 
-This is the Ultimate Linux Development Setup - a comprehensive dotfiles repository that provides automated installation and management of a complete development environment across multiple Linux distributions. It includes shell configuration (Bash/Zsh with Oh My Zsh), tmux, Neovim IDE configuration, and modern CLI tools.
+This is the Ultimate Development Setup - a comprehensive dotfiles repository that provides automated installation and management of a complete development environment across multiple Linux distributions and macOS. It includes shell configuration (Bash/Zsh with Oh My Zsh), tmux, Neovim IDE configuration, and modern CLI tools.
+
+### Platform Support
+- **Linux**: Ubuntu, Debian, Fedora, Arch, openSUSE, Alpine, and many more distributions
+- **macOS**: Full support via Homebrew package manager
+- Cross-platform configurations that work seamlessly on both Linux and macOS
 
 ## Core Commands
 

@@ -327,6 +327,7 @@ install_shell_environment() {
     
     # Deploy Zsh-specific configurations
     mkdir -p "$HOME/.config/zsh"
+    mkdir -p "$HOME/.config/zsh/completions"  # Create completions directory
     deploy_config "config/zsh/aliases.zsh" "$HOME/.config/zsh/aliases.zsh"
     deploy_config "config/zsh/functions.zsh" "$HOME/.config/zsh/functions.zsh"
     deploy_config "config/zsh/completions.zsh" "$HOME/.config/zsh/completions.zsh"

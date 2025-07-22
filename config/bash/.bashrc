@@ -43,10 +43,7 @@ if [ -f "$HOME/.config/shell/aliases.sh" ]; then
     source "$HOME/.config/shell/aliases.sh"
 fi
 
-# Source bash-specific aliases
-if [ -f "$HOME/.bash_aliases" ]; then
-    source "$HOME/.bash_aliases"
-fi
+# Note: Bash-specific aliases can be added to ~/.bashrc.local
 
 # Enable programmable completion
 if ! shopt -oq posix; then
