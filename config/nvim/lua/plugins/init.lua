@@ -621,4 +621,32 @@ return {
       })
     end,
   },
+
+  -- Claude Code integration
+  {
+    "greggh/claude-code.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = { "ClaudeCode", "ClaudeCodeContinue" },
+    keys = {
+      { "<C-,>", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
+      { "<leader>cc", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
+      { "<leader>cr", "<cmd>ClaudeCodeContinue<cr>", desc = "Continue Claude conversation" },
+    },
+    config = function()
+      require("claude-code").setup({
+        -- Window position: "right", "left", "top", "bottom", or "float"
+        position = "right",
+        -- Window width (for left/right) or height (for top/bottom) as percentage
+        size = 50,
+        -- Use project root as working directory
+        use_git_root = true,
+        -- Automatically detect and reload files changed by Claude
+        auto_reload = true,
+        -- Show line numbers in Claude terminal
+        line_numbers = false,
+        -- Additional command arguments for Claude Code CLI
+        additional_args = {},
+      })
+    end,
+  },
 }

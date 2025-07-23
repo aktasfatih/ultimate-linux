@@ -753,6 +753,22 @@ install_development_tools() {
         install_from_github "jesseduffield/lazygit"
     fi
 
+    # Install Claude Code CLI (for Neovim integration)
+    if ! command -v claude &> /dev/null; then
+        log INFO "Installing Claude Code CLI..."
+        if command -v npm &> /dev/null; then
+            npm install -g @anthropic-ai/claude-code || {
+                log WARNING "Failed to install Claude Code CLI via npm"
+                log INFO "You can install it manually with: npm install -g @anthropic-ai/claude-code"
+            }
+        else
+            log WARNING "npm not found. Claude Code CLI requires Node.js 18+"
+            log INFO "Install Node.js first, then run: npm install -g @anthropic-ai/claude-code"
+        fi
+    else
+        log SUCCESS "Claude Code CLI is already installed"
+    fi
+
     # Install language version managers
     # fnm (Fast Node Manager)
     if ! command -v fnm &> /dev/null; then

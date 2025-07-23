@@ -173,6 +173,12 @@ local mappings = {
     u = { "<cmd>TSUpdate<CR>", "Update" },
     s = { "<cmd>TSSync<CR>", "Sync" },
   },
+  
+  c = {
+    name = "Claude",
+    c = { "<cmd>ClaudeCode<CR>", "Toggle Claude Code" },
+    r = { "<cmd>ClaudeCodeContinue<CR>", "Continue Conversation" },
+  },
 }
 
 wk.register(mappings, opts)
