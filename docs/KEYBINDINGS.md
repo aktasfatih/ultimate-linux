@@ -19,13 +19,16 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `Prefix + $` | Rename session |
 | `Prefix + d` | Detach from session |
 | `Prefix + D` | Choose session to detach |
-| `Prefix + s` | List sessions |
+| `Prefix + s` | List sessions (choose from tree view) |
 | `Prefix + (` | Switch to previous session |
 | `Prefix + )` | Switch to next session |
 | `Prefix + L` | Switch to last session |
 | `Prefix + Q` | Kill session (with confirmation) |
 | `Prefix + Ctrl+c` | Create new session |
-| `Prefix + Ctrl+f` | Find session |
+| `Prefix + Ctrl+f` | Find session by name |
+| `Prefix + Ctrl+p` | Session picker with directory browsing (tmux-sessionizer) |
+| `Prefix + Ctrl+w` | Window switcher across sessions |
+| `Prefix + g` | Go to session (tmux-sessionist plugin) |
 
 ### Window Management
 | Key | Action |
@@ -664,6 +667,9 @@ While coding, these snippets expand:
 - Hold `Shift` to select text with mouse (bypasses tmux mouse mode)
 - Use `Prefix + z` to zoom a pane for focused work
 - `Prefix + S` to type in all panes simultaneously
+- `Prefix + Ctrl+p` opens tmux-sessionizer to quickly create/switch sessions in any directory
+- `Prefix + f` is bound to session manager (not the default find-window)
+- tmux-sessionist adds session management: `Prefix + g` prompts for session, `Prefix + C` creates new, `Prefix + X` kills session
 
 ### Neovim
 - Use `gcc` to comment/uncomment lines
