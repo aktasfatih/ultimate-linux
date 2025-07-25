@@ -27,7 +27,7 @@ keymap("n", "<leader>se", "<C-w>=", opts) -- equal width
 keymap("n", "<leader>sx", ":close<CR>", opts) -- close window
 
 -- Clear highlights
-keymap("n", "<leader>h", ":nohlsearch<CR>", opts)
+keymap("n", "<leader>nh", ":nohlsearch<CR>", opts)
 
 -- Better paste
 keymap("v", "p", '"_dP', opts)

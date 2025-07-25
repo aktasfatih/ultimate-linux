@@ -1,18 +1,30 @@
 -- Nvim-tree Configuration
 
-local nvim_tree = require("nvim-tree")
+-- Define diagnostic signs for NvimTree before setup
+-- This ensures they exist when NvimTree tries to use them
+local function define_nvimtree_signs()
+  local signs = {
+    { name = "NvimTreeDiagnosticErrorIcon", text = "", texthl = "DiagnosticError" },
+    { name = "NvimTreeDiagnosticWarnIcon", text = "", texthl = "DiagnosticWarn" },
+    { name = "NvimTreeDiagnosticInfoIcon", text = "", texthl = "DiagnosticInfo" },
+    { name = "NvimTreeDiagnosticHintIcon", text = "", texthl = "DiagnosticHint" },
+  }
 
--- Define diagnostic signs for NvimTree
-local signs = {
-  { name = "NvimTreeDiagnosticErrorIcon", text = "" },
-  { name = "NvimTreeDiagnosticWarnIcon", text = "" },
-  { name = "NvimTreeDiagnosticInfoIcon", text = "" },
-  { name = "NvimTreeDiagnosticHintIcon", text = "" },
-}
-
-for _, sign in ipairs(signs) do
-  vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
+  for _, sign in ipairs(signs) do
+    vim.fn.sign_define(sign.name, { texthl = sign.texthl, text = sign.text, numhl = "" })
+  end
 end
+
+-- Define signs immediately
+define_nvimtree_signs()
+
+-- Also define them in an autocmd to ensure they're available
+vim.api.nvim_create_autocmd({ "VimEnter", "ColorScheme" }, {
+  callback = define_nvimtree_signs,
+  desc = "Define NvimTree diagnostic signs"
+})
+
+local nvim_tree = require("nvim-tree")
 
 nvim_tree.setup({
   disable_netrw = true,

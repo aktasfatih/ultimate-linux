@@ -271,6 +271,7 @@ return {
   -- Git
   {
     "lewis6991/gitsigns.nvim",
+    lazy = false,  -- Load immediately
     config = function()
       require("plugins.configs.gitsigns")
     end,

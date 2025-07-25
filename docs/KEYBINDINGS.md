@@ -109,7 +109,7 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `<leader>w` | Save file |
 | `<leader>q` | Quit |
 | `<leader>Q` | Quit all |
-| `<leader>h` | Clear search highlights |
+| `<leader>nh` | Clear search highlights |
 | `<leader>rn` | Toggle relative line numbers |
 
 ### Window Navigation
