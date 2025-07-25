@@ -835,4 +835,52 @@ vim.keymap.set('n', '<leader>dh', ':DiffviewFileHistory %<CR>')
 vim.keymap.set('n', '<leader>G', ':Git<CR>')
 vim.keymap.set('n', '<leader>gP', ':Git push<CR>')
 vim.keymap.set('n', '<leader>gp', ':Git pull<CR>')
+
+-- Additional Fugitive keybindings
+vim.keymap.set('n', '<leader>gB', ':Git blame<CR>')              -- Git blame
+vim.keymap.set('n', '<leader>gL', ':Git log<CR>')                -- Git log
+vim.keymap.set('n', '<leader>gl', ':Git log --oneline<CR>')      -- Compact log
+vim.keymap.set('n', '<leader>gD', ':Gdiffsplit<CR>')             -- Diff split
+vim.keymap.set('n', '<leader>gH', ':Ghdiffsplit<CR>')            -- Horizontal diff
+vim.keymap.set('n', '<leader>gV', ':Gvdiffsplit<CR>')            -- Vertical diff
+vim.keymap.set('n', '<leader>gw', ':Gwrite<CR>')                 -- Stage current file
+vim.keymap.set('n', '<leader>gW', ':Gwrite!<CR>')                -- Stage and force write
+vim.keymap.set('n', '<leader>gq', ':Git checkout %<CR>')         -- Discard changes
+vim.keymap.set('n', '<leader>gC', ':Git commit<CR>')             -- Commit
+vim.keymap.set('n', '<leader>gA', ':Git commit --amend<CR>')     -- Amend commit
+vim.keymap.set('n', '<leader>gM', ':Git merge<CR>')              -- Start merge
+vim.keymap.set('n', '<leader>gS', ':Git stash<CR>')              -- Stash changes
+vim.keymap.set('n', '<leader>gU', ':Git stash pop<CR>')          -- Pop stash
+vim.keymap.set('n', '<leader>gR', ':Git rebase -i<CR>')          -- Interactive rebase
+vim.keymap.set('n', '<leader>gF', ':Git fetch<CR>')              -- Fetch from remote
+vim.keymap.set('n', '<leader>go', ':GBrowse<CR>')                -- Open in browser
+vim.keymap.set('n', '<leader>gO', ':GBrowse!<CR>')               -- Copy URL to clipboard
+
+-- Quick status with auto-refresh
+vim.keymap.set('n', '<leader>gs', function()
+  vim.cmd('Git')
+  vim.cmd('wincmd L')  -- Move to right split
+end, { desc = "Git status in vsplit" })
+
+-- Quick diff against index
+vim.keymap.set('n', '<leader>gdi', ':Git diff<CR>', { desc = "Diff against index" })
+vim.keymap.set('n', '<leader>gdc', ':Git diff --cached<CR>', { desc = "Diff cached/staged" })
+vim.keymap.set('n', '<leader>gdh', ':Git diff HEAD<CR>', { desc = "Diff against HEAD" })
+
+-- Branch operations
+vim.keymap.set('n', '<leader>gbc', ':Git checkout -b ', { desc = "Create branch" })
+vim.keymap.set('n', '<leader>gbd', ':Git branch -d ', { desc = "Delete branch" })
+vim.keymap.set('n', '<leader>gbD', ':Git branch -D ', { desc = "Force delete branch" })
+vim.keymap.set('n', '<leader>gbr', ':Git branch -m ', { desc = "Rename branch" })
+
+-- Quick conflict resolution helpers
+vim.keymap.set('n', '<leader>gmt', ':Git mergetool<CR>', { desc = "Open mergetool" })
+vim.keymap.set('n', '<leader>gmc', ':Git merge --continue<CR>', { desc = "Continue merge" })
+vim.keymap.set('n', '<leader>gma', ':Git merge --abort<CR>', { desc = "Abort merge" })
+vim.keymap.set('n', '<leader>grc', ':Git rebase --continue<CR>', { desc = "Continue rebase" })
+vim.keymap.set('n', '<leader>gra', ':Git rebase --abort<CR>', { desc = "Abort rebase" })
+
+-- Visual mode mappings for partial staging
+vim.keymap.set('v', '<leader>gs', ':Gwrite<CR>', { desc = "Stage selection" })
+vim.keymap.set('v', '<leader>gr', ':Gread<CR>', { desc = "Revert selection" })
 ```
