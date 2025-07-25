@@ -9,6 +9,7 @@ INSTALL_MODE="full"
 FORCE_INSTALL=false
 DRY_RUN=false
 NON_INTERACTIVE=false
+SKIP_GIT_CONFIG=false
 ACTION="install"
 
 BOLD='\033[1m'
@@ -50,6 +51,7 @@ Options:
     --force             Overwrite existing configs without prompting
     --backup-dir=PATH   Specify custom backup location
     --non-interactive   Run without user prompts
+    --skip-git-config   Skip Git user configuration
 
 Examples:
     ./install.sh                    # Full interactive installation
@@ -89,6 +91,9 @@ parse_arguments() {
                 ;;
             --non-interactive)
                 NON_INTERACTIVE=true
+                ;;
+            --skip-git-config)
+                SKIP_GIT_CONFIG=true
                 ;;
             *)
                 log ERROR "Unknown option: $1"
@@ -689,6 +694,12 @@ install_lua_language_server() {
 }
 
 configure_git_user() {
+    # Skip if flag is set or in non-interactive mode
+    if [[ "$SKIP_GIT_CONFIG" == "true" ]] || [[ "$NON_INTERACTIVE" == "true" ]]; then
+        log INFO "Skipping Git configuration (--skip-git-config flag set or non-interactive mode)"
+        return
+    fi
+    
     # Check if Git user name is set
     if [[ -z "$(git config --global user.name)" ]]; then
         echo
