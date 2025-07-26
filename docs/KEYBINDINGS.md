@@ -37,7 +37,7 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `Prefix + &` | Kill current window |
 | `Prefix + X` | Kill window |
 | `Prefix + ,` | Rename window |
-| `Prefix + .` | Move window |
+| `Prefix + .` | Move window to another session (prompts for session) |
 | `Prefix + 0-9` | Switch to window by number |
 | `Prefix + p` | Previous window |
 | `Prefix + n` | Next window |
@@ -46,8 +46,8 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 | `Prefix + Tab` | Last active window |
 | `Prefix + w` | List windows |
 | `Prefix + f` | Find window |
-| `Prefix + <` | Swap window left |
-| `Prefix + >` | Swap window right |
+| `Prefix + <` | Swap window left (within session) |
+| `Prefix + >` | Swap window right (within session) |
 
 ### Pane Management
 | Key | Action |
@@ -709,6 +709,32 @@ While coding, these snippets expand:
 | `reload` | `source ~/.zshrc` |
 
 ## Tips and Tricks
+
+### Window Movement Between Sessions
+
+#### Moving Windows
+- **`Prefix + .`** - Move current window to another session
+  - Prompts for target session name/number
+  - Window is removed from current session and added to target
+  - You stay in the current session
+  - Example: Type `other-session:` to move to "other-session" as last window
+  - Example: Type `other-session:2` to move to specific position
+
+#### Linking Windows (Window Sharing)
+- **`:link-window -s [session]:[window] -t [target]`** - Link a window to multiple sessions
+  - Window exists in both sessions simultaneously
+  - Changes in one are reflected in the other
+  - Example: `:link-window -s dev:1 -t main:3`
+
+#### Using `Prefix + J` (Join Pane)
+- This joins a **pane** from another window, not the whole window
+- The source window remains but loses that pane
+- If it was the only pane, the window closes
+
+#### Quick Tips
+- **`Prefix + Ctrl+w`** - Window switcher across all sessions (custom script)
+- Use `:move-window -t target-session:` to move and keep current window number
+- Use `:swap-window -s source -t target` to exchange windows between sessions
 
 ### tmux
 - Hold `Shift` to select text with mouse (bypasses tmux mouse mode) (built-in)
