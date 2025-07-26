@@ -176,24 +176,22 @@ The installer includes comprehensive shell management features:
 - `~/.config/nvim/lua/user/` - Neovim customizations
 - `~/.bashrc.$(hostname)` / `~/.zshrc.$(hostname)` - Machine-specific configs
 
-## Key Bindings
+## Key Bindings and Cheatsheet
 
-### tmux
-- Prefix: `Ctrl+Space`
-- Split horizontal: `Prefix + |`
-- Split vertical: `Prefix + -`
-- Navigate panes: `Prefix + h/j/k/l`
-- Resize panes: `Prefix + H/J/K/L`
-- Session manager: `Prefix + f`
+**IMPORTANT**: All keybindings and command references are maintained in `config/tmux/ultimate-cheatsheet.md`. This is the single source of truth for all keybindings, commands, and shortcuts across the entire setup.
 
-### Neovim
-- Leader: `Space`
-- File explorer: `<leader>e`
-- Find files: `<leader>ff`
-- Live grep: `<leader>fg`
-- Save file: `<leader>w`
-- LSP hover: `K`
-- Go to definition: `gd`
+To access the cheatsheet:
+- In tmux: Press `Prefix + ?` (Ctrl+Space then ?)
+- From terminal: `bat ~/.config/tmux/ultimate-cheatsheet.md`
+- The cheatsheet includes:
+  - tmux keybindings (Prefix: `Ctrl+Space`)
+  - Neovim commands (Leader: `Space`)
+  - Shell shortcuts and aliases
+  - Git commands and workflows
+  - Modern CLI tools usage
+  - System management commands
+
+**Note**: The old `docs/cheatsheet.md` file is deprecated. Do not update it. All updates should be made to `config/tmux/ultimate-cheatsheet.md`.
 
 ## Known Issues and Solutions
 
@@ -224,6 +222,14 @@ The installer includes comprehensive shell management features:
 2. Test with `--dry-run` first
 3. Use `deploy_config()` for safe deployment with backups
 4. Consider adding guards for shell-specific configs
+
+### Documentation Updates
+1. **Cheatsheet/Keybindings**: Update ONLY `config/tmux/ultimate-cheatsheet.md`
+   - This is the single source of truth for all keybindings and commands
+   - Do NOT update the deprecated `docs/cheatsheet.md`
+   - The cheatsheet is accessible via `Prefix + ?` in tmux
+2. **Other documentation**: Update files in `docs/` directory as needed
+3. **Script documentation**: Update help text in the scripts themselves
 
 ### Script Best Practices
 - Always use `set -euo pipefail` in bash scripts
