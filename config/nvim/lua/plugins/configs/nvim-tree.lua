@@ -1,27 +1,33 @@
 -- Nvim-tree Configuration
 
--- Define diagnostic signs for NvimTree before setup
--- This ensures they exist when NvimTree tries to use them
-local function define_nvimtree_signs()
-  local signs = {
-    { name = "NvimTreeDiagnosticErrorIcon", text = "", texthl = "DiagnosticError" },
-    { name = "NvimTreeDiagnosticWarnIcon", text = "", texthl = "DiagnosticWarn" },
-    { name = "NvimTreeDiagnosticInfoIcon", text = "", texthl = "DiagnosticInfo" },
-    { name = "NvimTreeDiagnosticHintIcon", text = "", texthl = "DiagnosticHint" },
-  }
-
-  for _, sign in ipairs(signs) do
-    vim.fn.sign_define(sign.name, { texthl = sign.texthl, text = sign.text, numhl = "" })
-  end
+-- Define highlight groups for NvimTree diagnostic icons
+-- These highlight groups must exist before nvim-tree tries to use them
+local function define_nvimtree_highlights()
+  -- Link the icon highlight groups to diagnostic highlight groups
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticErrorIcon", { link = "DiagnosticError" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticWarnIcon", { link = "DiagnosticWarn" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticInfoIcon", { link = "DiagnosticInfo" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticHintIcon", { link = "DiagnosticHint" })
+  
+  -- Also define the file and folder highlight groups
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticErrorFileHL", { link = "DiagnosticError" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticWarnFileHL", { link = "DiagnosticWarn" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticInfoFileHL", { link = "DiagnosticInfo" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticHintFileHL", { link = "DiagnosticHint" })
+  
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticErrorFolderHL", { link = "DiagnosticError" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticWarnFolderHL", { link = "DiagnosticWarn" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticInfoFolderHL", { link = "DiagnosticInfo" })
+  vim.api.nvim_set_hl(0, "NvimTreeDiagnosticHintFolderHL", { link = "DiagnosticHint" })
 end
 
--- Define signs immediately
-define_nvimtree_signs()
+-- Define highlights immediately when this config is loaded
+define_nvimtree_highlights()
 
--- Also define them in an autocmd to ensure they're available
-vim.api.nvim_create_autocmd({ "VimEnter", "ColorScheme" }, {
-  callback = define_nvimtree_signs,
-  desc = "Define NvimTree diagnostic signs"
+-- Re-define highlights on ColorScheme changes to handle theme switches
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = define_nvimtree_highlights,
+  desc = "Define NvimTree diagnostic highlight groups"
 })
 
 local nvim_tree = require("nvim-tree")
@@ -87,6 +93,7 @@ nvim_tree.setup({
     icons = {
       webdev_colors = true,
       git_placement = "before",
+      diagnostics_placement = "signcolumn",
       padding = " ",
       symlink_arrow = " ➛ ",
       show = {
@@ -94,6 +101,7 @@ nvim_tree.setup({
         folder = true,
         folder_arrow = true,
         git = true,
+        diagnostics = true,
       },
       glyphs = {
         default = "",
