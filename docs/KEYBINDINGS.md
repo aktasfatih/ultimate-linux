@@ -10,6 +10,11 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 
 ## tmux Keybindings
 
+### Core Concepts
+- **Session**: A collection of windows (like a workspace)
+- **Window**: A full-screen container, like a tab (can contain multiple panes)
+- **Pane**: A subdivision within a window (created by splitting)
+
 ### Prefix Key
 - **Prefix**: `Ctrl+Space` (all commands below require prefix unless noted)
 
