@@ -86,7 +86,7 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 |-----|--------|
 | `Prefix + r` | Reload tmux config |
 | `Prefix + S` | Synchronize panes toggle |
-| `Prefix + s` | Toggle status bar |
+| `Prefix + b` | Toggle status bar |
 | `Prefix + t` | Show time |
 | `Prefix + i` | Display message |
 | `Prefix + ~` | Show previous messages |
@@ -95,11 +95,58 @@ This document provides a comprehensive reference for all keybindings in the Ulti
 ### Layout Shortcuts
 | Key | Action |
 |-----|--------|
-| `Prefix + Alt+1` | Even horizontal layout |
-| `Prefix + Alt+2` | Even vertical layout |
-| `Prefix + Alt+3` | Main horizontal layout |
-| `Prefix + Alt+4` | Main vertical layout |
+| `Prefix + Alt+1` | Main horizontal layout |
+| `Prefix + Alt+2` | Main vertical layout |
+| `Prefix + Alt+3` | Even horizontal layout |
+| `Prefix + Alt+4` | Even vertical layout |
 | `Prefix + Alt+5` | Tiled layout |
+| `Prefix + Ctrl+1` | Even horizontal layout (with message) |
+| `Prefix + Ctrl+2` | Even vertical layout (with message) |
+| `Prefix + Ctrl+3` | Main horizontal layout (with message) |
+| `Prefix + Ctrl+4` | Main vertical layout (with message) |
+| `Prefix + Ctrl+5` | Tiled layout (with message) |
+
+### Popup Windows (Modern tmux 3.2+)
+| Key | Action |
+|-----|--------|
+| `Prefix + g` | Open Lazygit in popup |
+| `Prefix + G` | Open GitHub CLI dashboard in popup |
+| `Prefix + P` | Process viewer (btm/htop/top) in popup |
+| `Prefix + N` | Quick notes - opens today's note in popup |
+| `Prefix + u` | URL picker - extract and open URLs from pane |
+| `Prefix + e` | Directory explorer with preview |
+| `Prefix + ?` | Show tmux cheatsheet |
+| `Prefix + T` | Project templates selector |
+| `` Prefix + ` `` | Toggle scratch terminal session |
+
+### Advanced Copy Mode
+| Key | Action |
+|-----|--------|
+| `Prefix + v` | Enter copy mode (alternative to Enter) |
+| `Prefix + /` | Enter copy mode and start search |
+| `Prefix + Ctrl+s` | Enter copy mode and start search |
+
+### Additional Pane Commands
+| Key | Action |
+|-----|--------|
+| `Prefix + "` | Split pane vertically (maintains path) |
+| `Prefix + %` | Split pane horizontally (maintains path) |
+
+### Plugin-Specific Keybindings
+| Key | Action | Plugin |
+|-----|--------|--------|
+| `Prefix + Shift+s` | Save session | tmux-resurrect |
+| `Prefix + Shift+r` | Restore session | tmux-resurrect |
+| `Prefix + j` | Jump to text with hints | tmux-jump |
+| `Prefix + Tab` (in copy mode) | Extract text | extrakto |
+| `Prefix + @` | Join last active pane | tmux-sessionist |
+
+### Session Navigation Shortcuts  
+| Key | Action |
+|-----|--------|
+| `Prefix + g` | Go to session (sessionist) or Open Lazygit (see popup windows) |
+| `Prefix + Shift+c` | Create new session (sessionist) |
+| `Prefix + Shift+x` | Kill session without detaching (sessionist) |
 
 ## Neovim Keybindings
 
@@ -664,12 +711,30 @@ While coding, these snippets expand:
 ## Tips and Tricks
 
 ### tmux
-- Hold `Shift` to select text with mouse (bypasses tmux mouse mode)
-- Use `Prefix + z` to zoom a pane for focused work
-- `Prefix + S` to type in all panes simultaneously
-- `Prefix + Ctrl+p` opens tmux-sessionizer to quickly create/switch sessions in any directory
-- `Prefix + f` is bound to session manager (not the default find-window)
-- tmux-sessionist adds session management: `Prefix + g` prompts for session, `Prefix + C` creates new, `Prefix + X` kills session
+- Hold `Shift` to select text with mouse (bypasses tmux mouse mode) (built-in)
+- Use `Prefix + z` to zoom a pane for focused work (built-in)
+- `Prefix + S` to type in all panes simultaneously (built-in)
+- `Prefix + Ctrl+p` opens tmux-sessionizer to quickly create/switch sessions in any directory (custom script)
+- `Prefix + f` is bound to session manager, not the default find-window (built-in, remapped)
+
+#### Popup Windows (tmux 3.2+)
+- `Prefix + P` opens process viewer - btm → htop → top fallback (custom popup)
+- `Prefix + N` creates/opens today's note in ~/notes/ (custom popup)
+- `Prefix + u` extracts URLs from current pane and lets you open them (custom popup)
+- `Prefix + e` explores directories with live preview (custom popup)
+- `` Prefix + ` `` toggles a scratch terminal session (custom popup)
+- `Prefix + G` opens GitHub CLI dashboard if gh is installed (custom popup)
+- `Prefix + T` shows project templates for quick setup (custom popup + script)
+
+#### Plugin Features
+- **tmux-resurrect**: Save/restore complete tmux environment with `Prefix + Shift+s/r`
+- **tmux-jump**: Press `Prefix + j` then type letters to jump to text on screen
+- **extrakto**: In copy mode, `Tab` extracts text snippets like paths, URLs, IPs, etc.
+- **tmux-yank**: Enhanced clipboard integration with system clipboard
+- **tmux-copycat**: Enhanced search in copy mode with predefined regex patterns
+- **tmux-open**: In copy mode, `o` opens highlighted file/URL (Shift+o for editor)
+- **tmux-fpp**: Facebook PathPicker integration for selecting files from output
+- **tmux-prefix-highlight**: Shows when prefix is active in status bar
 
 ### Neovim
 - Use `gcc` to comment/uncomment lines
