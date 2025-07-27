@@ -333,17 +333,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [tmux](https://github.com/tmux/tmux) for the terminal multiplexer
 - All the plugin and tool authors that make this setup possible
 
-## 📸 Screenshots
-
-### Shell Environment
-![Shell](docs/images/shell.png)
-
-### Neovim IDE
-![Neovim](docs/images/neovim.png)
-
-### tmux Session
-![tmux](docs/images/tmux.png)
-
 ---
 
 Made with ❤️ for the Linux development community
