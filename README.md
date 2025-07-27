@@ -45,6 +45,7 @@ cd ~/.dotfiles && ./install.sh
 ### 🖥️ Terminal Multiplexer
 - **tmux** with sensible defaults
 - Custom keybindings (prefix: `Ctrl+Space`)
+- Custom keybindings documentation is available via `<c+s>?`
 - Session persistence with tmux-resurrect and continuum
 - Mouse support and clipboard integration
 - Beautiful status bar with system information
