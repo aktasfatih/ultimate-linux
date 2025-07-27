@@ -150,6 +150,8 @@
 | `[q` | Previous quickfix item | Navigate references/errors |
 | `]Q` | Last quickfix item | Jump to last result |
 | `[Q` | First quickfix item | Jump to first result |
+| `<leader>qc` | Close quickfix window | Hide results panel |
+| `<leader>qo` | Open quickfix window | Show results panel |
 
 ### Git Integration
 | Key | Action | Tool |
