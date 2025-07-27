@@ -147,15 +147,78 @@
 | Key | Action | Tool |
 |-----|--------|------|
 | `<leader>gg` | Open Lazygit | Full Git UI |
-| `<leader>gs` | Git status | Telescope |
-| `<leader>gc` | Git commits | Browse history |
-| `<leader>gb` | Git branches | Switch branches |
+| `<leader>gs` | Git status in vsplit | Fugitive |
+| `<leader>gc` | Git commits | Telescope |
+| `<leader>gb` | Git branches | Telescope |
 | `]c` | Next hunk | Gitsigns |
 | `[c` | Previous hunk | Gitsigns |
 | `<leader>hs` | Stage hunk | Gitsigns |
 | `<leader>hr` | Reset hunk | Gitsigns |
 | `<leader>hp` | Preview hunk | Gitsigns |
 | `<leader>hb` | Blame line | Gitsigns |
+
+### Git Operations (Diffview)
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>do` | Open Diffview | View all changes |
+| `<leader>dc` | Close Diffview | Exit diff view |
+| `<leader>dh` | File history (current) | History for current file |
+| `<leader>dH` | File history (all) | History for all files |
+
+### Git Operations (Fugitive)
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>G` | Git status | Full status view |
+| `<leader>gP` | Git push | Push to remote |
+| `<leader>gp` | Git pull | Pull from remote |
+| `<leader>gB` | Git blame | Show blame annotations |
+| `<leader>gL` | Git log | Full log view |
+| `<leader>gl` | Git log (compact) | One-line log view |
+| `<leader>gD` | Diff split | Show diff in split |
+| `<leader>gH` | Horizontal diff | Diff in horizontal split |
+| `<leader>gV` | Vertical diff | Diff in vertical split |
+| `<leader>gw` | Stage current file | Git add current file |
+| `<leader>gW` | Stage and force write | Force stage file |
+| `<leader>gq` | Discard changes | Checkout file |
+| `<leader>gC` | Commit | Open commit window |
+| `<leader>gA` | Amend commit | Amend last commit |
+| `<leader>gM` | Start merge | Begin merge process |
+| `<leader>gS` | Stash changes | Save to stash |
+| `<leader>gU` | Pop stash | Apply and remove stash |
+| `<leader>gR` | Interactive rebase | Rebase interactively |
+| `<leader>gF` | Fetch from remote | Update remote refs |
+| `<leader>go` | Open in browser | View on GitHub/GitLab |
+| `<leader>gO` | Copy URL to clipboard | Get file URL |
+
+### Git Diff Variations
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>gdi` | Diff against index | Working tree vs index |
+| `<leader>gdc` | Diff cached/staged | Index vs HEAD |
+| `<leader>gdh` | Diff against HEAD | Working tree vs HEAD |
+
+### Git Branch Operations
+| Key | Action | Usage |
+|-----|--------|-------|
+| `<leader>gbc` | Create branch | Prompt for new branch name |
+| `<leader>gbd` | Delete branch | Safe delete (merged only) |
+| `<leader>gbD` | Force delete branch | Delete regardless of merge |
+| `<leader>gbr` | Rename branch | Change branch name |
+
+### Git Conflict Resolution
+| Key | Action | Context |
+|-----|--------|---------|
+| `<leader>gmt` | Open mergetool | Resolve conflicts |
+| `<leader>gmc` | Continue merge | After resolving conflicts |
+| `<leader>gma` | Abort merge | Cancel merge operation |
+| `<leader>grc` | Continue rebase | After resolving conflicts |
+| `<leader>gra` | Abort rebase | Cancel rebase operation |
+
+### Git Visual Mode
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>gs` | Stage selection | Stage partial file (visual) |
+| `<leader>gr` | Revert selection | Discard partial changes (visual) |
 
 ### Window Navigation
 | Key | Action | Context |
@@ -660,7 +723,7 @@ extract file.7z
 | `Ctrl+t` | Fuzzy file insert | Type command then `Ctrl+t` |
 | `Alt+c` | Fuzzy cd | Press `Alt+c` anywhere |
 
-### File Operations  
+### File Operations
 | Command | Description | Example |
 |---------|-------------|---------|
 | `bat file` | View with highlighting | `bat README.md` |
