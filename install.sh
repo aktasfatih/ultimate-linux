@@ -725,8 +725,22 @@ configure_git_user() {
         log INFO "Git user email already configured: $(git config --global user.email)"
     fi
 
-    # Ask about GPG signing (only in interactive mode)
-    if [[ "$NON_INTERACTIVE" == "false" ]]; then
+    # Check if GPG signing is already configured
+    local existing_gpg_key
+    existing_gpg_key=$(git config --global user.signingkey 2>/dev/null || true)
+    local existing_gpg_sign
+    existing_gpg_sign=$(git config --global commit.gpgsign 2>/dev/null || true)
+    
+    if [[ -n "$existing_gpg_key" ]] || [[ "$existing_gpg_sign" == "true" ]]; then
+        log INFO "GPG signing already configured"
+        if [[ -n "$existing_gpg_key" ]]; then
+            log INFO "GPG key: $existing_gpg_key"
+        fi
+        if [[ "$existing_gpg_sign" == "true" ]]; then
+            log INFO "Commit signing: enabled"
+        fi
+    elif [[ "$NON_INTERACTIVE" == "false" ]]; then
+        # Ask about GPG signing (only in interactive mode and if not already configured)
         read -p "Do you want to configure GPG signing for commits? [y/N] " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
