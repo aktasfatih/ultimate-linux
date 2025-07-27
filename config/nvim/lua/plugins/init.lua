@@ -162,6 +162,7 @@ return {
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
+    event = "VeryLazy",
     config = function()
       require("plugins.configs.nvim-tree")
     end,
@@ -272,6 +273,8 @@ return {
   {
     "lewis6991/gitsigns.nvim",
     lazy = false,  -- Load immediately
+    priority = 100,  -- Load early to ensure keybindings work
+    event = { "BufReadPre", "BufNewFile" },  -- Also trigger on buffer events
     config = function()
       require("plugins.configs.gitsigns")
     end,

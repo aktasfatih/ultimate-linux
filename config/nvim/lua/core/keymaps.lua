@@ -100,3 +100,60 @@ keymap("n", "<leader>tf", function()
     vim.notify("Format on save: DISABLED", vim.log.levels.INFO)
   end
 end, { desc = "Toggle Format on Save" })
+
+-- Git keybindings (Diffview)
+keymap('n', '<leader>do', ':DiffviewOpen<CR>', { desc = "Open Diffview" })
+keymap('n', '<leader>dc', ':DiffviewClose<CR>', { desc = "Close Diffview" })
+keymap('n', '<leader>dh', ':DiffviewFileHistory %<CR>', { desc = "File history" })
+keymap('n', '<leader>dH', ':DiffviewFileHistory<CR>', { desc = "All file history" })
+
+-- Git keybindings (Fugitive)
+keymap('n', '<leader>G', ':Git<CR>', { desc = "Git status" })
+keymap('n', '<leader>gP', ':Git push<CR>', { desc = "Git push" })
+keymap('n', '<leader>gp', ':Git pull<CR>', { desc = "Git pull" })
+keymap('n', '<leader>gB', ':Git blame<CR>', { desc = "Git blame" })
+keymap('n', '<leader>gL', ':Git log<CR>', { desc = "Git log" })
+keymap('n', '<leader>gl', ':Git log --oneline<CR>', { desc = "Git log (compact)" })
+keymap('n', '<leader>gD', ':Gdiffsplit<CR>', { desc = "Diff split" })
+keymap('n', '<leader>gH', ':Ghdiffsplit<CR>', { desc = "Horizontal diff" })
+keymap('n', '<leader>gV', ':Gvdiffsplit<CR>', { desc = "Vertical diff" })
+keymap('n', '<leader>gw', ':Gwrite<CR>', { desc = "Stage current file" })
+keymap('n', '<leader>gW', ':Gwrite!<CR>', { desc = "Stage and force write" })
+keymap('n', '<leader>gq', ':Git checkout %<CR>', { desc = "Discard changes" })
+keymap('n', '<leader>gC', ':Git commit<CR>', { desc = "Commit" })
+keymap('n', '<leader>gA', ':Git commit --amend<CR>', { desc = "Amend commit" })
+keymap('n', '<leader>gM', ':Git merge<CR>', { desc = "Start merge" })
+keymap('n', '<leader>gS', ':Git stash<CR>', { desc = "Stash changes" })
+keymap('n', '<leader>gU', ':Git stash pop<CR>', { desc = "Pop stash" })
+keymap('n', '<leader>gR', ':Git rebase -i<CR>', { desc = "Interactive rebase" })
+keymap('n', '<leader>gF', ':Git fetch<CR>', { desc = "Fetch from remote" })
+keymap('n', '<leader>go', ':GBrowse<CR>', { desc = "Open in browser" })
+keymap('n', '<leader>gO', ':GBrowse!<CR>', { desc = "Copy URL to clipboard" })
+
+-- Quick git status in vsplit
+keymap('n', '<leader>gs', function()
+  vim.cmd('Git')
+  vim.cmd('wincmd L')  -- Move to right split
+end, { desc = "Git status in vsplit" })
+
+-- Git diff variations
+keymap('n', '<leader>gdi', ':Git diff<CR>', { desc = "Diff against index" })
+keymap('n', '<leader>gdc', ':Git diff --cached<CR>', { desc = "Diff cached/staged" })
+keymap('n', '<leader>gdh', ':Git diff HEAD<CR>', { desc = "Diff against HEAD" })
+
+-- Branch operations
+keymap('n', '<leader>gbc', ':Git checkout -b ', { desc = "Create branch" })
+keymap('n', '<leader>gbd', ':Git branch -d ', { desc = "Delete branch" })
+keymap('n', '<leader>gbD', ':Git branch -D ', { desc = "Force delete branch" })
+keymap('n', '<leader>gbr', ':Git branch -m ', { desc = "Rename branch" })
+
+-- Conflict resolution helpers
+keymap('n', '<leader>gmt', ':Git mergetool<CR>', { desc = "Open mergetool" })
+keymap('n', '<leader>gmc', ':Git merge --continue<CR>', { desc = "Continue merge" })
+keymap('n', '<leader>gma', ':Git merge --abort<CR>', { desc = "Abort merge" })
+keymap('n', '<leader>grc', ':Git rebase --continue<CR>', { desc = "Continue rebase" })
+keymap('n', '<leader>gra', ':Git rebase --abort<CR>', { desc = "Abort rebase" })
+
+-- Visual mode mappings for partial staging
+keymap('v', '<leader>gs', ':Gwrite<CR>', { desc = "Stage selection" })
+keymap('v', '<leader>gr', ':Gread<CR>', { desc = "Revert selection" })

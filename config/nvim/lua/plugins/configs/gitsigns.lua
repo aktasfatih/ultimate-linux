@@ -14,21 +14,26 @@ local function setup_gitsigns_keymaps(bufnr)
   local function map(mode, l, r, opts)
     opts = opts or {}
     opts.buffer = bufnr
+    opts.silent = true
     vim.keymap.set(mode, l, r, opts)
   end
   
-  -- Navigation
+  -- Navigation - using simpler approach for better reliability
   map("n", "]c", function()
-    if vim.wo.diff then return "]c" end
-    vim.schedule(function() gs.next_hunk() end)
-    return "<Ignore>"
-  end, { expr = true, desc = "Next hunk" })
+    if vim.wo.diff then 
+      vim.cmd("normal! ]c")
+    else
+      gs.next_hunk()
+    end
+  end, { desc = "Next hunk" })
   
   map("n", "[c", function()
-    if vim.wo.diff then return "[c" end
-    vim.schedule(function() gs.prev_hunk() end)
-    return "<Ignore>"
-  end, { expr = true, desc = "Previous hunk" })
+    if vim.wo.diff then 
+      vim.cmd("normal! [c")
+    else
+      gs.prev_hunk()
+    end
+  end, { desc = "Previous hunk" })
   
   -- Actions
   map("n", "<leader>hs", gs.stage_hunk, { desc = "Stage hunk" })
@@ -93,31 +98,57 @@ gitsigns.setup({
   on_attach = function(bufnr)
     -- Set up keymaps when Gitsigns attaches to a buffer
     setup_gitsigns_keymaps(bufnr)
+    
+    -- Also set up buffer-local variable to track attachment
+    vim.b[bufnr].gitsigns_attached = true
   end,
 })
 
--- Also set up autocmd as backup
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  group = vim.api.nvim_create_augroup("GitSignsLazyLoad", { clear = true }),
-  callback = function()
-    local ok, gs = pcall(require, 'gitsigns')
-    if ok and vim.fn.finddir('.git', vim.fn.expand('%:p:h') .. ';') ~= '' then
-      -- Only set up keymaps if not already set
-      local maps = vim.api.nvim_buf_get_keymap(0, 'n')
-      local has_gitsigns_maps = false
-      for _, map in ipairs(maps) do
-        if map.lhs:match("<leader>hp") then
-          has_gitsigns_maps = true
-          break
+-- Force immediate setup for current buffer if in a git repo
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
+  group = vim.api.nvim_create_augroup("GitSignsKeymaps", { clear = true }),
+  callback = function(args)
+    local bufnr = args.buf
+    
+    -- Check if we're in a git repository
+    if vim.fn.finddir('.git', vim.fn.expand('%:p:h') .. ';') ~= '' then
+      -- Check if gitsigns is attached
+      if vim.b[bufnr].gitsigns_attached then
+        -- Check if keymaps exist
+        local maps = vim.api.nvim_buf_get_keymap(bufnr, 'n')
+        local has_next_hunk = false
+        for _, map in ipairs(maps) do
+          if map.lhs == "]c" then
+            has_next_hunk = true
+            break
+          end
         end
-      end
-      
-      if not has_gitsigns_maps and vim.b.gitsigns_attached then
-        setup_gitsigns_keymaps(0)
+        
+        -- If keymaps don't exist, set them up
+        if not has_next_hunk then
+          setup_gitsigns_keymaps(bufnr)
+        end
       end
     end
   end,
 })
+
+-- Debug command to check Gitsigns status
+vim.api.nvim_create_user_command('GitsignsDebug', function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  print("Buffer:", bufnr)
+  print("Gitsigns attached:", vim.b[bufnr].gitsigns_attached or false)
+  print("In git repo:", vim.fn.finddir('.git', vim.fn.expand('%:p:h') .. ';') ~= '')
+  
+  local maps = vim.api.nvim_buf_get_keymap(bufnr, 'n')
+  local gitsigns_maps = {}
+  for _, map in ipairs(maps) do
+    if map.lhs == "]c" or map.lhs == "[c" then
+      table.insert(gitsigns_maps, map.lhs)
+    end
+  end
+  print("Gitsigns navigation maps:", vim.inspect(gitsigns_maps))
+end, {})
 
 -- Return true to indicate successful setup
 return true

@@ -1,8 +1,14 @@
 -- Nvim-tree Configuration
 
--- Define highlight groups for NvimTree diagnostic icons
--- These highlight groups must exist before nvim-tree tries to use them
-local function define_nvimtree_highlights()
+-- Define highlight groups and signs for NvimTree diagnostic icons
+-- These must exist before nvim-tree tries to use them
+local function define_nvimtree_diagnostics()
+  -- Define the diagnostic signs that nvim-tree expects
+  vim.fn.sign_define("NvimTreeDiagnosticErrorIcon", { text = "", texthl = "DiagnosticError" })
+  vim.fn.sign_define("NvimTreeDiagnosticWarnIcon", { text = "", texthl = "DiagnosticWarn" })
+  vim.fn.sign_define("NvimTreeDiagnosticInfoIcon", { text = "", texthl = "DiagnosticInfo" })
+  vim.fn.sign_define("NvimTreeDiagnosticHintIcon", { text = "", texthl = "DiagnosticHint" })
+  
   -- Link the icon highlight groups to diagnostic highlight groups
   vim.api.nvim_set_hl(0, "NvimTreeDiagnosticErrorIcon", { link = "DiagnosticError" })
   vim.api.nvim_set_hl(0, "NvimTreeDiagnosticWarnIcon", { link = "DiagnosticWarn" })
@@ -21,16 +27,36 @@ local function define_nvimtree_highlights()
   vim.api.nvim_set_hl(0, "NvimTreeDiagnosticHintFolderHL", { link = "DiagnosticHint" })
 end
 
--- Define highlights immediately when this config is loaded
-define_nvimtree_highlights()
+-- Define diagnostics immediately when this config is loaded
+define_nvimtree_diagnostics()
 
--- Re-define highlights on ColorScheme changes to handle theme switches
+-- Re-define diagnostics on ColorScheme changes to handle theme switches
 vim.api.nvim_create_autocmd("ColorScheme", {
-  callback = define_nvimtree_highlights,
-  desc = "Define NvimTree diagnostic highlight groups"
+  callback = define_nvimtree_diagnostics,
+  desc = "Define NvimTree diagnostic signs and highlight groups"
 })
 
+-- Also re-define on any sign_unplace event that might clear our signs
+vim.api.nvim_create_autocmd({"BufEnter", "FileType", "VimEnter"}, {
+  callback = function()
+    -- Check if our signs still exist
+    local signs = vim.fn.sign_getdefined("NvimTreeDiagnosticHintIcon")
+    if vim.tbl_isempty(signs) then
+      define_nvimtree_diagnostics()
+    end
+  end,
+  desc = "Ensure NvimTree diagnostic signs are defined"
+})
+
+-- Ensure signs are defined before nvim-tree setup
+vim.defer_fn(function()
+  define_nvimtree_diagnostics()
+end, 10)
+
 local nvim_tree = require("nvim-tree")
+
+-- Final check before setup
+define_nvimtree_diagnostics()
 
 nvim_tree.setup({
   disable_netrw = true,
@@ -134,3 +160,33 @@ nvim_tree.setup({
 -- Keymaps
 vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>nf", ":NvimTreeFindFile<CR>", { noremap = true, silent = true })
+
+-- Ensure NvimTree buffers are not modifiable
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "NvimTree",
+  callback = function()
+    vim.opt_local.modifiable = false
+  end,
+  desc = "Make NvimTree buffers non-modifiable"
+})
+
+-- Add a safety wrapper to prevent sign errors
+local original_error = vim.api.nvim_err_write
+vim.api.nvim_create_autocmd("BufWritePost", {
+  callback = function()
+    -- Temporarily suppress sign errors and re-define signs if needed
+    vim.api.nvim_err_write = function(msg)
+      if msg:match("Unknown sign: NvimTreeDiagnostic") then
+        define_nvimtree_diagnostics()
+        return
+      end
+      original_error(msg)
+    end
+    
+    -- Restore original error handler after a short delay
+    vim.defer_fn(function()
+      vim.api.nvim_err_write = original_error
+    end, 100)
+  end,
+  desc = "Handle NvimTree sign errors on save"
+})
