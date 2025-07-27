@@ -53,6 +53,15 @@ keymap("n", "<leader>s", ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
 -- Toggle relative line numbers
 keymap("n", "<leader>rn", ":set relativenumber!<CR>", opts)
 
+-- Toggle word wrap
+keymap("n", "<leader>tw", ":set wrap!<CR>", opts)
+
+-- Enhanced navigation
+keymap("n", "<leader>mr", "<C-w>L", opts) -- Move to rightmost split
+keymap("n", "<leader>ml", "<C-w>H", opts) -- Move to leftmost split
+keymap("n", "<leader>mt", "<C-w>K", opts) -- Move to top split
+keymap("n", "<leader>mb", "<C-w>J", opts) -- Move to bottom split
+
 -- Better terminal navigation
 keymap("t", "<C-h>", "<C-\\><C-N><C-w>h", opts)
 keymap("t", "<C-j>", "<C-\\><C-N><C-w>j", opts)

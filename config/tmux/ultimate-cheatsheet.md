@@ -112,6 +112,7 @@
 | `<leader>Q` | Quit all | Normal mode |
 | `<leader>nh` | Clear search highlights | After searching |
 | `<leader>rn` | Toggle relative line numbers | UI preference |
+| `<leader>tw` | Toggle word wrap | Line wrapping on/off |
 | `gcc` | Comment/uncomment line | Code editing |
 | `gc` | Comment/uncomment selection | Visual mode |
 
@@ -240,6 +241,10 @@
 | `<leader>sh` | Split horizontal | New horizontal split |
 | `<leader>se` | Equal window size | Balance splits |
 | `<leader>sx` | Close window | Close split |
+| `<leader>mr` | Move to rightmost split | Navigate to right edge |
+| `<leader>ml` | Move to leftmost split | Navigate to left edge |
+| `<leader>mt` | Move to top split | Navigate to top |
+| `<leader>mb` | Move to bottom split | Navigate to bottom |
 
 ### Buffer Management
 | Key | Action | Usage |
