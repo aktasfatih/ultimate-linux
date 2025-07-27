@@ -143,6 +143,14 @@
 | `]d` | Next diagnostic | Jump to next error |
 | `<leader>e` | Show diagnostics | Error details |
 
+### Quickfix Navigation (LSP Results)
+| Key | Action | Usage |
+|-----|--------|-------|
+| `]q` | Next quickfix item | Navigate references/errors |
+| `[q` | Previous quickfix item | Navigate references/errors |
+| `]Q` | Last quickfix item | Jump to last result |
+| `[Q` | First quickfix item | Jump to first result |
+
 ### Git Integration
 | Key | Action | Tool |
 |-----|--------|------|

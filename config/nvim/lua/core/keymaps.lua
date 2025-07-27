@@ -157,3 +157,9 @@ keymap('n', '<leader>gra', ':Git rebase --abort<CR>', { desc = "Abort rebase" })
 -- Visual mode mappings for partial staging
 keymap('v', '<leader>gs', ':Gwrite<CR>', { desc = "Stage selection" })
 keymap('v', '<leader>gr', ':Gread<CR>', { desc = "Revert selection" })
+
+-- Quickfix navigation
+keymap("n", "]q", ":cnext<CR>", opts)
+keymap("n", "[q", ":cprev<CR>", opts)
+keymap("n", "]Q", ":clast<CR>", opts)
+keymap("n", "[Q", ":cfirst<CR>", opts)
