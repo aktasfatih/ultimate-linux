@@ -479,8 +479,8 @@ install_tmux() {
     fi
 
     # Deploy tmux cheatsheet
-    if [[ -f "config/tmux/tmux-cheatsheet.md" ]]; then
-        deploy_config "config/tmux/tmux-cheatsheet.md" "$HOME/.config/tmux/tmux-cheatsheet.md"
+    if [[ -f "config/tmux/ultimate-cheatsheet.md" ]]; then
+        deploy_config "config/tmux/ultimate-cheatsheet.md" "$HOME/.config/tmux/ultimate-cheatsheet.md"
     fi
 
     # Note about tmux plugins
