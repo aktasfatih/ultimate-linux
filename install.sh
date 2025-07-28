@@ -701,7 +701,9 @@ configure_git_user() {
     fi
     
     # Check if Git user name is set
-    if [[ -z "$(git config --global user.name)" ]]; then
+    local current_git_name
+    current_git_name=$(git config --global user.name 2>/dev/null || true)
+    if [[ -z "$current_git_name" ]]; then
         echo
         echo -e "${BLUE}Git user configuration${NC}"
         echo "Please enter your Git user information:"
@@ -711,18 +713,20 @@ configure_git_user() {
             log SUCCESS "Git user name set to: $git_name"
         fi
     else
-        log INFO "Git user name already configured: $(git config --global user.name)"
+        log INFO "Git user name already configured: $current_git_name"
     fi
 
     # Check if Git user email is set
-    if [[ -z "$(git config --global user.email)" ]]; then
+    local current_git_email
+    current_git_email=$(git config --global user.email 2>/dev/null || true)
+    if [[ -z "$current_git_email" ]]; then
         read -p "Your email: " git_email
         if [[ -n "$git_email" ]]; then
             git config --global user.email "$git_email"
             log SUCCESS "Git user email set to: $git_email"
         fi
     else
-        log INFO "Git user email already configured: $(git config --global user.email)"
+        log INFO "Git user email already configured: $current_git_email"
     fi
 
     # Check if GPG signing is already configured
