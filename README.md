@@ -55,11 +55,13 @@ cd ~/.dotfiles && ./install.sh
 - LSP support for multiple languages
 - Auto-completion, snippets, and formatting
 - File explorer, fuzzy finder, git integration
+- **GitHub integration** with Octo.nvim (issues, PRs, reviews)
 - Treesitter-based syntax highlighting
 - Beautiful Catppuccin theme
 
 ### 🛠️ Development Tools
 - Git with extensive aliases and delta diff viewer
+- **GitHub CLI** (`gh`) for repository management
 - Language version managers: `fnm` (Node.js), `pyenv` (Python), `rustup` (Rust)
 - Docker and docker-compose support
 - Comprehensive `.gitignore` templates
@@ -107,7 +109,7 @@ cd ~/.dotfiles && ./install.sh
 - **File Operations**: eza (ls replacement), bat (cat replacement)
 - **Search**: ripgrep (grep replacement), fd-find (find replacement)
 - **Navigation**: fzf (fuzzy finder), zoxide (cd replacement)
-- **Git**: delta (diff tool), lazygit (TUI)
+- **Git**: delta (diff tool), lazygit (TUI), **gh** (GitHub CLI)
 - **System**: dust (du replacement), procs (ps replacement), bottom (htop replacement)
 
 ### Development Environment
@@ -150,7 +152,7 @@ cd ~/.dotfiles && ./install.sh
 - **File Operations**: eza (ls replacement), bat (cat replacement)
 - **Search**: ripgrep (grep replacement), fd (find replacement)
 - **Navigation**: fzf (fuzzy finder), zoxide (cd replacement)
-- **Git**: delta (diff tool), lazygit (TUI)
+- **Git**: delta (diff tool), lazygit (TUI), **gh** (GitHub CLI)
 - **System**: dust (du replacement), procs (ps replacement), bottom (htop replacement)
 
 ### Development Environment
@@ -201,6 +203,9 @@ After installation, update your personal information:
 git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
 
+# GitHub CLI authentication (for Octo.nvim)
+gh auth login
+
 # Local overrides (optional)
 touch ~/.zshrc.local      # Shell customizations
 touch ~/.tmux.conf.local  # tmux customizations
@@ -231,6 +236,13 @@ touch ~/.zshrc.$(hostname)  # Loaded automatically
 - **Buffer list**: `<leader>fb`
 - **Save file**: `<leader>w`
 - **Close buffer**: `<leader>bd`
+
+### GitHub Integration (Octo.nvim)
+- **List issues**: `<leader>oi`
+- **List PRs**: `<leader>opr`
+- **Create PR**: `<leader>oprc`
+- **List repos**: `<leader>ore`
+- Note: Requires `gh auth login` after installation
 
 See [docs/KEYBINDINGS.md](docs/KEYBINDINGS.md) for complete reference.
 

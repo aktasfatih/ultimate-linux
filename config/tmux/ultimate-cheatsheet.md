@@ -231,6 +231,182 @@
 | `<leader>gs` | Stage selection | Stage partial file (visual) |
 | `<leader>gr` | Revert selection | Discard partial changes (visual) |
 
+### GitHub Integration (Octo.nvim)
+
+**Setup Required:**
+Octo.nvim requires the GitHub CLI (`gh`) which is automatically installed by this setup. You just need to authenticate it. Works with both GitHub.com and GitHub Enterprise servers.
+
+#### Initial Setup (Personal GitHub):
+```bash
+# GitHub CLI is already installed by the setup!
+# Just authenticate with GitHub.com
+gh auth login
+
+# Verify authentication
+gh auth status
+```
+
+#### Enterprise GitHub Setup:
+```bash
+# Authenticate with GitHub Enterprise Server
+gh auth login --hostname your-github-enterprise.com
+
+# Set as default (optional)
+gh config set default_host your-github-enterprise.com
+
+# Verify enterprise authentication
+gh auth status --hostname your-github-enterprise.com
+```
+
+#### Multiple GitHub Accounts:
+```bash
+# Switch between accounts
+gh auth switch --hostname github.com
+gh auth switch --hostname your-github-enterprise.com
+
+# List all authenticated accounts
+gh auth status --show-token
+```
+
+#### Configuration in Neovim:
+The plugin is pre-configured but you can customize it by adding to `~/.config/nvim/lua/user/init.lua`:
+```lua
+require("octo").setup({
+  -- For enterprise GitHub, set your hostname
+  github_hostname = "your-github-enterprise.com", -- Leave empty for github.com
+  
+  -- SSH aliases (if you use custom SSH configs)
+  ssh_aliases = {
+    ["github.com"] = "gh",
+    ["your-github-enterprise.com"] = "gh-enterprise"
+  },
+  
+  -- Timeout for API requests (increase for slow networks)
+  timeout = 10000,
+})
+```
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>oi` | List issues | Browse repository issues |
+| `<leader>oic` | Create issue | Create new issue |
+| `<leader>ois` | Search issues | Search through issues |
+| `<leader>opr` | List pull requests | Browse pull requests |
+| `<leader>oprc` | Create pull request | Create new PR |
+| `<leader>oprs` | Search pull requests | Search through PRs |
+| `<leader>ore` | List repositories | Browse repositories |
+| `<leader>orv` | View repository | View repo details |
+| `<leader>orf` | Fork repository | Fork current repo |
+| `<leader>ogs` | List gists | Browse gists |
+| `<leader>ogc` | Create gist | Create new gist |
+
+### GitHub Issue/PR Context (when viewing)
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<space>ic` | Close issue/PR | Close current item |
+| `<space>io` | Reopen issue/PR | Reopen closed item |
+| `<space>il` | List issues | List repo issues |
+| `<space>ca` | Add comment | Add new comment |
+| `<space>cd` | Delete comment | Remove comment |
+| `]c` | Next comment | Navigate to next comment |
+| `[c` | Previous comment | Navigate to previous comment |
+| `<space>aa` | Add assignee | Assign user |
+| `<space>ad` | Remove assignee | Unassign user |
+| `<space>la` | Add label | Add label to issue/PR |
+| `<space>ld` | Remove label | Remove label |
+| `<space>lc` | Create label | Create new label |
+| `<C-r>` | Reload | Refresh current view |
+| `<C-b>` | Open in browser | View on GitHub |
+| `<C-y>` | Copy URL | Copy GitHub URL |
+
+### GitHub PR Specific
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<space>po` | Checkout PR | Switch to PR branch |
+| `<space>pm` | Merge PR | Merge commit PR |
+| `<space>psm` | Squash and merge | Squash merge PR |
+| `<space>pc` | List commits | Show PR commits |
+| `<space>pf` | List changed files | Show modified files |
+| `<space>pd` | Show PR diff | Display PR changes |
+| `<space>va` | Add reviewer | Request review |
+| `<space>vd` | Remove reviewer | Remove review request |
+| `gf` | Go to file | Open file in PR |
+
+### GitHub Reactions
+| Key | Action | Emoji |
+|-----|--------|-------|
+| `<space>r+` | Thumbs up | 👍 |
+| `<space>r-` | Thumbs down | 👎 |
+| `<space>rh` | Heart | ❤️ |
+| `<space>rl` | Laugh | 😄 |
+| `<space>rp` | Party | 🎉 |
+| `<space>rc` | Confused | 😕 |
+| `<space>re` | Eyes | 👀 |
+| `<space>rr` | Rocket | 🚀 |
+
+### GitHub PR Review
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<space>ca` | Add review comment | Comment on specific line |
+| `<space>sa` | Add suggestion | Suggest code change |
+| `]t` | Next thread | Next review thread |
+| `[t` | Previous thread | Previous review thread |
+| `]q` | Next changed file | Navigate file list |
+| `[q` | Previous changed file | Navigate file list |
+| `<C-a>` | Approve review | Approve PR |
+| `<C-m>` | Comment review | Submit review comment |
+| `<C-r>` | Request changes | Request changes |
+| `<C-c>` | Close review tab | Exit review mode |
+| `<leader><space>` | Toggle viewed | Mark file as viewed |
+
+#### Octo.nvim Tips & Troubleshooting:
+
+**Working with Multiple Accounts:**
+- Octo uses the currently active `gh` auth session
+- Switch accounts with `gh auth switch` before using Octo commands
+- Check current account: `:lua print(vim.fn.system('gh auth status'))`
+
+**Enterprise Setup:**
+- For GitHub Enterprise, update the config with your hostname
+- Ensure your SSH config matches if using custom aliases
+- Some enterprise servers may require longer timeout values
+
+**Installation Details:**
+- The setup script automatically installs GitHub CLI from official repositories
+- On Debian/Ubuntu: Adds GitHub's official apt repository  
+- On Fedora/RHEL: Uses dnf package manager
+- On Arch: Uses pacman
+- On macOS: Uses Homebrew
+- Fallback: Downloads from GitHub releases
+
+**Common Issues:**
+- **"Not authenticated"**: Run `gh auth login` and restart Neovim
+- **"Repository not found"**: Ensure you're in a git repository with GitHub remote
+- **API rate limiting**: Wait or authenticate with a personal access token
+- **Slow loading**: Increase timeout in config or check network connection
+- **"gh not found"**: Restart your shell after installation to reload PATH
+
+**Useful Commands:**
+```bash
+# Check if repository is properly connected
+gh repo view
+
+# Test GitHub CLI connection
+gh api user
+
+# View current repository issues (outside Neovim)
+gh issue list
+
+# View current repository PRs (outside Neovim)
+gh pr list
+```
+
+**Integration with Git Workflows:**
+- Use `<leader>oprc` to create PR directly from current branch
+- Checkout PRs with `<space>po` to test changes locally
+- Review and merge PRs without leaving Neovim
+- Add comments and suggestions directly in the diff view
+
 ### Window Navigation
 | Key | Action | Context |
 |-----|--------|---------|

@@ -376,6 +376,7 @@ install_modern_cli_tools() {
         "dust:du replacement"
         "procs:ps replacement"
         "bottom:system monitor"
+        "gh:GitHub CLI"
     )
 
     for tool_info in "${tools[@]}"; do
@@ -438,6 +439,33 @@ install_modern_cli_tools() {
                 ;;
             bottom)
                 install_packages "bottom" || install_via_cargo "bottom"
+                ;;
+            gh)
+                if ! command -v gh &> /dev/null; then
+                    # Try package manager first
+                    if [[ "$DISTRO_FAMILY" == "debian" ]]; then
+                        # Add GitHub CLI official repository for Debian/Ubuntu
+                        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+                        && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+                        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+                        && sudo apt update \
+                        && sudo apt install gh -y || {
+                            log WARN "Failed to install gh via package manager"
+                            install_from_github "cli/cli" "gh"
+                        }
+                    elif [[ "$DISTRO_FAMILY" == "fedora" ]]; then
+                        sudo dnf install gh -y || install_from_github "cli/cli" "gh"
+                    elif [[ "$DISTRO_FAMILY" == "arch" ]]; then
+                        sudo pacman -S --noconfirm github-cli || install_from_github "cli/cli" "gh"
+                    elif [[ "$DISTRO_FAMILY" == "alpine" ]]; then
+                        sudo apk add github-cli || install_from_github "cli/cli" "gh"
+                    elif [[ "$DISTRO_FAMILY" == "macos" ]]; then
+                        brew install gh || install_from_github "cli/cli" "gh"
+                    else
+                        # Fallback to GitHub releases
+                        install_from_github "cli/cli" "gh"
+                    fi
+                fi
                 ;;
         esac
     done
