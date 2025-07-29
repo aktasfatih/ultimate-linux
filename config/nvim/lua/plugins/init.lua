@@ -228,14 +228,31 @@ return {
     event = { "BufReadPost", "BufNewFile" },
   },
 
-  -- LSP (with version pins for Neovim 0.9.5 compatibility)
+  -- Mason (load early for commands)
+  {
+    "williamboman/mason.nvim",
+    cmd = { "Mason", "MasonInstall", "MasonUninstall", "MasonUpdate", "MasonLog" },
+    config = function()
+      require("mason").setup({
+        ui = {
+          border = "rounded",
+          icons = {
+            package_installed = "✓",
+            package_pending = "➜",
+            package_uninstalled = "✗",
+          },
+        },
+      })
+    end,
+  },
+
+  -- LSP (updated for compatibility with modern gopls)
   {
     "neovim/nvim-lspconfig",
-    commit = "0b8165cf95806bc4bb8f745bb0c92021b2ed4b98", -- Last commit supporting Neovim 0.9
     dependencies = {
-      { "williamboman/mason.nvim", version = "v1.10.0" },
-      { "williamboman/mason-lspconfig.nvim", version = "v1.29.0" },
-      { "jay-babu/mason-nvim-dap.nvim", version = "v2.3.0" },
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
+      "jay-babu/mason-nvim-dap.nvim",
       "folke/neodev.nvim",
       "nvimtools/none-ls.nvim",
       { "jay-babu/mason-null-ls.nvim", version = "v2.6.0" },

@@ -3,17 +3,7 @@
 -- Setup neodev for Neovim Lua development
 require("neodev").setup()
 
--- Mason setup
-require("mason").setup({
-  ui = {
-    border = "rounded",
-    icons = {
-      package_installed = "✓",
-      package_pending = "➜",
-      package_uninstalled = "✗",
-    },
-  },
-})
+-- Mason setup (now handled in plugins/init.lua)
 
 -- Mason LSP config
 require("mason-lspconfig").setup({
