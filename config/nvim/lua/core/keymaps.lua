@@ -211,11 +211,15 @@ keymap("n", "<leader>dfb", function() require("telescope").extensions.dap.list_b
 keymap("n", "<leader>dfv", function() require("telescope").extensions.dap.variables() end, { desc = "Debug Variables" })
 keymap("n", "<leader>dff", function() require("telescope").extensions.dap.frames() end, { desc = "Debug Frames" })
 
--- Language-specific debug keybindings
--- Go debugging
-keymap("n", "<leader>dgt", function()
-  require("dap-go").debug_test()
-end, { desc = "Debug Go Test", ft = "go" })
-keymap("n", "<leader>dgl", function()
-  require("dap-go").debug_last_test()
-end, { desc = "Debug Last Go Test", ft = "go" })
+-- Language-specific debug keybindings (set via autocmd)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "go",
+  callback = function()
+    vim.keymap.set("n", "<leader>dgt", function()
+      require("dap-go").debug_test()
+    end, { desc = "Debug Go Test", buffer = true })
+    vim.keymap.set("n", "<leader>dgl", function()
+      require("dap-go").debug_last_test()
+    end, { desc = "Debug Last Go Test", buffer = true })
+  end,
+})
