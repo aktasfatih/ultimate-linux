@@ -614,6 +614,72 @@ function greet(name) {
 | `...` | Two levels up | `cd ...` |
 | `....` | Three levels up | `cd ....` |
 
+### Vi Mode (Shell)
+**Note**: Vi mode is enabled by default in this setup. You'll see a left arrow `◀` when in normal mode.
+
+#### Mode Switching
+| Key | Action | Description |
+|-----|--------|-------------|
+| `Escape` | Enter normal mode | Switch from insert to normal mode |
+| `i` | Enter insert mode at cursor | Resume normal typing |
+| `a` | Enter insert mode after cursor | Most common way to resume typing |
+| `A` | Enter insert mode at end of line | Jump to end and type |
+| `I` | Enter insert mode at beginning | Jump to start and type |
+
+#### Navigation in Normal Mode
+| Key | Action | Description |
+|-----|--------|-------------|
+| `h` | Move left one character | Basic movement |
+| `l` | Move right one character | Basic movement |
+| `w` | Move forward one word | Jump between words |
+| `b` | Move backward one word | Jump between words |
+| `e` | Move to end of word | Word boundary |
+| `0` | Move to beginning of line | Start of line |
+| `$` | Move to end of line | End of line |
+| `^` | Move to first non-blank char | Skip leading spaces |
+
+#### Editing in Normal Mode
+| Key | Action | Description |
+|-----|--------|-------------|
+| `x` | Delete character under cursor | Quick delete |
+| `X` | Delete character before cursor | Backspace equivalent |
+| `dd` | Delete entire line | Clear whole command |
+| `D` | Delete from cursor to end | Clear rest of line |
+| `C` | Change from cursor to end | Delete and enter insert mode |
+| `cc` | Change entire line | Replace whole command |
+| `r` | Replace single character | Type new character |
+| `s` | Substitute character | Delete char and enter insert |
+
+#### Text Objects (Advanced)
+| Key | Action | Description |
+|-----|--------|-------------|
+| `dw` | Delete word | From cursor to end of word |
+| `db` | Delete word backward | From cursor to start of word |
+| `d0` | Delete to beginning | Clear from start to cursor |
+| `d$` | Delete to end | Same as `D` |
+| `cw` | Change word | Replace word |
+| `cb` | Change word backward | Replace previous word |
+
+#### Quick Commands
+| Key | Action | Description |
+|-----|--------|-------------|
+| `u` | Undo last change | Undo in normal mode |
+| `Ctrl+r` | Redo | Redo undone change |
+| `/` | Search forward | Enter search pattern |
+| `?` | Search backward | Reverse search |
+| `n` | Next search result | Continue search |
+| `N` | Previous search result | Reverse search direction |
+
+#### Disabling Vi Mode
+If you prefer normal shell behavior (emacs mode):
+```bash
+# Edit ~/.dotfiles/config/zsh/key-bindings.zsh
+# Comment out: bindkey -v
+# Add: bindkey -e
+```
+
+**Pro Tip**: Most beginners should disable vi mode until comfortable with vim. Press `i` or `a` to return to normal typing when you see the left arrow!
+
 ---
 
 # Git Commands

@@ -183,13 +183,29 @@ elif command -v vim &>/dev/null; then
     export EDITOR='vim'
 fi
 
-# Reload shell configuration
-reload() {
-    if [ -n "${ZSH_VERSION:-}" ]; then
-        source ~/.zshrc
-        echo "Zsh configuration reloaded"
-    elif [ -n "${BASH_VERSION:-}" ]; then
-        source ~/.bashrc
-        echo "Bash configuration reloaded"
+# SSH Agent Management
+ssh_agent_start() {
+    # Check if SSH agent is already running
+    if [ -n "$SSH_AUTH_SOCK" ] && [ -e "$SSH_AUTH_SOCK" ]; then
+        # Test if the agent is responsive
+        if ssh-add -l >/dev/null 2>&1; then
+            return 0
+        fi
     fi
+    
+    # Start a new SSH agent
+    eval "$(ssh-agent -s)" >/dev/null
+    
+    # Add default SSH keys if they exist
+    for key in ~/.ssh/id_rsa ~/.ssh/id_ed25519 ~/.ssh/id_ecdsa; do
+        if [ -f "$key" ]; then
+            ssh-add "$key" 2>/dev/null
+        fi
+    done
 }
+
+# Initialize SSH agent for interactive shells
+if [ -t 1 ]; then
+    ssh_agent_start
+fi
+

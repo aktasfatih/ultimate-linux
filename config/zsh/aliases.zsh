@@ -10,10 +10,20 @@
 # Avoid duplicating aliases that work the same in both shells.
 
 # Enhanced file operations with more safety flags
-alias rm='rm -Iv --preserve-root'
-alias chown='chown --preserve-root'
-alias chmod='chmod --preserve-root'
-alias chgrp='chgrp --preserve-root'
+# Note: macOS uses BSD coreutils, Linux uses GNU coreutils
+if [[ "$(uname)" == "Darwin" ]]; then
+    # macOS/BSD versions
+    alias rm='rm -i'
+    alias chown='chown'
+    alias chmod='chmod'
+    alias chgrp='chgrp'
+else
+    # Linux/GNU versions
+    alias rm='rm -Iv --preserve-root'
+    alias chown='chown --preserve-root'
+    alias chmod='chmod --preserve-root'
+    alias chgrp='chgrp --preserve-root'
+fi
 
 # Network utilities
 alias localip='hostname -I | awk "{print $1}"'

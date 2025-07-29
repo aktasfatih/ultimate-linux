@@ -1,7 +1,8 @@
 # Ultimate Linux Development Setup - Zsh Key Bindings
 
-# Enable vi mode
-bindkey -v
+# Enable vi mode (comment out to disable)
+# bindkey -v
+bindkey -e  # Use emacs mode instead (normal shell behavior)
 export KEYTIMEOUT=1
 
 # Better vi mode
@@ -199,3 +200,14 @@ bindkey '^x^l' insert-last-command-output
 if command -v tmux &> /dev/null; then
     bindkey -s '^f' 'tmux-sessionizer\n'
 fi
+
+# Word movement with Option+Arrow keys (for macOS Terminal/iTerm2)
+# These escape sequences are what macOS Terminal sends for Option+Arrow
+bindkey "^[^[[C" forward-word    # Option+Right Arrow
+bindkey "^[^[[D" backward-word   # Option+Left Arrow
+bindkey "^[[1;3C" forward-word   # Alternative sequence for Option+Right
+bindkey "^[[1;3D" backward-word  # Alternative sequence for Option+Left
+
+# Additional word movement bindings for different terminal emulators
+bindkey "^[f" forward-word       # Alt+f (common alternative)
+bindkey "^[b" backward-word      # Alt+b (common alternative)
