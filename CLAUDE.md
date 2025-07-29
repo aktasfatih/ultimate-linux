@@ -20,7 +20,7 @@ When adding new features:
 
 **NEVER modify deployed configuration files directly (e.g., ~/.zshrc, ~/.bashrc).** All fixes must be made in:
 1. The source configuration files in the `config/` directory
-2. The installation scripts that deploy these configurations
+2. The installation scripts that deploy these configurations  
 3. The utility scripts in `scripts/` that are sourced by the installers
 
 This ensures:
@@ -155,6 +155,14 @@ The `install_from_github()` function handles downloading binaries from GitHub re
 - Falls back to cargo installation when available
 - Supports various archive formats (.tar.gz, .zip, .deb, .rpm)
 
+### Neovim Configuration Architecture
+- **Plugin Manager**: lazy.nvim with lazy loading for performance
+- **Core Configuration**: Split into `core/` directory (keymaps, options, autocmds)
+- **Plugin Configurations**: Separate config files in `plugins/configs/`
+- **LSP Setup**: Mason for automatic LSP server installation
+- **Debugging**: Full DAP (Debug Adapter Protocol) support for Go, Node.js, Python
+- **GitHub Integration**: Octo.nvim for issues, PRs, and code reviews
+
 ### Clipboard Integration
 - System clipboard tools (`xclip`, `xsel`) installed by default
 - tmux configured with dynamic clipboard detection (`.tmux.clipboard.conf`)
@@ -186,6 +194,8 @@ To access the cheatsheet:
 - The cheatsheet includes:
   - tmux keybindings (Prefix: `Ctrl+Space`)
   - Neovim commands (Leader: `Space`)
+  - Debugging controls (DAP)
+  - GitHub integration (Octo.nvim)
   - Shell shortcuts and aliases
   - Git commands and workflows
   - Modern CLI tools usage
@@ -208,6 +218,11 @@ To access the cheatsheet:
 ### Package Name Differences
 - Handled by `map_package_name()` function
 - Example: `fd-find` vs `fd`, `batcat` vs `bat`
+
+### Neovim Plugin Issues
+- Debugging plugins require proper DAP adapter installation
+- Mason automatically installs required debug adapters (delve, js-debug-adapter, debugpy)
+- Octo.nvim requires GitHub CLI authentication: `gh auth login`
 
 ## Development Guidelines
 
@@ -254,3 +269,17 @@ To access the cheatsheet:
 ./install.sh --shell=bash --dry-run
 ./install.sh --shell=zsh --dry-run
 ```
+
+### Neovim Plugin Development
+- Plugin configurations go in `config/nvim/lua/plugins/configs/`
+- Use lazy.nvim's lazy loading for performance
+- For debugging: Add to Mason DAP setup in `config/nvim/lua/plugins/configs/lsp.lua`
+- Always test buffer-local keymaps with FileType autocmds
+- Verify Lua syntax: `lua -e "loadfile('path/to/file')"`
+
+### Common Pitfalls
+1. **Invalid keymap parameters**: `vim.keymap.set()` doesn't accept `ft` parameter - use FileType autocmds
+2. **Manual user config edits**: Always fix source files in `config/` directory
+3. **Missing dependency handling**: Check if tools exist before using them
+4. **Cross-platform issues**: Test on both Linux and macOS
+5. **Plugin version compatibility**: Pin versions for Neovim 0.9.x compatibility
