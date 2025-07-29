@@ -3,6 +3,7 @@
 ## 🎯 Quick Navigation
 - [tmux Keybindings](#tmux-keybindings)
 - [Neovim Commands](#neovim-commands)
+  - [Debugging (DAP)](#debugging-dap)
 - [Zsh/Shell Shortcuts](#zsh-shell-shortcuts)
 - [Git Commands](#git-commands)
 - [Modern CLI Tools](#modern-cli-tools)
@@ -445,6 +446,106 @@ gh pr list
 | `y` | Copy name | To clipboard |
 | `Y` | Copy path | Relative path |
 | `gy` | Copy absolute path | Full path |
+
+### Debugging (DAP)
+
+**Prerequisites:**
+- **Go**: Requires `delve` debugger (auto-installed via Mason)
+- **Node.js**: Requires `js-debug-adapter` (auto-installed via Mason)
+- **Python**: Requires `debugpy` (auto-installed via Mason)
+
+#### Basic Debug Controls
+| Key | Action | Usage |
+|-----|--------|-------|
+| `F5` | Start/Continue debugging | Launch or resume execution |
+| `F10` | Step over | Execute current line |
+| `F11` | Step into | Enter function calls |
+| `F12` | Step out | Exit current function |
+| `<leader>dt` | Terminate session | Stop debugging |
+
+#### Breakpoint Management
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>db` | Toggle breakpoint | Add/remove breakpoint at cursor |
+| `<leader>dB` | Conditional breakpoint | Break only when condition is true |
+| `<leader>dp` | Log point | Print message without stopping |
+| `<leader>dfb` | List breakpoints | Show all breakpoints (Telescope) |
+
+#### Debug UI & Information
+| Key | Action | Usage |
+|-----|--------|-------|
+| `<leader>du` | Toggle debug UI | Show/hide debug panels |
+| `<leader>dr` | Open REPL | Interactive debug console |
+| `<leader>de` | Evaluate expression | Inspect variables (normal/visual) |
+| `<leader>dl` | Run last config | Repeat last debug session |
+
+#### Telescope Debug Integration
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>dfc` | Debug configurations | Select debug config |
+| `<leader>dfv` | Debug variables | View current variables |
+| `<leader>dff` | Debug frames | View call stack |
+
+#### Language-Specific Debugging
+
+**Go Debugging:**
+| Key | Action | Usage |
+|-----|--------|-------|
+| `<leader>dgt` | Debug Go test | Debug test under cursor |
+| `<leader>dgl` | Debug last Go test | Re-run last test debug |
+
+**Available Go Debug Configurations:**
+- **Debug**: Run current Go file
+- **Debug test**: Debug current test file
+- **Debug test (go.mod)**: Debug tests in current package
+- **Attach remote**: Connect to running Go process
+
+**Node.js/JavaScript Debugging:**
+Available configurations (select with `F5`):
+- **Launch file**: Debug current JS/TS file
+- **Attach**: Connect to running Node.js process
+- **Debug Jest Tests**: Debug Jest test files
+- **Start Chrome**: Debug web applications in Chrome
+
+**Python Debugging:**
+- **Launch file**: Debug current Python file
+- Uses `debugpy` for full debugging support
+
+#### Debug UI Layout
+
+When debug UI is open (`<leader>du`), you'll see:
+- **Left Panel**: Scopes, breakpoints, call stack, watch variables
+- **Bottom Panel**: Debug REPL and console output
+- **Main View**: Your code with debug highlights
+
+#### Debug Workflow Examples
+
+**Go Application:**
+```go
+// Set breakpoint with <leader>db
+func main() {
+    name := "World"  // <- breakpoint here
+    fmt.Printf("Hello, %s!\n", name)
+}
+// Press F5 to start debugging
+```
+
+**Node.js Application:**
+```javascript
+// Set breakpoint with <leader>db
+function greet(name) {
+    const message = `Hello, ${name}!`;  // <- breakpoint here
+    console.log(message);
+}
+// Press F5 and select "Launch file"
+```
+
+**Debugging Tips:**
+- Use `<leader>de` to evaluate expressions while paused
+- Set conditional breakpoints for complex debugging scenarios
+- Use log points to trace execution without stopping
+- The debug REPL allows interactive code execution
+- Virtual text shows variable values inline while debugging
 
 ---
 

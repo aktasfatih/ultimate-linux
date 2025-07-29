@@ -235,6 +235,7 @@ return {
     dependencies = {
       { "williamboman/mason.nvim", version = "v1.10.0" },
       { "williamboman/mason-lspconfig.nvim", version = "v1.29.0" },
+      { "jay-babu/mason-nvim-dap.nvim", version = "v2.3.0" },
       "folke/neodev.nvim",
       "nvimtools/none-ls.nvim",
       { "jay-babu/mason-null-ls.nvim", version = "v2.6.0" },
@@ -830,6 +831,136 @@ return {
         -- Additional command arguments for Claude Code CLI
         additional_args = {},
       })
+    end,
+  },
+
+  -- Debug Adapter Protocol (DAP) - Core debugging support
+  {
+    "mfussenegger/nvim-dap",
+    dependencies = {
+      -- Debug UI
+      {
+        "rcarriga/nvim-dap-ui",
+        dependencies = { "nvim-neotest/nvim-nio" },
+        config = function()
+          require("plugins.configs.dap-ui")
+        end,
+      },
+      -- Virtual text during debugging
+      {
+        "theHamsta/nvim-dap-virtual-text",
+        config = function()
+          require("nvim-dap-virtual-text").setup({
+            enabled = true,
+            enabled_commands = true,
+            highlight_changed_variables = true,
+            highlight_new_as_changed = false,
+            show_stop_reason = true,
+            commented = false,
+            only_first_definition = true,
+            all_references = false,
+            clear_on_continue = false,
+            display_callback = function(variable, _buf, _stackframe, _node)
+              return variable.name .. ' = ' .. variable.value
+            end,
+          })
+        end,
+      },
+      -- Telescope integration for DAP
+      {
+        "nvim-telescope/telescope-dap.nvim",
+        config = function()
+          require("telescope").load_extension("dap")
+        end,
+      },
+    },
+    config = function()
+      require("plugins.configs.dap")
+    end,
+  },
+
+  -- Go debugging support
+  {
+    "leoluz/nvim-dap-go",
+    dependencies = { "mfussenegger/nvim-dap" },
+    ft = "go",
+    config = function()
+      require("dap-go").setup({
+        -- Additional dap configurations can be added here
+        dap_configurations = {
+          {
+            type = "go",
+            name = "Attach remote",
+            mode = "remote",
+            request = "attach",
+          },
+        },
+        -- delve configurations
+        delve = {
+          path = "dlv",
+          initialize_timeout_sec = 20,
+          port = "${port}",
+          args = {},
+          build_flags = "",
+        },
+      })
+    end,
+  },
+
+  -- Node.js debugging support
+  {
+    "mxsdev/nvim-dap-vscode-js",
+    dependencies = { "mfussenegger/nvim-dap" },
+    ft = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+    config = function()
+      require("dap-vscode-js").setup({
+        debugger_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter",
+        debugger_cmd = { "js-debug-adapter" },
+        adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "node-terminal", "pwa-extensionHost" },
+      })
+      
+      -- Configure Node.js debugging
+      for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
+        require("dap").configurations[language] = {
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Launch file",
+            program = "${file}",
+            cwd = "${workspaceFolder}",
+          },
+          {
+            type = "pwa-node",
+            request = "attach",
+            name = "Attach",
+            processId = require("dap.utils").pick_process,
+            cwd = "${workspaceFolder}",
+          },
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Debug Jest Tests",
+            -- trace = true, -- include debugger info
+            runtimeExecutable = "node",
+            runtimeArgs = {
+              "./node_modules/jest/bin/jest.js",
+              "--runInBand",
+            },
+            rootPath = "${workspaceFolder}",
+            cwd = "${workspaceFolder}",
+            console = "integratedTerminal",
+            internalConsoleOptions = "neverOpen",
+          },
+          {
+            type = "pwa-chrome",
+            request = "launch",
+            name = "Start Chrome with \"localhost\"",
+            url = "http://localhost:3000",
+            webRoot = "${workspaceFolder}",
+            userDataDir = "${workspaceFolder}/.vscode/vscode-chrome-debug-userdatadir"
+          }
+        }
+      end
     end,
   },
 }

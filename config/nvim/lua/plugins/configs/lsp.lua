@@ -37,6 +37,49 @@ require("mason-lspconfig").setup({
   automatic_installation = true,
 })
 
+-- Mason DAP (Debug Adapter Protocol) config
+require("mason-nvim-dap").setup({
+  ensure_installed = {
+    "delve",              -- Go debugger
+    "js-debug-adapter",   -- Node.js/JavaScript debugger
+    "debugpy",            -- Python debugger
+    "bash-debug-adapter", -- Bash debugger
+  },
+  automatic_installation = true,
+  handlers = {
+    function(config)
+      -- Default handler
+      require("mason-nvim-dap").default_setup(config)
+    end,
+    delve = function(config)
+      config.configurations = {
+        {
+          type = "delve",
+          name = "Debug",
+          request = "launch",
+          program = "${file}",
+        },
+        {
+          type = "delve",
+          name = "Debug test", -- configuration for debugging test files
+          request = "launch",
+          mode = "test",
+          program = "${file}",
+        },
+        -- works with go.mod packages and sub packages 
+        {
+          type = "delve",
+          name = "Debug test (go.mod)",
+          request = "launch",
+          mode = "test",
+          program = "./${relativeFileDirname}",
+        },
+      }
+      require("mason-nvim-dap").default_setup(config)
+    end,
+  },
+})
+
 -- LSP capabilities
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 

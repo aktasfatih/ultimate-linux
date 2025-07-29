@@ -188,3 +188,34 @@ keymap("n", "<leader>orf", ":Octo repo fork<CR>", { desc = "Fork repository" })
 keymap("n", "<leader>ogs", ":Octo gist list<CR>", { desc = "List gists" })
 keymap("n", "<leader>ogc", ":Octo gist create<CR>", { desc = "Create gist" })
 
+-- Debugging (DAP)
+keymap("n", "<F5>", function() require("dap").continue() end, { desc = "Debug: Start/Continue" })
+keymap("n", "<F10>", function() require("dap").step_over() end, { desc = "Debug: Step Over" })
+keymap("n", "<F11>", function() require("dap").step_into() end, { desc = "Debug: Step Into" })
+keymap("n", "<F12>", function() require("dap").step_out() end, { desc = "Debug: Step Out" })
+keymap("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "Toggle Breakpoint" })
+keymap("n", "<leader>dB", function() require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: ')) end, { desc = "Conditional Breakpoint" })
+keymap("n", "<leader>dp", function() require("dap").set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end, { desc = "Log Point" })
+keymap("n", "<leader>dr", function() require("dap").repl.open() end, { desc = "Open REPL" })
+keymap("n", "<leader>dl", function() require("dap").run_last() end, { desc = "Run Last Debug Config" })
+keymap("n", "<leader>dt", function() require("dap").terminate() end, { desc = "Terminate Debug Session" })
+
+-- Debug UI
+keymap("n", "<leader>du", function() require("dapui").toggle() end, { desc = "Toggle Debug UI" })
+keymap("n", "<leader>de", function() require("dapui").eval() end, { desc = "Evaluate Expression" })
+keymap("v", "<leader>de", function() require("dapui").eval() end, { desc = "Evaluate Selection" })
+
+-- Telescope DAP integration
+keymap("n", "<leader>dfc", function() require("telescope").extensions.dap.configurations() end, { desc = "Debug Configurations" })
+keymap("n", "<leader>dfb", function() require("telescope").extensions.dap.list_breakpoints() end, { desc = "List Breakpoints" })
+keymap("n", "<leader>dfv", function() require("telescope").extensions.dap.variables() end, { desc = "Debug Variables" })
+keymap("n", "<leader>dff", function() require("telescope").extensions.dap.frames() end, { desc = "Debug Frames" })
+
+-- Language-specific debug keybindings
+-- Go debugging
+keymap("n", "<leader>dgt", function()
+  require("dap-go").debug_test()
+end, { desc = "Debug Go Test", ft = "go" })
+keymap("n", "<leader>dgl", function()
+  require("dap-go").debug_last_test()
+end, { desc = "Debug Last Go Test", ft = "go" })
