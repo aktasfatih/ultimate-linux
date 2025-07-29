@@ -182,6 +182,14 @@ keymap("n", "<leader>ois", ":Octo issue search<CR>", { desc = "Search issues" })
 keymap("n", "<leader>opr", ":Octo pr list<CR>", { desc = "List pull requests" })
 keymap("n", "<leader>oprc", ":Octo pr create<CR>", { desc = "Create pull request" })
 keymap("n", "<leader>oprs", ":Octo pr search<CR>", { desc = "Search pull requests" })
+keymap("n", "<leader>oprv", function()
+  local branch = vim.fn.system("git branch --show-current"):gsub("%s+", "")
+  if branch ~= "" then
+    vim.cmd("Octo pr list state:open head:" .. branch)
+  else
+    print("Not in a git repository or no current branch")
+  end
+end, { desc = "View PR for current branch" })
 keymap("n", "<leader>ore", ":Octo repo list<CR>", { desc = "List repositories" })
 keymap("n", "<leader>orv", ":Octo repo view<CR>", { desc = "View repository" })
 keymap("n", "<leader>orf", ":Octo repo fork<CR>", { desc = "Fork repository" })

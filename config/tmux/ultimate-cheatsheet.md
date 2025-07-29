@@ -295,6 +295,7 @@ require("octo").setup({
 | `<leader>opr` | List pull requests | Browse pull requests |
 | `<leader>oprc` | Create pull request | Create new PR |
 | `<leader>oprs` | Search pull requests | Search through PRs |
+| `<leader>oprv` | View PR for current branch | Show PR directly |
 | `<leader>ore` | List repositories | Browse repositories |
 | `<leader>orv` | View repository | View repo details |
 | `<leader>orf` | Fork repository | Fork current repo |
