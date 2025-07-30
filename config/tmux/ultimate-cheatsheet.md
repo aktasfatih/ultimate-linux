@@ -145,6 +145,37 @@
 | `]d` | Next diagnostic | Jump to next error |
 | `<leader>e` | Show diagnostics | Error details |
 
+### LSP Visual Indicators
+
+#### Diagnostic Signs (Left Gutter)
+| Symbol | Meaning | Description |
+|--------|---------|-------------|
+| `` | Error | Code has errors (red) |
+| `` | Warning | Code has warnings (yellow) |
+| `` | Info | Informational messages (blue) |
+| `` | Hint | Code hints/suggestions (green) |
+
+#### Code Action Indicators
+| Symbol | Location | Meaning |
+|--------|----------|---------|
+| `💡` | Left gutter | Code actions available - press `<leader>ca` |
+| `💡` | Virtual text | Lightbulb indicates quick fixes available |
+
+#### How to Use Diagnostics
+1. **Navigate errors**: Use `]d` and `[d` to jump between issues
+2. **View details**: Press `<leader>e` on any line with a diagnostic symbol
+3. **Quick fixes**: Press `<leader>ca` when you see the lightbulb (💡)
+4. **Hover for info**: Press `K` over any symbol for documentation
+
+#### Diagnostic Workflow
+```
+1. See 'E' symbol → Code has error
+2. Press `<leader>e` → View error details
+3. See 💡 lightbulb → Quick fix available
+4. Press `<leader>ca` → Choose from available fixes
+5. Use `]d` / `[d` → Navigate to next/previous issue
+```
+
 ### Quickfix Navigation (LSP Results)
 | Key | Action | Usage |
 |-----|--------|-------|

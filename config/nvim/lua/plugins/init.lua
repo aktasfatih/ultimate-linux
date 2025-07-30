@@ -246,6 +246,39 @@ return {
     end,
   },
 
+  -- Mason-LSPConfig (bridge between mason and lspconfig)
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = {
+      "williamboman/mason.nvim",
+      "neovim/nvim-lspconfig",
+    },
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = {
+          "lua_ls",
+          "ts_ls", 
+          "pyright",
+          "rust_analyzer",
+          "gopls",
+          "bashls",
+          "cssls",
+          "html",
+          "jsonls",
+          "yamlls",
+          "dockerls",
+          "taplo",
+          "tailwindcss",
+          "eslint",
+          "prismals",
+        },
+        automatic_installation = true,
+      })
+      
+      -- setup_handlers will be called in the LSP config file
+    end,
+  },
+
   -- LSP (updated for compatibility with modern gopls)
   {
     "neovim/nvim-lspconfig",

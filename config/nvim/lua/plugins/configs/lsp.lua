@@ -5,27 +5,7 @@ require("neodev").setup()
 
 -- Mason setup (now handled in plugins/init.lua)
 
--- Mason LSP config
-require("mason-lspconfig").setup({
-  ensure_installed = {
-    "lua_ls",
-    "tsserver",
-    "pyright",
-    "rust_analyzer",
-    "gopls",
-    "bashls",
-    "cssls",
-    "html",
-    "jsonls",
-    "yamlls",
-    "dockerls",
-    "taplo",
-    "tailwindcss",  -- For Next.js Tailwind CSS
-    "eslint",       -- For Next.js linting
-    "prismals",     -- For Prisma (often used with Supabase)
-  },
-  automatic_installation = true,
-})
+-- Mason LSP config (now handled in plugins/init.lua)
 
 -- Mason DAP (Debug Adapter Protocol) config
 require("mason-nvim-dap").setup({
@@ -106,68 +86,60 @@ local on_attach = function(client, bufnr)
   buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.format({ async = true })<CR>", opts)
 end
 
--- LSP settings
-local lspconfig = require("lspconfig")
-
--- Lua
-lspconfig.lua_ls.setup({
-  capabilities = capabilities,
-  on_attach = on_attach,
-  settings = {
-    Lua = {
-      diagnostics = {
-        globals = { "vim" },
+-- LSP settings (servers are now auto-configured by mason-lspconfig)
+-- Setup handlers for automatic server configuration
+require("mason-lspconfig").setup_handlers({
+  -- Default handler for all servers
+  function(server_name)
+    local lspconfig = require("lspconfig")
+    
+    lspconfig[server_name].setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+    })
+  end,
+  
+  -- Custom configuration for lua_ls
+  ["lua_ls"] = function()
+    local lspconfig = require("lspconfig")
+    
+    lspconfig.lua_ls.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = {
+        Lua = {
+          diagnostics = {
+            globals = { "vim" },
+          },
+          workspace = {
+            library = vim.api.nvim_get_runtime_file("", true),
+            checkThirdParty = false,
+          },
+          telemetry = {
+            enable = false,
+          },
+        },
       },
-      workspace = {
-        library = vim.api.nvim_get_runtime_file("", true),
-        checkThirdParty = false,
+    })
+  end,
+  
+  -- Custom configuration for rust_analyzer
+  ["rust_analyzer"] = function()
+    local lspconfig = require("lspconfig")
+    
+    lspconfig.rust_analyzer.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = {
+        ["rust-analyzer"] = {
+          checkOnSave = {
+            command = "clippy",
+          },
+        },
       },
-      telemetry = {
-        enable = false,
-      },
-    },
-  },
+    })
+  end,
 })
-
--- TypeScript/JavaScript
-lspconfig.tsserver.setup({
-  capabilities = capabilities,
-  on_attach = on_attach,
-})
-
--- Python
-lspconfig.pyright.setup({
-  capabilities = capabilities,
-  on_attach = on_attach,
-})
-
--- Rust
-lspconfig.rust_analyzer.setup({
-  capabilities = capabilities,
-  on_attach = on_attach,
-  settings = {
-    ["rust-analyzer"] = {
-      checkOnSave = {
-        command = "clippy",
-      },
-    },
-  },
-})
-
--- Go
-lspconfig.gopls.setup({
-  capabilities = capabilities,
-  on_attach = on_attach,
-})
-
--- Other servers
-local servers = { "bashls", "cssls", "html", "jsonls", "yamlls", "dockerls", "taplo" }
-for _, server in ipairs(servers) do
-  lspconfig[server].setup({
-    capabilities = capabilities,
-    on_attach = on_attach,
-  })
-end
 
 -- Diagnostic config
 vim.diagnostic.config({
