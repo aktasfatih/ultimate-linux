@@ -235,6 +235,8 @@
 | `<leader>gF` | Fetch from remote | Update remote refs |
 | `<leader>go` | Open in browser | View on GitHub/GitLab |
 | `<leader>gO` | Copy URL to clipboard | Get file URL |
+| `<leader>gu` | Copy GitHub URL (current line) | Copy line permalink |
+| `<leader>gY` | Copy GitHub URL (selection) | Copy selection permalink |
 
 ### Git Diff Variations
 | Key | Action | Description |
@@ -265,6 +267,16 @@
 |-----|--------|-------------|
 | `<leader>gs` | Stage selection | Stage partial file (visual) |
 | `<leader>gr` | Revert selection | Discard partial changes (visual) |
+
+### GitHub URL Copying
+| Key | Action | Description |
+|-----|--------|-------------|
+| `<leader>gO` | Copy file URL | Copy current file's GitHub URL |
+| `<leader>gu` | Copy line permalink | Copy GitHub URL with current line number |
+| `<leader>gY` | Copy selection permalink | Copy GitHub URL with selected line range (visual mode) |
+| `<leader>go` | Open in browser | Open current file/line in GitHub |
+
+**Note**: These commands work when you're in a git repository with a GitHub remote. The URL includes the current branch, file path, and line numbers.
 
 ### GitHub Integration (Octo.nvim)
 

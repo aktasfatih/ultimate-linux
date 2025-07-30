@@ -60,6 +60,13 @@ local on_attach = function(client, bufnr)
   -- Enable semantic highlighting if available
   if client.server_capabilities.semanticTokensProvider then
     vim.lsp.semantic_tokens.start(bufnr, client.id)
+    
+    -- Force refresh semantic tokens for better highlighting
+    if client.name == "gopls" then
+      vim.defer_fn(function()
+        vim.lsp.semantic_tokens.force_refresh(bufnr)
+      end, 500)
+    end
   end
   
   -- Attach navic if available and Neovim is 0.10+
@@ -141,6 +148,36 @@ vim.defer_fn(function()
           ["rust-analyzer"] = {
             checkOnSave = {
               command = "clippy",
+            },
+          },
+        },
+      })
+    end,
+    
+    -- Custom configuration for gopls (Go language server)
+    ["gopls"] = function()
+      local lspconfig = require("lspconfig")
+      
+      lspconfig.gopls.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = {
+          gopls = {
+            analyses = {
+              unusedparams = true,
+              shadow = true,
+            },
+            staticcheck = true,
+            gofumpt = true,
+            semanticTokens = true,  -- Enable semantic tokens
+            -- Enhanced semantic highlighting
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
             },
           },
         },

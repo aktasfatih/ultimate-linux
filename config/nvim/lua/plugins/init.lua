@@ -52,6 +52,24 @@ return {
             ["@lsp.type.type.go"] = { fg = colors.yellow, style = { "italic" } },
             ["@lsp.type.struct.go"] = { fg = colors.yellow, style = { "bold" } },
             ["@lsp.type.interface.go"] = { fg = colors.yellow, style = { "italic", "bold" } },
+            ["@lsp.type.package.go"] = { fg = colors.mauve, style = { "italic" } },
+            -- Additional Go semantic tokens
+            ["@lsp.typemod.variable.readonly.go"] = { fg = colors.blue },
+            ["@lsp.typemod.variable.defaultLibrary.go"] = { fg = colors.red },
+            ["@lsp.typemod.function.defaultLibrary.go"] = { fg = colors.sapphire, style = { "bold" } },
+            ["@lsp.typemod.method.defaultLibrary.go"] = { fg = colors.sapphire, style = { "bold" } },
+            ["@lsp.typemod.type.defaultLibrary.go"] = { fg = colors.yellow, style = { "italic" } },
+            -- Treesitter Go highlights (fallback)
+            ["@keyword.go"] = { fg = colors.mauve, style = { "bold" } },
+            ["@keyword.function.go"] = { fg = colors.mauve, style = { "bold" } },
+            ["@keyword.return.go"] = { fg = colors.mauve, style = { "bold" } },
+            ["@type.go"] = { fg = colors.yellow, style = { "italic" } },
+            ["@type.builtin.go"] = { fg = colors.yellow, style = { "bold" } },
+            ["@function.builtin.go"] = { fg = colors.sapphire, style = { "bold" } },
+            ["@constant.builtin.go"] = { fg = colors.peach, style = { "bold" } },
+            ["@string.go"] = { fg = colors.green },
+            ["@number.go"] = { fg = colors.peach },
+            ["@boolean.go"] = { fg = colors.peach, style = { "bold" } },
           }
         end,
       })
