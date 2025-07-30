@@ -19,7 +19,41 @@ return {
           mason = true,
           telescope = true,
           which_key = true,
+          semantic_tokens = true,
+          rainbow_delimiters = true,
+          lsp_trouble = true,
         },
+        custom_highlights = function(colors)
+          return {
+            -- Enhanced semantic highlighting for Go and other languages
+            ["@lsp.type.variable"] = { fg = colors.text },
+            ["@lsp.type.variable.readonly"] = { fg = colors.blue },
+            ["@lsp.type.parameter"] = { fg = colors.peach },
+            ["@lsp.type.function"] = { fg = colors.blue },
+            ["@lsp.type.method"] = { fg = colors.blue },
+            ["@lsp.type.property"] = { fg = colors.teal },
+            ["@lsp.type.field"] = { fg = colors.teal },
+            ["@lsp.type.enum"] = { fg = colors.yellow },
+            ["@lsp.type.enumMember"] = { fg = colors.peach },
+            ["@lsp.type.type"] = { fg = colors.yellow },
+            ["@lsp.type.class"] = { fg = colors.yellow },
+            ["@lsp.type.struct"] = { fg = colors.yellow },
+            ["@lsp.type.interface"] = { fg = colors.yellow },
+            ["@lsp.type.namespace"] = { fg = colors.blue },
+            ["@lsp.type.keyword"] = { fg = colors.mauve },
+            ["@lsp.type.string"] = { fg = colors.green },
+            ["@lsp.type.number"] = { fg = colors.peach },
+            ["@lsp.type.boolean"] = { fg = colors.peach },
+            ["@lsp.type.comment"] = { fg = colors.overlay1 },
+            -- Go-specific enhancements
+            ["@lsp.type.variable.go"] = { fg = colors.text },
+            ["@lsp.type.function.go"] = { fg = colors.blue, style = { "bold" } },
+            ["@lsp.type.method.go"] = { fg = colors.sapphire, style = { "bold" } },
+            ["@lsp.type.type.go"] = { fg = colors.yellow, style = { "italic" } },
+            ["@lsp.type.struct.go"] = { fg = colors.yellow, style = { "bold" } },
+            ["@lsp.type.interface.go"] = { fg = colors.yellow, style = { "italic", "bold" } },
+          }
+        end,
       })
       vim.cmd.colorscheme("catppuccin")
     end,
@@ -219,6 +253,57 @@ return {
     "nvim-treesitter/nvim-treesitter-textobjects",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     event = { "BufReadPost", "BufNewFile" },
+  },
+
+  -- Rainbow brackets for better syntax highlighting
+  {
+    "HiPhish/rainbow-delimiters.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      local rainbow_delimiters = require("rainbow-delimiters")
+      vim.g.rainbow_delimiters = {
+        strategy = {
+          [""] = rainbow_delimiters.strategy["global"],
+          vim = rainbow_delimiters.strategy["local"],
+        },
+        query = {
+          [""] = "rainbow-delimiters",
+          lua = "rainbow-blocks",
+        },
+        highlight = {
+          "RainbowDelimiterRed",
+          "RainbowDelimiterYellow", 
+          "RainbowDelimiterBlue",
+          "RainbowDelimiterOrange",
+          "RainbowDelimiterGreen",
+          "RainbowDelimiterViolet",
+          "RainbowDelimiterCyan",
+        },
+      }
+    end,
+  },
+
+  -- Enhanced Go syntax highlighting
+  {
+    "ray-x/go.nvim", 
+    dependencies = {
+      "ray-x/guihua.lua",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("go").setup({
+        goimports = "gopls", -- use gopls for imports
+        fillstruct = "gopls",
+        dap_debug = true,
+        dap_debug_gui = true,
+        trouble = true, -- true: use trouble to open quickfix
+        luasnip = true, -- enable snippet
+        icons = {breakpoint = '🧘', currentpos = '🏃'},
+      })
+    end,
+    event = {"CmdlineEnter"},
+    ft = {"go", 'gomod'},
   },
 
   -- Mason (load early for commands)

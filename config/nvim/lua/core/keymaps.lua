@@ -145,6 +145,23 @@ keymap("n", "<leader>tf", function()
   end
 end, { desc = "Toggle Format on Save" })
 
+-- Toggle semantic highlighting
+keymap("n", "<leader>ts", function()
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  for _, client in ipairs(clients) do
+    if client.server_capabilities.semanticTokensProvider then
+      if vim.lsp.semantic_tokens.get_client(0) then
+        vim.lsp.semantic_tokens.stop(0, client.id)
+        vim.notify("Semantic highlighting: DISABLED", vim.log.levels.INFO)
+      else
+        vim.lsp.semantic_tokens.start(0, client.id)
+        vim.notify("Semantic highlighting: ENABLED", vim.log.levels.INFO)
+      end
+      break
+    end
+  end
+end, { desc = "Toggle Semantic Highlighting" })
+
 -- Git keybindings (Diffview)
 keymap('n', '<leader>do', ':DiffviewOpen<CR>', { desc = "Open Diffview" })
 keymap('n', '<leader>dc', ':DiffviewClose<CR>', { desc = "Close Diffview" })

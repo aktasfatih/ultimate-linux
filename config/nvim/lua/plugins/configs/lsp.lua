@@ -57,6 +57,11 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local on_attach = function(client, bufnr)
   local opts = { noremap = true, silent = true, buffer = bufnr }
   
+  -- Enable semantic highlighting if available
+  if client.server_capabilities.semanticTokensProvider then
+    vim.lsp.semantic_tokens.start(bufnr, client.id)
+  end
+  
   -- Attach navic if available and Neovim is 0.10+
   if vim.fn.has('nvim-0.10') == 1 and client.server_capabilities.documentSymbolProvider then
     local navic_ok, navic = pcall(require, "nvim-navic")
