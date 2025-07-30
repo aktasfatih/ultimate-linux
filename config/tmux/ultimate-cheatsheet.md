@@ -143,7 +143,7 @@
 | `<leader>f` | Format document | Auto-format code |
 | `[d` | Previous diagnostic | Jump to previous error |
 | `]d` | Next diagnostic | Jump to next error |
-| `<leader>e` | Show diagnostics | Error details |
+| `<leader>E` | Show diagnostics | Error details |
 
 ### LSP Visual Indicators
 
@@ -163,14 +163,14 @@
 
 #### How to Use Diagnostics
 1. **Navigate errors**: Use `]d` and `[d` to jump between issues
-2. **View details**: Press `<leader>e` on any line with a diagnostic symbol
+2. **View details**: Press `<leader>E` on any line with a diagnostic symbol
 3. **Quick fixes**: Press `<leader>ca` when you see the lightbulb (💡)
 4. **Hover for info**: Press `K` over any symbol for documentation
 
 #### Diagnostic Workflow
 ```
 1. See 'E' symbol → Code has error
-2. Press `<leader>e` → View error details
+2. Press `<leader>E` → View error details
 3. See 💡 lightbulb → Quick fix available
 4. Press `<leader>ca` → Choose from available fixes
 5. Use `]d` / `[d` → Navigate to next/previous issue
@@ -205,6 +205,9 @@
 |-----|--------|-------------|
 | `<leader>do` | Open Diffview | View all changes |
 | `<leader>dc` | Close Diffview | Exit diff view |
+| `<leader>dm` | Diffview: your changes vs main | Only your changes since merge base |
+| `<leader>db` | Diffview: your changes vs branch | Compare with custom branch |
+| `<leader>ds` | Diffview: staged changes | View only staged changes |
 | `<leader>dh` | File history (current) | History for current file |
 | `<leader>dH` | File history (all) | History for all files |
 
@@ -326,7 +329,8 @@ require("octo").setup({
 | `<leader>opr` | List pull requests | Browse pull requests |
 | `<leader>oprc` | Create pull request | Create new PR |
 | `<leader>oprs` | Search pull requests | Search through PRs |
-| `<leader>oprv` | View PR for current branch | Show PR directly |
+| `<leader>oprv` | View PR for current branch | Open specific PR for current branch |
+| `<leader>oprr` | Enter PR review mode | Review mode for current branch |
 | `<leader>ore` | List repositories | Browse repositories |
 | `<leader>orv` | View repository | View repo details |
 | `<leader>orf` | Fork repository | Fork current repo |
@@ -463,6 +467,16 @@ gh pr list
 | `<leader>bd` | Delete buffer | Close file |
 | `:bnext` | Next buffer | Command mode |
 | `:bprev` | Previous buffer | Command mode |
+
+### File Navigation
+| Key | Action | Description |
+|-----|--------|-------------|
+| `gf` | Go to file | Open file under cursor in current window |
+| `gF` | Go to file | Same as `gf` |
+| `<leader>gf` | Go to file (vertical split) | Open file in vertical split |
+| `<leader>gF` | Go to file (horizontal split) | Open file in horizontal split |
+| `<leader>gt` | Go to file (new tab) | Open file in new tab |
+| `<leader>go` | Go to file (with options) | Interactive menu to choose where to open |
 
 ### File Explorer (NvimTree)
 | Key | Action | Context |

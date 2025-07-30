@@ -79,6 +79,41 @@ keymap("v", "<leader>p", '"+p', opts) -- paste from system clipboard
 -- Better yank behavior (don't move cursor)
 keymap("n", "Y", "y$", opts)
 
+-- Enhanced file opening (gf variants)
+keymap("n", "gf", "<cmd>edit <cfile><CR>", { desc = "Go to file" })
+keymap("n", "gF", "<cmd>edit <cfile><CR>", { desc = "Go to file" })
+keymap("n", "<leader>gf", "<cmd>vsplit <cfile><CR>", { desc = "Go to file in vertical split" })
+keymap("n", "<leader>gF", "<cmd>split <cfile><CR>", { desc = "Go to file in horizontal split" })
+keymap("n", "<leader>gt", "<cmd>tabedit <cfile><CR>", { desc = "Go to file in new tab" })
+
+-- Interactive file opener
+keymap("n", "<leader>go", function()
+  local file = vim.fn.expand("<cfile>")
+  if file == "" then
+    print("No file under cursor")
+    return
+  end
+  
+  local choices = {
+    "1. Open in current window",
+    "2. Open in vertical split", 
+    "3. Open in horizontal split",
+    "4. Open in new tab"
+  }
+  
+  local choice = vim.fn.inputlist(vim.list_extend({"How to open '" .. file .. "':"}, choices))
+  
+  if choice == 1 then
+    vim.cmd("edit " .. file)
+  elseif choice == 2 then
+    vim.cmd("vsplit " .. file)
+  elseif choice == 3 then
+    vim.cmd("split " .. file)
+  elseif choice == 4 then
+    vim.cmd("tabedit " .. file)
+  end
+end, { desc = "Go to file with options" })
+
 -- TypeScript/JavaScript specific
 keymap("n", "<leader>lo", function()
   vim.lsp.buf.code_action({
@@ -113,6 +148,31 @@ end, { desc = "Toggle Format on Save" })
 -- Git keybindings (Diffview)
 keymap('n', '<leader>do', ':DiffviewOpen<CR>', { desc = "Open Diffview" })
 keymap('n', '<leader>dc', ':DiffviewClose<CR>', { desc = "Close Diffview" })
+keymap('n', '<leader>dm', function()
+  -- Get merge base with origin/main (or main if origin/main doesn't exist)
+  local merge_base_cmd = "git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || echo 'HEAD~1'"
+  local merge_base = vim.fn.system(merge_base_cmd):gsub("%s+", "")
+  
+  if merge_base and merge_base ~= "" then
+    vim.cmd("DiffviewOpen " .. merge_base .. "..HEAD")
+  else
+    print("Could not determine merge base. Using HEAD~1")
+    vim.cmd("DiffviewOpen HEAD~1..HEAD")
+  end
+end, { desc = "Diffview: your changes vs main" })
+keymap('n', '<leader>db', function()
+  -- Compare with specific branch
+  local branch = vim.fn.input("Compare with branch: ", "origin/main")
+  if branch and branch ~= "" then
+    local merge_base = vim.fn.system("git merge-base HEAD " .. branch):gsub("%s+", "")
+    if merge_base and merge_base ~= "" then
+      vim.cmd("DiffviewOpen " .. merge_base .. "..HEAD")
+    else
+      print("Could not find merge base with " .. branch)
+    end
+  end
+end, { desc = "Diffview: your changes vs branch" })
+keymap('n', '<leader>ds', ':DiffviewOpen --staged<CR>', { desc = "Diffview: staged changes" })
 keymap('n', '<leader>dh', ':DiffviewFileHistory %<CR>', { desc = "File history" })
 keymap('n', '<leader>dH', ':DiffviewFileHistory<CR>', { desc = "All file history" })
 
@@ -185,11 +245,22 @@ keymap("n", "<leader>oprs", ":Octo pr search<CR>", { desc = "Search pull request
 keymap("n", "<leader>oprv", function()
   local branch = vim.fn.system("git branch --show-current"):gsub("%s+", "")
   if branch ~= "" then
-    vim.cmd("Octo pr list state:open head:" .. branch)
+    -- First try to find the PR for this branch
+    local pr_output = vim.fn.system("gh pr list --head=" .. branch .. " --json number --jq '.[0].number'")
+    local pr_number = pr_output:gsub("%s+", "")
+    
+    if pr_number ~= "" and pr_number ~= "null" then
+      -- Open the specific PR
+      vim.cmd("Octo pr edit " .. pr_number)
+    else
+      -- Fallback to review mode or create PR prompt
+      print("No PR found for branch '" .. branch .. "'. Use <leader>oprc to create one or <leader>opr to list all PRs.")
+    end
   else
     print("Not in a git repository or no current branch")
   end
 end, { desc = "View PR for current branch" })
+keymap("n", "<leader>oprr", ":Octo review<CR>", { desc = "Enter PR review mode" })
 keymap("n", "<leader>ore", ":Octo repo list<CR>", { desc = "List repositories" })
 keymap("n", "<leader>orv", ":Octo repo view<CR>", { desc = "View repository" })
 keymap("n", "<leader>orf", ":Octo repo fork<CR>", { desc = "Fork repository" })
