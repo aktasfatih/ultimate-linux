@@ -7,13 +7,13 @@ nvim_tree.setup({
   hijack_netrw = true,
   open_on_tab = false,
   hijack_cursor = false,
-  update_cwd = true,
+  update_cwd = false,
   diagnostics = {
     enable = false,  -- Disable to avoid sign errors
   },
   update_focused_file = {
     enable = true,
-    update_cwd = true,
+    update_cwd = false,
     ignore_list = {},
   },
   system_open = {
