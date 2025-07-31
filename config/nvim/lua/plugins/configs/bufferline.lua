@@ -19,9 +19,9 @@ require("bufferline").setup({
     close_icon = "",
     left_trunc_marker = "",
     right_trunc_marker = "",
-    max_name_length = 30,
-    max_prefix_length = 30,
-    truncate_names = true,
+    max_name_length = 50,
+    max_prefix_length = 50,
+    truncate_names = false,
     tab_size = 21,
     diagnostics = "nvim_lsp",
     diagnostics_update_in_insert = false,
@@ -43,6 +43,17 @@ require("bufferline").setup({
     show_close_icon = true,
     show_tab_indicators = true,
     show_duplicate_prefix = true,
+    name_formatter = function(buf)
+      -- Show relative path from git root
+      local git_root = vim.fn.systemlist('git rev-parse --show-toplevel')[1]
+      if git_root and git_root ~= '' then
+        local rel_path = vim.fn.fnamemodify(buf.name, ':p')
+        if string.find(rel_path, git_root, 1, true) == 1 then
+          return string.sub(rel_path, #git_root + 2) -- +2 to remove leading slash
+        end
+      end
+      return vim.fn.fnamemodify(buf.name, ':t') -- fallback to filename only
+    end,
     persist_buffer_sort = true,
     separator_style = "thin",
     enforce_regular_tabs = false,

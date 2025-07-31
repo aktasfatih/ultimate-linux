@@ -65,7 +65,7 @@ local filename = {
   "filename",
   file_status = true,
   newfile_status = false,
-  path = 1,
+  path = 3, -- 0: just filename, 1: relative path, 2: absolute path, 3: absolute path with tilde
   symbols = {
     modified = "  ",
     readonly = "",

@@ -7,7 +7,14 @@ telescope.setup({
   defaults = {
     prompt_prefix = " ",
     selection_caret = " ",
-    path_display = { "smart" },
+    path_display = function(opts, path)
+      local tail = require("telescope.utils").path_tail(path)
+      local relpath = vim.fn.fnamemodify(path, ":~:.")
+      if #relpath < #path then
+        return relpath .. " (" .. tail .. ")"
+      end
+      return path
+    end,
     file_ignore_patterns = { ".git/", "node_modules/", "target/", "dist/", "build/" },
     
     mappings = {
@@ -53,14 +60,17 @@ telescope.setup({
       theme = "dropdown",
       previewer = false,
       hidden = true,
+      path_display = { "truncate" },
     },
     live_grep = {
       theme = "ivy",
+      path_display = { "truncate" },
     },
     buffers = {
       theme = "dropdown",
       previewer = false,
       initial_mode = "normal",
+      path_display = { "truncate" },
     },
   },
   extensions = {
