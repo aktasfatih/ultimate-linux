@@ -44,20 +44,27 @@ require("core.options")
 require("core.keymaps")
 require("core.autocmds")
 
--- Load plugins
-require("lazy").setup("plugins", {
+-- Load plugins (use minimal config for SSH sessions)
+local plugins_spec = vim.g.performance_mode and "plugins.init-minimal" or "plugins"
+require("lazy").setup(plugins_spec, {
   install = {
     colorscheme = { "catppuccin" },
   },
   checker = {
-    enabled = true,
+    enabled = not vim.g.performance_mode,  -- Disable checker in SSH
     notify = false,
   },
   change_detection = {
+    enabled = not vim.g.performance_mode,  -- Disable in SSH
     notify = false,
   },
   performance = {
+    cache = {
+      enabled = true,
+    },
+    reset_packpath = true,
     rtp = {
+      reset = true,
       disabled_plugins = {
         "gzip",
         "matchit",
@@ -65,6 +72,7 @@ require("lazy").setup("plugins", {
         "netrwPlugin",
         "tarPlugin",
         "tohtml",
+        "tutor",
         "zipPlugin",
       },
     },

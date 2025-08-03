@@ -79,3 +79,39 @@ autocmd("TermOpen", {
     vim.cmd("startinsert")
   end,
 })
+
+-- Performance debugging commands
+vim.api.nvim_create_user_command("StartupTime", function()
+  vim.cmd("tabnew")
+  vim.cmd("StartupTime")
+end, { desc = "Show startup time analysis" })
+
+vim.api.nvim_create_user_command("TogglePerformanceMode", function()
+  vim.g.performance_mode = not vim.g.performance_mode
+  local status = vim.g.performance_mode and "enabled" or "disabled"
+  vim.notify("Performance mode " .. status .. ". Restart Neovim for full effect.", vim.log.levels.INFO)
+end, { desc = "Toggle performance mode" })
+
+vim.api.nvim_create_user_command("CheckPerformance", function()
+  local stats = {}
+  stats.performance_mode = vim.g.performance_mode and "Enabled (SSH)" or "Disabled"
+  stats.loaded_plugins = #vim.tbl_keys(require("lazy").plugins())
+  stats.lsp_clients = #vim.lsp.get_clients()
+  
+  local report = string.format([[
+Performance Report:
+- Mode: %s
+- Loaded plugins: %d
+- Active LSP clients: %d
+- SSH session: %s
+
+Tips for better performance:
+1. Run :Lazy profile to see plugin load times
+2. Use :LspInfo to check LSP server status
+3. Run :checkhealth for diagnostics
+4. Consider using minimal config on remote servers
+]], stats.performance_mode, stats.loaded_plugins, stats.lsp_clients,
+    (vim.env.SSH_CLIENT or vim.env.SSH_TTY) and "Yes" or "No")
+  
+  vim.notify(report, vim.log.levels.INFO)
+end, { desc = "Check Neovim performance" })

@@ -72,7 +72,7 @@ gitsigns.setup({
   linehl = false,
   word_diff = false,
   watch_gitdir = {
-    interval = 1000,
+    interval = 7000,  -- Increased from 1000ms to 7000ms to reduce flashing
     follow_files = true,
   },
   attach_to_untracked = true,
@@ -105,7 +105,8 @@ gitsigns.setup({
 })
 
 -- Force immediate setup for current buffer if in a git repo
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
+-- Only run on BufWritePost to reduce flashing
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
   group = vim.api.nvim_create_augroup("GitSignsKeymaps", { clear = true }),
   callback = function(args)
     local bufnr = args.buf

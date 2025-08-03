@@ -505,6 +505,20 @@ gh pr list
 | `Y` | Copy path | Relative path |
 | `gy` | Copy absolute path | Full path |
 
+#### Multi-File Selection
+| Key | Action | Description |
+|-----|--------|-------------|
+| `v` | Visual selection mode | Enter selection mode |
+| `Space` | Toggle selection | Select/deselect individual file |
+| `j`/`k` | Move in visual mode | Navigate while selecting |
+| `Esc` | Clear selection | Exit selection mode |
+
+**Multi-file operations**: After selecting files with `v` or `Space`, use:
+- `x` - Cut all selected files
+- `c` - Copy all selected files
+- `d` - Delete all selected files
+- `p` - Paste files to current location
+
 ### Debugging (DAP)
 
 **Prerequisites:**

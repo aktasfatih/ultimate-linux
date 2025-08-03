@@ -15,7 +15,7 @@ require("mason-nvim-dap").setup({
     "debugpy",            -- Python debugger
     "bash-debug-adapter", -- Bash debugger
   },
-  automatic_installation = true,
+  automatic_installation = false,  -- Disabled for better performance
   handlers = {
     function(config)
       -- Default handler
@@ -61,12 +61,8 @@ local on_attach = function(client, bufnr)
   if client.server_capabilities.semanticTokensProvider then
     vim.lsp.semantic_tokens.start(bufnr, client.id)
     
-    -- Force refresh semantic tokens for better highlighting
-    if client.name == "gopls" then
-      vim.defer_fn(function()
-        vim.lsp.semantic_tokens.force_refresh(bufnr)
-      end, 500)
-    end
+    -- Removed force refresh to improve performance
+    -- Semantic tokens will update naturally
   end
   
   -- Attach navic if available and Neovim is 0.10+
@@ -187,11 +183,11 @@ vim.defer_fn(function()
 end, 100)
 
 -- Diagnostic config
-vim.diagnostic.config({
-  virtual_text = true,
+local diag_config = {
+  virtual_text = not vim.g.performance_mode,  -- Disable virtual text in SSH
   signs = true,
   update_in_insert = false,
-  underline = true,
+  underline = not vim.g.performance_mode,  -- Disable underline in SSH
   severity_sort = true,
   float = {
     focusable = false,
@@ -201,7 +197,15 @@ vim.diagnostic.config({
     header = "",
     prefix = "",
   },
-})
+}
+
+-- In performance mode, use less frequent updates
+if vim.g.performance_mode then
+  diag_config.virtual_text = false
+  diag_config.underline = false
+end
+
+vim.diagnostic.config(diag_config)
 
 -- Diagnostic signs
 local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
@@ -222,7 +226,7 @@ require("mason-null-ls").setup({
     "shellcheck",
     "hadolint",
   },
-  automatic_installation = true,
+  automatic_installation = false,  -- Disabled for better performance
 })
 
 none_ls.setup({

@@ -2,6 +2,9 @@
 
 local opt = vim.opt
 
+-- Performance mode for remote servers
+vim.g.performance_mode = vim.env.SSH_CLIENT ~= nil or vim.env.SSH_TTY ~= nil
+
 -- General
 opt.backup = false
 opt.clipboard = "unnamedplus"
@@ -25,7 +28,7 @@ opt.updatetime = 300
 opt.writebackup = false
 
 -- UI
-opt.cursorline = true
+opt.cursorline = vim.g.performance_mode and false or true  -- Disable in SSH
 opt.laststatus = 3
 opt.number = true
 opt.relativenumber = true
@@ -50,6 +53,11 @@ opt.smartcase = true
 
 -- Performance
 opt.lazyredraw = false -- Disabled for Noice compatibility
+opt.updatetime = vim.g.performance_mode and 1000 or 300  -- Slower updates in SSH
+opt.timeoutlen = 300
+opt.redrawtime = 1500  -- Reduce redraw time
+opt.ttimeoutlen = 10   -- Reduce keycode delay
+opt.lazyredraw = vim.g.performance_mode  -- Enable lazy redraw in SSH
 
 -- Neovim specific
 opt.shadafile = vim.fn.stdpath("data") .. "/shada/main.shada"
@@ -59,6 +67,14 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 -- Clipboard configuration
+local function is_ssh()
+  return vim.env.SSH_CLIENT ~= nil or vim.env.SSH_TTY ~= nil
+end
+
+local function has_display()
+  return vim.env.DISPLAY ~= nil and vim.env.DISPLAY ~= ""
+end
+
 if vim.fn.has('mac') == 1 then
   -- macOS clipboard
   vim.g.clipboard = {
@@ -73,8 +89,21 @@ if vim.fn.has('mac') == 1 then
     },
     cache_enabled = 1,
   }
+elseif is_ssh() or not has_display() then
+  -- SSH or no display - use OSC52 for clipboard
+  vim.g.clipboard = {
+    name = 'OSC 52',
+    copy = {
+      ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+      ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+    },
+    paste = {
+      ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+      ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+    },
+  }
 else
-  -- Linux clipboard
+  -- Linux with display - use xclip
   vim.g.clipboard = {
     name = 'ultimate-linux-clipboard',
     copy = {

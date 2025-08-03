@@ -51,7 +51,7 @@ Options:
     --force             Overwrite existing configs without prompting
     --backup-dir=PATH   Specify custom backup location
     --non-interactive   Run without user prompts
-    --skip-git-config   Skip Git user configuration
+    --skip-git-config   Skip Git configuration (keeps existing .gitconfig)
 
 Examples:
     ./install.sh                    # Full interactive installation
@@ -797,12 +797,16 @@ install_development_tools() {
     fi
 
     # Git configuration
-    deploy_config "config/git/.gitconfig" "$HOME/.gitconfig"
-    deploy_config "config/git/.gitignore_global" "$HOME/.gitignore_global"
-
-    # Configure Git user details if not set
-    if [[ "$NON_INTERACTIVE" == "false" ]]; then
-        configure_git_user
+    if [[ "$SKIP_GIT_CONFIG" == "true" ]]; then
+        log INFO "Skipping Git configuration deployment (--skip-git-config flag set)"
+    else
+        deploy_config "config/git/.gitconfig" "$HOME/.gitconfig"
+        deploy_config "config/git/.gitignore_global" "$HOME/.gitignore_global"
+        
+        # Configure Git user details if not set
+        if [[ "$NON_INTERACTIVE" == "false" ]]; then
+            configure_git_user
+        fi
     fi
 
     # Install lazygit

@@ -118,7 +118,7 @@ return {
   {
     "folke/noice.nvim",
     event = "VeryLazy",
-    enabled = vim.fn.has('nvim-0.10') == 1,
+    enabled = vim.fn.has('nvim-0.10') == 1 and not vim.g.performance_mode,
     opts = {
       lsp = {
         override = {
@@ -245,6 +245,7 @@ return {
   {
     "RRethy/vim-illuminate",
     event = { "BufReadPost", "BufNewFile" },
+    enabled = not vim.g.performance_mode,  -- Disable in SSH
     config = function()
       require("illuminate").configure({
         delay = 120,
@@ -368,7 +369,7 @@ return {
           "eslint",
           "prismals",
         },
-        automatic_installation = true,
+        automatic_installation = false,  -- Disabled for better performance
       })
       
       -- setup_handlers will be called in the LSP config file
@@ -426,9 +427,7 @@ return {
   -- Git
   {
     "lewis6991/gitsigns.nvim",
-    lazy = false,  -- Load immediately
-    priority = 100,  -- Load early to ensure keybindings work
-    event = { "BufReadPre", "BufNewFile" },  -- Also trigger on buffer events
+    event = { "BufReadPre", "BufNewFile" },  -- Load on buffer events only
     config = function()
       require("plugins.configs.gitsigns")
     end,
@@ -648,6 +647,7 @@ return {
   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
+    enabled = not vim.g.performance_mode,  -- Disable in SSH
     config = function()
       require("ibl").setup()
     end,

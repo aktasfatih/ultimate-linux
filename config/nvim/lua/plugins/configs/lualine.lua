@@ -96,28 +96,39 @@ local lsp = {
 }
 
 -- Battery status (if available)
+-- Cache battery level to reduce filesystem reads
+local battery_cache = { level = nil, last_update = 0 }
 local battery = {
   function()
-    local handle = io.popen("cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1")
-    local result = handle:read("*a")
-    handle:close()
-    if result and result ~= "" then
-      local level = tonumber(result:gsub("%s+", ""))
-      if level then
-        local icon = ""
-        if level > 80 then
-          icon = ""
-        elseif level > 60 then
-          icon = ""
-        elseif level > 40 then
-          icon = ""
-        elseif level > 20 then
-          icon = ""
-        else
-          icon = ""
+    local current_time = os.time()
+    -- Only update every 30 seconds to reduce flashing
+    if current_time - battery_cache.last_update > 30 then
+      battery_cache.last_update = current_time
+      local handle = io.popen("cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1")
+      if handle then
+        local result = handle:read("*a")
+        handle:close()
+        if result and result ~= "" then
+          battery_cache.level = tonumber(result:gsub("%s+", ""))
         end
-        return icon .. " " .. level .. "%%"
       end
+    end
+    
+    if battery_cache.level then
+      local level = battery_cache.level
+      local icon = ""
+      if level > 80 then
+        icon = ""
+      elseif level > 60 then
+        icon = ""
+      elseif level > 40 then
+        icon = ""
+      elseif level > 20 then
+        icon = ""
+      else
+        icon = ""
+      end
+      return icon .. " " .. level .. "%%"
     end
     return ""
   end,
@@ -150,7 +161,7 @@ lualine.setup({
     },
     lualine_x = { 
       lsp,
-      battery,
+      -- battery,  -- Commented out to prevent flashing
       diff, 
       spaces, 
       "encoding", 

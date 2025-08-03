@@ -71,7 +71,10 @@ export NEXT_TELEMETRY_DISABLED=1
 export GPG_TTY=$(tty)
 
 # SSH
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+# Only set SSH_AUTH_SOCK if not already set (preserves SSH agent forwarding)
+if [[ -z "$SSH_AUTH_SOCK" ]]; then
+    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+fi
 
 # History
 export HISTFILE="$HOME/.zsh_history"
