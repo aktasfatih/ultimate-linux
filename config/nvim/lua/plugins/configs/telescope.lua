@@ -7,15 +7,13 @@ telescope.setup({
   defaults = {
     prompt_prefix = " ",
     selection_caret = " ",
-    path_display = function(opts, path)
-      local tail = require("telescope.utils").path_tail(path)
-      local relpath = vim.fn.fnamemodify(path, ":~:.")
-      if #relpath < #path then
-        return relpath .. " (" .. tail .. ")"
-      end
-      return path
-    end,
+    path_display = { "truncate" },
     file_ignore_patterns = { ".git/", "node_modules/", "target/", "dist/", "build/" },
+    layout_config = {
+      prompt_position = "top",
+      preview_cutoff = 120,
+    },
+    sorting_strategy = "ascending",
     
     mappings = {
       i = {
@@ -74,6 +72,12 @@ telescope.setup({
     },
   },
   extensions = {
+    fzf = {
+      fuzzy = true,
+      override_generic_sorter = true,
+      override_file_sorter = true,
+      case_mode = "smart_case",
+    },
     file_browser = {
       theme = "dropdown",
       hijack_netrw = true,
@@ -110,6 +114,7 @@ telescope.setup({
 })
 
 -- Load extensions
+telescope.load_extension("fzf")
 telescope.load_extension("file_browser")
 
 -- Keymaps

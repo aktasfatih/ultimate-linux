@@ -118,18 +118,52 @@
 | `gc` | Comment/uncomment selection | Visual mode |
 
 ### File Navigation (Telescope)
+**Note**: Enhanced with fzf-native for faster, more accurate fuzzy searching
+
 | Key | Action | Description |
 |-----|--------|-------------|
-| `<leader>ff` | Find files | Fuzzy file search |
+| `<leader>ff` | Find files | Fuzzy file search (fzf-native powered) |
 | `<leader>fg` | Live grep | Search in files |
 | `<leader>fb` | Browse buffers | Open buffers |
 | `<leader>fh` | Help tags | Search help |
-| `<leader>fe` | File browser | Directory navigation |
+| `<leader>fe` | File browser | Directory navigation with file operations |
 | `<leader>fo` | Recent files | History |
 | `<leader>fc` | Commands | Command palette |
 | `<leader>fk` | Keymaps | Show all keymaps |
 | `<leader>fr` | Registers | Clipboard history |
 | `<leader>fm` | Marks | Bookmarks |
+
+#### Telescope File Browser (`<leader>fe`)
+**Insert Mode:**
+| Key | Action | Description |
+|-----|--------|-------------|
+| `Alt+c` | Create file/folder | Add new item (end with `/` for folder) |
+| `Alt+r` | Rename | Rename selected item |
+| `Alt+m` | Move | Move item to new location |
+| `Alt+y` | Copy | Copy selected item |
+| `Alt+d` | Delete | Remove selected item |
+| `Ctrl+o` | Open | Open file/folder |
+| `Ctrl+g` | Go to parent | Navigate up one directory |
+| `Ctrl+e` | Go to home | Navigate to home directory |
+| `Ctrl+w` | Go to cwd | Navigate to current working directory |
+| `Ctrl+t` | Change cwd | Set current directory as working directory |
+| `Ctrl+h` | Toggle hidden | Show/hide hidden files |
+
+**Normal Mode:**
+| Key | Action | Description |
+|-----|--------|-------------|
+| `c` | Create | Create new file/folder |
+| `r` | Rename | Rename selected item |
+| `m` | Move | Move item to new location |
+| `y` | Copy | Copy selected item |
+| `d` | Delete | Remove selected item |
+| `o` | Open | Open file/folder |
+| `g` | Go to parent | Navigate up one directory |
+| `e` | Go to home | Navigate to home directory |
+| `w` | Go to cwd | Navigate to current working directory |
+| `t` | Change cwd | Set current directory as working directory |
+| `h` | Toggle hidden | Show/hide hidden files |
+
 ### LSP Functions
 | Key | Action | Usage |
 |-----|--------|-------|
