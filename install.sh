@@ -201,9 +201,13 @@ create_backup() {
 
     # List of files/dirs to backup
     local items_to_backup=(
-        ".zshrc" ".zshenv" ".bashrc" ".bash_profile"
-        ".tmux.conf" ".config/nvim" ".vimrc"
+        ".zshrc" ".zshenv" ".zshrc.local"
+        ".bashrc" ".bash_profile" ".bashrc.local"
+        ".tmux.conf" ".tmux.clipboard.conf" ".tmux"
+        ".config/nvim" ".config/zsh" ".config/shell" ".config/tmux"
+        ".vimrc" ".vim"
         ".gitconfig" ".gitignore_global"
+        ".ssh/config" ".config/starship.toml"
     )
 
     for item in "${items_to_backup[@]}"; do
