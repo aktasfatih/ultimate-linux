@@ -2,8 +2,8 @@
 
 local opt = vim.opt
 
--- Performance mode for remote servers
-vim.g.performance_mode = vim.env.SSH_CLIENT ~= nil or vim.env.SSH_TTY ~= nil
+-- Performance mode (disabled - use full features even on remote servers)
+vim.g.performance_mode = false
 
 -- General
 opt.backup = false
@@ -28,7 +28,7 @@ opt.updatetime = 300
 opt.writebackup = false
 
 -- UI
-opt.cursorline = vim.g.performance_mode and false or true  -- Disable in SSH
+opt.cursorline = true
 opt.laststatus = 3
 opt.number = true
 opt.relativenumber = true
@@ -53,11 +53,11 @@ opt.smartcase = true
 
 -- Performance
 opt.lazyredraw = false -- Disabled for Noice compatibility
-opt.updatetime = vim.g.performance_mode and 1000 or 300  -- Slower updates in SSH
+opt.updatetime = 300
 opt.timeoutlen = 300
 opt.redrawtime = 1500  -- Reduce redraw time
 opt.ttimeoutlen = 10   -- Reduce keycode delay
-opt.lazyredraw = vim.g.performance_mode  -- Enable lazy redraw in SSH
+opt.lazyredraw = false
 
 -- Neovim specific
 opt.shadafile = vim.fn.stdpath("data") .. "/shada/main.shada"

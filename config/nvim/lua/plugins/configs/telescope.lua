@@ -74,41 +74,35 @@ telescope.setup({
     },
   },
   extensions = {
-    fzf = {
-      fuzzy = true,
-      override_generic_sorter = true,
-      override_file_sorter = true,
-      case_mode = "smart_case",
-    },
     file_browser = {
       theme = "dropdown",
       hijack_netrw = true,
       mappings = {
         ["i"] = {
-          ["<A-c>"] = telescope.extensions.file_browser.actions.create,
-          ["<A-r>"] = telescope.extensions.file_browser.actions.rename,
-          ["<A-m>"] = telescope.extensions.file_browser.actions.move,
-          ["<A-y>"] = telescope.extensions.file_browser.actions.copy,
-          ["<A-d>"] = telescope.extensions.file_browser.actions.remove,
-          ["<C-o>"] = telescope.extensions.file_browser.actions.open,
-          ["<C-g>"] = telescope.extensions.file_browser.actions.goto_parent_dir,
-          ["<C-e>"] = telescope.extensions.file_browser.actions.goto_home_dir,
-          ["<C-w>"] = telescope.extensions.file_browser.actions.goto_cwd,
-          ["<C-t>"] = telescope.extensions.file_browser.actions.change_cwd,
-          ["<C-h>"] = telescope.extensions.file_browser.actions.toggle_hidden,
+          ["<A-c>"] = require("telescope").extensions.file_browser.actions.create,
+          ["<A-r>"] = require("telescope").extensions.file_browser.actions.rename,
+          ["<A-m>"] = require("telescope").extensions.file_browser.actions.move,
+          ["<A-y>"] = require("telescope").extensions.file_browser.actions.copy,
+          ["<A-d>"] = require("telescope").extensions.file_browser.actions.remove,
+          ["<C-o>"] = require("telescope").extensions.file_browser.actions.open,
+          ["<C-g>"] = require("telescope").extensions.file_browser.actions.goto_parent_dir,
+          ["<C-e>"] = require("telescope").extensions.file_browser.actions.goto_home_dir,
+          ["<C-w>"] = require("telescope").extensions.file_browser.actions.goto_cwd,
+          ["<C-t>"] = require("telescope").extensions.file_browser.actions.change_cwd,
+          ["<C-h>"] = require("telescope").extensions.file_browser.actions.toggle_hidden,
         },
         ["n"] = {
-          ["c"] = telescope.extensions.file_browser.actions.create,
-          ["r"] = telescope.extensions.file_browser.actions.rename,
-          ["m"] = telescope.extensions.file_browser.actions.move,
-          ["y"] = telescope.extensions.file_browser.actions.copy,
-          ["d"] = telescope.extensions.file_browser.actions.remove,
-          ["o"] = telescope.extensions.file_browser.actions.open,
-          ["g"] = telescope.extensions.file_browser.actions.goto_parent_dir,
-          ["e"] = telescope.extensions.file_browser.actions.goto_home_dir,
-          ["w"] = telescope.extensions.file_browser.actions.goto_cwd,
-          ["t"] = telescope.extensions.file_browser.actions.change_cwd,
-          ["h"] = telescope.extensions.file_browser.actions.toggle_hidden,
+          ["c"] = require("telescope").extensions.file_browser.actions.create,
+          ["r"] = require("telescope").extensions.file_browser.actions.rename,
+          ["m"] = require("telescope").extensions.file_browser.actions.move,
+          ["y"] = require("telescope").extensions.file_browser.actions.copy,
+          ["d"] = require("telescope").extensions.file_browser.actions.remove,
+          ["o"] = require("telescope").extensions.file_browser.actions.open,
+          ["g"] = require("telescope").extensions.file_browser.actions.goto_parent_dir,
+          ["e"] = require("telescope").extensions.file_browser.actions.goto_home_dir,
+          ["w"] = require("telescope").extensions.file_browser.actions.goto_cwd,
+          ["t"] = require("telescope").extensions.file_browser.actions.change_cwd,
+          ["h"] = require("telescope").extensions.file_browser.actions.toggle_hidden,
         },
       },
     },
@@ -116,7 +110,6 @@ telescope.setup({
 })
 
 -- Load extensions
-telescope.load_extension("fzf")
 telescope.load_extension("file_browser")
 
 -- Keymaps

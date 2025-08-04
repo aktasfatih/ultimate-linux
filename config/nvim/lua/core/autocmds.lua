@@ -87,14 +87,12 @@ vim.api.nvim_create_user_command("StartupTime", function()
 end, { desc = "Show startup time analysis" })
 
 vim.api.nvim_create_user_command("TogglePerformanceMode", function()
-  vim.g.performance_mode = not vim.g.performance_mode
-  local status = vim.g.performance_mode and "enabled" or "disabled"
-  vim.notify("Performance mode " .. status .. ". Restart Neovim for full effect.", vim.log.levels.INFO)
-end, { desc = "Toggle performance mode" })
+  vim.notify("Performance mode is disabled. Full feature set is always enabled.", vim.log.levels.INFO)
+end, { desc = "Performance mode (disabled)" })
 
 vim.api.nvim_create_user_command("CheckPerformance", function()
   local stats = {}
-  stats.performance_mode = vim.g.performance_mode and "Enabled (SSH)" or "Disabled"
+  stats.performance_mode = "Disabled (Full features enabled)"
   stats.loaded_plugins = #vim.tbl_keys(require("lazy").plugins())
   stats.lsp_clients = #vim.lsp.get_clients()
   

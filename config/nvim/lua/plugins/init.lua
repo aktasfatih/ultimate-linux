@@ -118,7 +118,7 @@ return {
   {
     "folke/noice.nvim",
     event = "VeryLazy",
-    enabled = vim.fn.has('nvim-0.10') == 1 and not vim.g.performance_mode,
+    enabled = vim.fn.has('nvim-0.10') == 1,
     opts = {
       lsp = {
         override = {
@@ -245,7 +245,7 @@ return {
   {
     "RRethy/vim-illuminate",
     event = { "BufReadPost", "BufNewFile" },
-    enabled = not vim.g.performance_mode,  -- Disable in SSH
+    enabled = true,
     config = function()
       require("illuminate").configure({
         delay = 120,
@@ -647,7 +647,7 @@ return {
   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
-    enabled = not vim.g.performance_mode,  -- Disable in SSH
+    enabled = true,
     config = function()
       require("ibl").setup()
     end,

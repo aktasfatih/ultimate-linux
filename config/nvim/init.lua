@@ -44,18 +44,18 @@ require("core.options")
 require("core.keymaps")
 require("core.autocmds")
 
--- Load plugins (use minimal config for SSH sessions)
-local plugins_spec = vim.g.performance_mode and "plugins.init-minimal" or "plugins"
+-- Load plugins (always use full configuration)
+local plugins_spec = "plugins"
 require("lazy").setup(plugins_spec, {
   install = {
     colorscheme = { "catppuccin" },
   },
   checker = {
-    enabled = not vim.g.performance_mode,  -- Disable checker in SSH
+    enabled = true,
     notify = false,
   },
   change_detection = {
-    enabled = not vim.g.performance_mode,  -- Disable in SSH
+    enabled = true,
     notify = false,
   },
   performance = {

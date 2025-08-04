@@ -184,10 +184,10 @@ end, 100)
 
 -- Diagnostic config
 local diag_config = {
-  virtual_text = not vim.g.performance_mode,  -- Disable virtual text in SSH
+  virtual_text = true,
   signs = true,
   update_in_insert = false,
-  underline = not vim.g.performance_mode,  -- Disable underline in SSH
+  underline = true,
   severity_sort = true,
   float = {
     focusable = false,
@@ -198,12 +198,6 @@ local diag_config = {
     prefix = "",
   },
 }
-
--- In performance mode, use less frequent updates
-if vim.g.performance_mode then
-  diag_config.virtual_text = false
-  diag_config.underline = false
-end
 
 vim.diagnostic.config(diag_config)
 

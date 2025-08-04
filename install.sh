@@ -9,6 +9,7 @@ INSTALL_MODE="full"
 FORCE_INSTALL=false
 DRY_RUN=false
 NON_INTERACTIVE=false
+NO_BACKUP=false
 SKIP_GIT_CONFIG=false
 ACTION="install"
 
@@ -50,6 +51,7 @@ Options:
     --dry-run           Show what would be installed without executing
     --force             Overwrite existing configs without prompting
     --backup-dir=PATH   Specify custom backup location
+    --no-backup         Skip creating backup of existing configurations
     --non-interactive   Run without user prompts
     --skip-git-config   Skip Git configuration (keeps existing .gitconfig)
 
@@ -57,6 +59,7 @@ Examples:
     ./install.sh                    # Full interactive installation
     ./install.sh --minimal --force  # Minimal setup, overwrite existing
     ./install.sh --dry-run          # Preview installation
+    ./install.sh --no-backup       # Skip creating backup of existing configs
 
 EOF
 }
@@ -91,6 +94,9 @@ parse_arguments() {
                 ;;
             --non-interactive)
                 NON_INTERACTIVE=true
+                ;;
+            --no-backup)
+                NO_BACKUP=true
                 ;;
             --skip-git-config)
                 SKIP_GIT_CONFIG=true
@@ -191,6 +197,11 @@ source_utils() {
 }
 
 create_backup() {
+    if [[ "$NO_BACKUP" == "true" ]]; then
+        log INFO "Skipping backup (--no-backup flag specified)"
+        return
+    fi
+    
     if [[ "$DRY_RUN" == "true" ]]; then
         log INFO "[DRY RUN] Would create backup at $BACKUP_DIR"
         return
