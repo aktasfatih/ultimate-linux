@@ -164,20 +164,33 @@
 | `t` | Change cwd | Set current directory as working directory |
 | `h` | Toggle hidden | Show/hide hidden files |
 
-### LSP Functions
+### LSP Functions & Code Inspection
 | Key | Action | Usage |
 |-----|--------|-------|
 | `gd` | Go to definition | Jump to code definition |
 | `gD` | Go to declaration | Jump to declaration |
 | `gr` | Find references | Where is this used? |
 | `gi` | Go to implementation | Implementation details |
-| `K` | Hover documentation | Show info popup |
+| `K` | Hover documentation | **Show function signature, params, return type, docs** |
+| `<Ctrl-k>` | Signature help | Show function signature while typing parameters |
+| `<leader>D` | Type definition | Jump to type definition |
 | `<leader>ca` | Code action | Quick fixes/refactors |
 | `<leader>rn` | Rename symbol | Rename everywhere |
 | `<leader>f` | Format document | Auto-format code |
 | `[d` | Previous diagnostic | Jump to previous error |
 | `]d` | Next diagnostic | Jump to next error |
 | `<leader>E` | Show diagnostics | Error details |
+
+#### Function/Variable Inspection Workflow
+1. **Position cursor** on any function or variable name
+2. **Press `K`** to see detailed popup with:
+   - Function signature and parameters
+   - Return type information
+   - Documentation and comments
+   - Usage examples (if available)
+3. **Press `<Ctrl-k>`** while typing function calls to see parameter hints
+4. **Use `gd`** to jump to the actual definition for full context
+5. **Use `gr`** to see all places where the symbol is used
 
 ### LSP Visual Indicators
 
