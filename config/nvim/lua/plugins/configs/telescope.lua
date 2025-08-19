@@ -113,9 +113,12 @@ telescope.setup({
   },
 })
 
--- Load extensions
+-- Load extensions on demand to improve startup time
 telescope.load_extension("fzf")
-telescope.load_extension("file_browser")
+-- Load file_browser extension only when needed
+vim.defer_fn(function()
+  telescope.load_extension("file_browser")
+end, 0)
 
 -- Keymaps
 local keymap = vim.keymap.set

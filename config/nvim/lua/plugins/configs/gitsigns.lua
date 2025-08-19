@@ -105,31 +105,21 @@ gitsigns.setup({
 })
 
 -- Force immediate setup for current buffer if in a git repo
--- Only run on BufWritePost to reduce flashing
-vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
   group = vim.api.nvim_create_augroup("GitSignsKeymaps", { clear = true }),
   callback = function(args)
     local bufnr = args.buf
     
     -- Check if we're in a git repository
     if vim.fn.finddir('.git', vim.fn.expand('%:p:h') .. ';') ~= '' then
-      -- Check if gitsigns is attached
-      if vim.b[bufnr].gitsigns_attached then
-        -- Check if keymaps exist
-        local maps = vim.api.nvim_buf_get_keymap(bufnr, 'n')
-        local has_next_hunk = false
-        for _, map in ipairs(maps) do
-          if map.lhs == "]c" then
-            has_next_hunk = true
-            break
-          end
-        end
-        
-        -- If keymaps don't exist, set them up
-        if not has_next_hunk then
+      -- Small delay to ensure gitsigns is attached
+      vim.defer_fn(function()
+        local gs = package.loaded.gitsigns
+        if gs and gs.is_attached and gs.is_attached(bufnr) then
           setup_gitsigns_keymaps(bufnr)
+          vim.b[bufnr].gitsigns_keymaps_setup = true
         end
-      end
+      end, 100)
     end
   end,
 })
@@ -137,19 +127,55 @@ vim.api.nvim_create_autocmd({ "BufWritePost" }, {
 -- Debug command to check Gitsigns status
 vim.api.nvim_create_user_command('GitsignsDebug', function()
   local bufnr = vim.api.nvim_get_current_buf()
+  local gs = package.loaded.gitsigns
+  
+  print("=== Gitsigns Debug Info ===")
   print("Buffer:", bufnr)
   print("Gitsigns attached:", vim.b[bufnr].gitsigns_attached or false)
+  print("Keymaps setup:", vim.b[bufnr].gitsigns_keymaps_setup or false)
   print("In git repo:", vim.fn.finddir('.git', vim.fn.expand('%:p:h') .. ';') ~= '')
+  
+  if gs then
+    print("Gitsigns loaded:", true)
+    print("Is attached:", gs.is_attached and gs.is_attached(bufnr) or false)
+  else
+    print("Gitsigns loaded:", false)
+  end
   
   local maps = vim.api.nvim_buf_get_keymap(bufnr, 'n')
   local gitsigns_maps = {}
   for _, map in ipairs(maps) do
-    if map.lhs == "]c" or map.lhs == "[c" then
-      table.insert(gitsigns_maps, map.lhs)
+    if string.match(map.lhs, "<leader>h") or map.lhs == "]c" or map.lhs == "[c" then
+      table.insert(gitsigns_maps, { lhs = map.lhs, desc = map.desc or "no desc" })
     end
   end
-  print("Gitsigns navigation maps:", vim.inspect(gitsigns_maps))
+  print("Gitsigns-related maps:")
+  for _, m in ipairs(gitsigns_maps) do
+    print("  " .. m.lhs .. " -> " .. m.desc)
+  end
+  
+  -- Test if <leader>hp exists
+  local hp_map = vim.api.nvim_buf_get_keymap(bufnr, 'n')
+  local has_hp = false
+  for _, map in ipairs(hp_map) do
+    if map.lhs == "<leader>hp" then
+      has_hp = true
+      print("Found <leader>hp mapping:", map.desc or "no desc")
+      break
+    end
+  end
+  if not has_hp then
+    print("WARNING: <leader>hp mapping not found!")
+  end
 end, {})
+
+-- Manual command to force setup Gitsigns keymaps
+vim.api.nvim_create_user_command('GitsignsSetupKeymaps', function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  setup_gitsigns_keymaps(bufnr)
+  vim.b[bufnr].gitsigns_keymaps_setup = true
+  print("Gitsigns keymaps manually set up for buffer " .. bufnr)
+end, { desc = "Manually setup Gitsigns keymaps" })
 
 -- Return true to indicate successful setup
 return true

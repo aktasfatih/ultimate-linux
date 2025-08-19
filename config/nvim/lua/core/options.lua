@@ -24,11 +24,10 @@ opt.swapfile = false
 opt.termguicolors = true
 opt.timeoutlen = 300
 opt.undofile = true
-opt.updatetime = 300
 opt.writebackup = false
 
 -- UI
-opt.cursorline = true
+opt.cursorline = false -- Disabled to fix cursor flickering
 opt.laststatus = 3
 opt.number = true
 opt.relativenumber = true
@@ -51,13 +50,20 @@ opt.hlsearch = true
 opt.ignorecase = true
 opt.smartcase = true
 
--- Performance
+-- Performance optimizations for cursor responsiveness
 opt.lazyredraw = false -- Disabled for Noice compatibility
-opt.updatetime = 300
+opt.updatetime = 100   -- Reduced for better responsiveness (was 300)
 opt.timeoutlen = 300
 opt.redrawtime = 1500  -- Reduce redraw time
-opt.ttimeoutlen = 10   -- Reduce keycode delay
-opt.lazyredraw = false
+opt.ttyfast = true     -- Indicate fast terminal connection
+opt.synmaxcol = 200    -- Limit syntax highlighting to 200 columns for performance
+
+-- Fix for cursor flickering/responsiveness issues
+vim.g.cursorhold_updatetime = 100
+
+-- Terminal/tmux cursor flickering fixes
+vim.opt.guicursor = ""  -- Disable cursor styling to prevent flickering
+vim.opt.ttimeoutlen = 0 -- Reduce key sequence timeout for better responsiveness
 
 -- Neovim specific
 opt.shadafile = vim.fn.stdpath("data") .. "/shada/main.shada"

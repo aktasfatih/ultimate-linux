@@ -19,7 +19,7 @@ return {
           mason = true,
           telescope = true,
           which_key = true,
-          semantic_tokens = true,
+          semantic_tokens = false, -- Disable for performance
           rainbow_delimiters = true,
           lsp_trouble = true,
         },
@@ -241,18 +241,19 @@ return {
     end,
   },
 
-  -- Highlight matching words
+  -- Highlight matching words (optimized)
   {
     "RRethy/vim-illuminate",
     event = { "BufReadPost", "BufNewFile" },
     enabled = true,
     config = function()
       require("illuminate").configure({
-        delay = 120,
-        large_file_cutoff = 2000,
+        delay = 200,              -- Increased delay to reduce CPU usage
+        large_file_cutoff = 1500, -- Reduced cutoff for better performance
         large_file_overrides = {
           providers = { "lsp" },
         },
+        max_file_lines = 1000,    -- Don't illuminate very large files
       })
     end,
   },
@@ -303,7 +304,7 @@ return {
     end,
   },
 
-  -- Enhanced Go syntax highlighting
+  -- Enhanced Go syntax highlighting (lazy loaded)
   {
     "ray-x/go.nvim", 
     dependencies = {
@@ -314,15 +315,14 @@ return {
       require("go").setup({
         goimports = "gopls", -- use gopls for imports
         fillstruct = "gopls",
-        dap_debug = true,
-        dap_debug_gui = true,
-        trouble = true, -- true: use trouble to open quickfix
-        luasnip = true, -- enable snippet
+        dap_debug = false,    -- Disable to improve performance
+        dap_debug_gui = false,
+        trouble = false,      -- Disable to improve performance
+        luasnip = true,       -- enable snippet
         icons = {breakpoint = '🧘', currentpos = '🏃'},
       })
     end,
-    event = {"CmdlineEnter"},
-    ft = {"go", 'gomod'},
+    ft = {"go", 'gomod'},  -- Only load for Go files
   },
 
   -- Mason (load early for commands)
@@ -460,6 +460,7 @@ return {
       "nvim-telescope/telescope.nvim",
       "nvim-tree/nvim-web-devicons",
     },
+    cmd = { "Octo" },  -- Only load when Octo command is used
     config = function()
       require("octo").setup({
         use_local_fs = false,

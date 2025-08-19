@@ -57,13 +57,10 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local on_attach = function(client, bufnr)
   local opts = { noremap = true, silent = true, buffer = bufnr }
   
-  -- Enable semantic highlighting if available
-  if client.server_capabilities.semanticTokensProvider then
-    vim.lsp.semantic_tokens.start(bufnr, client.id)
-    
-    -- Removed force refresh to improve performance
-    -- Semantic tokens will update naturally
-  end
+  -- Disable semantic highlighting to improve performance (causes cursor lag)
+  -- if client.server_capabilities.semanticTokensProvider then
+  --   vim.lsp.semantic_tokens.start(bufnr, client.id)
+  -- end
   
   -- Attach navic if available and Neovim is 0.10+
   if vim.fn.has('nvim-0.10') == 1 and client.server_capabilities.documentSymbolProvider then
@@ -165,8 +162,8 @@ vim.defer_fn(function()
             },
             staticcheck = true,
             gofumpt = true,
-            semanticTokens = true,  -- Enable semantic tokens
-            -- Enhanced semantic highlighting
+            semanticTokens = false, -- Disable semantic tokens for performance
+            -- Semantic highlighting disabled for better performance
             hints = {
               assignVariableTypes = true,
               compositeLiteralFields = true,
@@ -180,7 +177,7 @@ vim.defer_fn(function()
       })
     end,
   })
-end, 100)
+end, 0)
 
 -- Diagnostic config
 local diag_config = {
@@ -210,18 +207,19 @@ end
 
 -- None-ls setup (successor to null-ls)
 local none_ls = require("null-ls")
-require("mason-null-ls").setup({
-  ensure_installed = {
-    "prettier",
-    "stylua",
-    "black",
-    "isort",
-    "shfmt",
-    "shellcheck",
-    "hadolint",
-  },
-  automatic_installation = false,  -- Disabled for better performance
-})
+-- Commented out mason-null-ls auto-setup to improve performance
+-- require("mason-null-ls").setup({
+--   ensure_installed = {
+--     "prettier",
+--     "stylua", 
+--     "black",
+--     "isort",
+--     "shfmt",
+--     "shellcheck",
+--     "hadolint",
+--   },
+--   automatic_installation = false,
+-- })
 
 none_ls.setup({
   sources = {
