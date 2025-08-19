@@ -833,10 +833,32 @@ install_development_tools() {
     if ! command -v claude &> /dev/null; then
         log INFO "Installing Claude Code CLI..."
         if command -v npm &> /dev/null; then
-            npm install -g @anthropic-ai/claude-code || {
-                log WARNING "Failed to install Claude Code CLI via npm"
-                log INFO "You can install it manually with: npm install -g @anthropic-ai/claude-code"
-            }
+            # Try regular npm install first
+            if npm install -g @anthropic-ai/claude-code 2>/dev/null; then
+                log SUCCESS "Claude Code CLI installed successfully"
+            else
+                # If that fails due to permissions, configure user directory
+                log INFO "Permission denied, configuring npm user directory..."
+                mkdir -p ~/.npm-global
+                npm config set prefix ~/.npm-global
+                
+                # Update PATH for current session
+                export PATH=~/.npm-global/bin:$PATH
+                
+                # Add to local shell config files (not the main dotfiles)
+                if ! grep -q "npm-global/bin" ~/.bashrc.local 2>/dev/null; then
+                    echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc.local
+                fi
+                if ! grep -q "npm-global/bin" ~/.zshrc.local 2>/dev/null; then
+                    echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc.local
+                fi
+                
+                # Try installing again
+                npm install -g @anthropic-ai/claude-code || {
+                    log WARNING "Failed to install Claude Code CLI via npm"
+                    log INFO "You can install it manually with: npm install -g @anthropic-ai/claude-code"
+                }
+            fi
         else
             log WARNING "npm not found. Claude Code CLI requires Node.js 18+"
             log INFO "Install Node.js first, then run: npm install -g @anthropic-ai/claude-code"
