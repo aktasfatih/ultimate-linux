@@ -94,6 +94,7 @@
 |-----|--------|-------|
 | `Prefix + r` | Reload config | Apply changes |
 | `Prefix + S` | Synchronize panes | Type everywhere |
+| `Prefix + A` | Refresh SSH agent | Fix git after reconnect |
 | `Prefix + I` | Install plugins | TPM |
 | `Prefix + U` | Update plugins | TPM |
 | `Prefix + Shift+s` | Save session | tmux-resurrect |
