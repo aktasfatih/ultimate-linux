@@ -39,7 +39,7 @@ cd ~/.dotfiles && ./install.sh
 - **Zsh** with **Oh My Zsh** framework
 - **Starship** cross-shell prompt with git integration
 - Powerful plugins: autosuggestions, syntax highlighting, completions
-- Modern CLI tools: `eza`, `bat`, `ripgrep`, `fd`, `fzf`, `zoxide`
+- Modern CLI tools: `eza`, `bat`, `ripgrep`, `fd`, `fzf`, `zoxide`, `lazydocker`, `k9s`
 - Extensive aliases and custom functions
 
 ### 🖥️ Terminal Multiplexer

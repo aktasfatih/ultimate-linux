@@ -887,6 +887,7 @@ If you prefer normal shell behavior (emacs mode):
 |------|---------|-------------|
 | **lazygit** | `lg` or `lazygit` | Git TUI |
 | **lazydocker** | `lazydocker` | Docker TUI |
+| **k9s** | `k9s` | Kubernetes TUI |
 | **httpie** | `http GET api.example.com` | Better curl |
 | **jq** | `curl api | jq '.items[]'` | JSON processor |
 | **delta** | `git diff | delta` | Better diff |

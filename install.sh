@@ -392,6 +392,8 @@ install_modern_cli_tools() {
         "procs:ps replacement"
         "bottom:system monitor"
         "gh:GitHub CLI"
+        "lazydocker:Docker TUI"
+        "k9s:Kubernetes TUI"
     )
 
     for tool_info in "${tools[@]}"; do
@@ -480,6 +482,16 @@ install_modern_cli_tools() {
                         # Fallback to GitHub releases
                         install_from_github "cli/cli" "gh"
                     fi
+                fi
+                ;;
+            lazydocker)
+                if ! command -v lazydocker &> /dev/null; then
+                    install_from_github "jesseduffield/lazydocker"
+                fi
+                ;;
+            k9s)
+                if ! command -v k9s &> /dev/null; then
+                    install_from_github "derailed/k9s"
                 fi
                 ;;
         esac
