@@ -241,6 +241,40 @@ install_from_github() {
                     download_url=$(echo "$api_response" | grep -E "browser_download_url.*x86_64-unknown-linux" | cut -d '"' -f 4 | head -1 || true)
                 fi
                 ;;
+            lazydocker)
+                if [[ "$os" == "darwin" ]]; then
+                    # macOS patterns for lazydocker
+                    if [[ "$arch" == "arm64" ]]; then
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Darwin_arm64" | cut -d '"' -f 4 | head -1 || true)
+                    else
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Darwin_x86_64" | cut -d '"' -f 4 | head -1 || true)
+                    fi
+                else
+                    # Linux patterns for lazydocker
+                    if [[ "$arch" == "arm64" ]]; then
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Linux_arm64" | cut -d '"' -f 4 | head -1 || true)
+                    else
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Linux_x86_64" | cut -d '"' -f 4 | head -1 || true)
+                    fi
+                fi
+                ;;
+            k9s)
+                if [[ "$os" == "darwin" ]]; then
+                    # macOS patterns for k9s
+                    if [[ "$arch" == "arm64" ]]; then
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Darwin_arm64" | cut -d '"' -f 4 | head -1 || true)
+                    else
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Darwin_amd64" | cut -d '"' -f 4 | head -1 || true)
+                    fi
+                else
+                    # Linux patterns for k9s
+                    if [[ "$arch" == "arm64" ]]; then
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Linux_arm64" | cut -d '"' -f 4 | head -1 || true)
+                    else
+                        download_url=$(echo "$api_response" | grep -E "browser_download_url.*Linux_amd64" | cut -d '"' -f 4 | head -1 || true)
+                    fi
+                fi
+                ;;
             *)
                 # Try more generic patterns
                 download_url=$(echo "$api_response" | grep -E "browser_download_url.*[._-]${os}[._-]" | grep -i "${arch}\|x86_64" | cut -d '"' -f 4 | head -1 || true)
