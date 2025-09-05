@@ -394,6 +394,7 @@ install_modern_cli_tools() {
         "gh:GitHub CLI"
         "lazydocker:Docker TUI"
         "k9s:Kubernetes TUI"
+        "ranger:terminal file manager"
     )
 
     for tool_info in "${tools[@]}"; do
@@ -492,6 +493,21 @@ install_modern_cli_tools() {
             k9s)
                 if ! command -v k9s &> /dev/null; then
                     install_from_github "derailed/k9s"
+                fi
+                ;;
+            ranger)
+                if ! command -v ranger &> /dev/null; then
+                    # ranger is typically available in most package managers
+                    install_packages "ranger" || {
+                        # Fallback to pip installation if package manager fails
+                        log INFO "Installing ranger via pip..."
+                        if command -v pip3 &> /dev/null; then
+                            pip3 install --user ranger-fm || log WARN "Could not install ranger"
+                        else
+                            log WARN "pip3 not found, installing python3-pip first..."
+                            install_packages "python3-pip" && pip3 install --user ranger-fm || log WARN "Could not install ranger"
+                        fi
+                    }
                 fi
                 ;;
         esac
