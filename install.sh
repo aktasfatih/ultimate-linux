@@ -249,7 +249,7 @@ install_base_packages() {
         local common_packages=(
             "git" "curl" "wget" "build-essential" "cmake"
             "unzip" "tar" "gzip" "ca-certificates" "gnupg"
-            "xclip" "xsel"
+            "xclip" "xsel" "sshfs"
         )
     fi
 
