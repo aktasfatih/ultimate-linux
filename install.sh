@@ -12,6 +12,7 @@ NON_INTERACTIVE=false
 NO_BACKUP=false
 SKIP_GIT_CONFIG=false
 ACTION="install"
+VERSION_FILE="${HOME}/.config/ultimate-linux/version.json"
 
 BOLD='\033[1m'
 RED='\033[0;31m'
@@ -44,6 +45,7 @@ Usage: ./install.sh [OPTIONS]
 
 Options:
     --help              Show this help message
+    --version           Show installed version and commit info
     --full              Complete setup (default)
     --minimal           Basic setup (shell + git only)
     --server            Server-optimized (no GUI dependencies)
@@ -70,6 +72,9 @@ parse_arguments() {
             --help)
                 print_usage
                 exit 0
+                ;;
+            --version)
+                ACTION="version"
                 ;;
             --full)
                 INSTALL_MODE="full"
@@ -1132,6 +1137,104 @@ finalize_installation() {
     fi
 }
 
+# Version tracking functions
+get_git_info() {
+    if [[ -d "$DOTFILES_DIR/.git" ]]; then
+        cd "$DOTFILES_DIR"
+        local commit_hash=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+        local commit_date=$(git log -1 --format="%ai" 2>/dev/null || echo "unknown")
+        local commit_message=$(git log -1 --pretty=format:"%s" 2>/dev/null || echo "unknown")
+        local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+        local remote_url=$(git config --get remote.origin.url 2>/dev/null || echo "unknown")
+        echo "$commit_hash|$commit_date|$commit_message|$branch|$remote_url"
+    else
+        echo "unknown|unknown|unknown|unknown|unknown"
+    fi
+}
+
+store_version_info() {
+    if [[ "$DRY_RUN" == "true" ]]; then
+        return
+    fi
+    
+    log INFO "Storing version information..."
+    
+    local version_dir="$(dirname "$VERSION_FILE")"
+    mkdir -p "$version_dir"
+    
+    local git_info=$(get_git_info)
+    IFS='|' read -r commit_hash commit_date commit_message branch remote_url <<< "$git_info"
+    
+    cat > "$VERSION_FILE" << EOF
+{
+    "install_date": "$(date -Iseconds)",
+    "install_mode": "$INSTALL_MODE",
+    "git": {
+        "commit": "$commit_hash",
+        "commit_date": "$commit_date",
+        "commit_message": "$commit_message",
+        "branch": "$branch",
+        "remote": "$remote_url"
+    },
+    "dotfiles_dir": "$DOTFILES_DIR",
+    "hostname": "$(hostname)",
+    "os": "$(uname -s)",
+    "os_version": "$(uname -r)"
+}
+EOF
+    
+    log SUCCESS "Version information stored in $VERSION_FILE"
+}
+
+show_installed_version() {
+    if [[ ! -f "$VERSION_FILE" ]]; then
+        echo -e "${YELLOW}No installation information found.${NC}"
+        echo -e "${CYAN}Run './install.sh' to install Ultimate Linux setup.${NC}"
+        exit 0
+    fi
+    
+    echo -e "${BOLD}${BLUE}Ultimate Linux Development Setup - Installation Info${NC}"
+    echo -e "${BLUE}=====================================================${NC}"
+    echo
+    
+    # Parse JSON manually for compatibility
+    local install_date=$(grep '"install_date"' "$VERSION_FILE" | cut -d'"' -f4)
+    local install_mode=$(grep '"install_mode"' "$VERSION_FILE" | cut -d'"' -f4)
+    local commit=$(grep '"commit"' "$VERSION_FILE" | head -1 | cut -d'"' -f4)
+    local commit_date=$(grep '"commit_date"' "$VERSION_FILE" | cut -d'"' -f4)
+    local commit_message=$(grep '"commit_message"' "$VERSION_FILE" | cut -d'"' -f4)
+    local branch=$(grep '"branch"' "$VERSION_FILE" | cut -d'"' -f4)
+    
+    echo -e "${GREEN}Installed:${NC} $install_date"
+    echo -e "${GREEN}Mode:${NC} $install_mode"
+    echo
+    echo -e "${CYAN}Git Information:${NC}"
+    echo -e "  ${BOLD}Branch:${NC} $branch"
+    echo -e "  ${BOLD}Commit:${NC} ${commit:0:8}"
+    echo -e "  ${BOLD}Date:${NC} $commit_date"
+    echo -e "  ${BOLD}Message:${NC} $commit_message"
+    echo
+    
+    # Check if current repo is different from installed version
+    if [[ -d "$DOTFILES_DIR/.git" ]]; then
+        cd "$DOTFILES_DIR"
+        local current_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+        
+        if [[ "$current_commit" != "$commit" && "$current_commit" != "unknown" ]]; then
+            echo -e "${YELLOW}Repository has updates available!${NC}"
+            echo -e "${CYAN}Current commit:${NC} ${current_commit:0:8}"
+            echo
+            echo -e "${CYAN}To see what's changed, run:${NC}"
+            echo "  ./update.sh --changelog"
+            echo
+            echo -e "${CYAN}To update, run:${NC}"
+            echo "  ./update.sh"
+        else
+            echo -e "${GREEN}✓ Installation is up to date with repository${NC}"
+        fi
+    fi
+}
+
 main() {
     echo -e "${BOLD}${BLUE}Ultimate Linux Development Setup${NC}"
     echo -e "${BLUE}================================${NC}"
@@ -1188,8 +1291,14 @@ main() {
             # Run verification
             run_verification
 
+            # Store version information
+            store_version_info
+
             # Finalize
             finalize_installation
+            ;;
+        version)
+            show_installed_version
             ;;
     esac
 }
