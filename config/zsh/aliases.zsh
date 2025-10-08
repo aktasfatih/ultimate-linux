@@ -330,4 +330,4 @@ done
 alias battery='upower -i $(upower -e | grep BAT) | grep --color=never -E "state|to\ full|to\ empty|percentage"'
 
 # Claude Code
-alias claude-yolo='claude --dangerously-skip-permissions'
+alias claude-yolo='happy --dangerously-skip-permissions'
