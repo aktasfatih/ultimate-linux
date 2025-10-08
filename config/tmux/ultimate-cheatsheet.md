@@ -1102,6 +1102,24 @@ git log --oneline | fzf | awk '{print $1}' | xargs git show
 | Neovim | `~/.config/nvim/` | `~/.config/nvim/lua/user/` |
 | Git | `~/.gitconfig` | Project `.git/config` |
 | Starship | `~/.config/starship.toml` | - |
+| Claude Agents | `~/.claude/agents/` | Symlinked to repo |
+
+### Claude Code Agent Management
+```bash
+# List available agents
+./install.sh --list-agents
+
+# Agents are symlinked - edit in either location:
+# Repository: config/claude/agents/
+# Home: ~/.claude/agents/
+
+# Create new agent (either location works)
+vim ~/.claude/agents/my-agent.md
+# OR
+vim config/claude/agents/my-agent.md
+
+# Changes are instantly available - no deployment needed!
+```
 
 ---
 

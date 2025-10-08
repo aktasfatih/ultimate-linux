@@ -20,7 +20,7 @@ When adding new features:
 
 **NEVER modify deployed configuration files directly (e.g., ~/.zshrc, ~/.bashrc).** All fixes must be made in:
 1. The source configuration files in the `config/` directory
-2. The installation scripts that deploy these configurations  
+2. The installation scripts that deploy these configurations
 3. The utility scripts in `scripts/` that are sourced by the installers
 
 This ensures:
@@ -51,7 +51,7 @@ This is the Ultimate Development Setup - a comprehensive dotfiles repository tha
 
 # Installation modes
 ./install.sh --minimal           # Basic shell + git only
-./install.sh --server            # No GUI dependencies  
+./install.sh --server            # No GUI dependencies
 ./install.sh --dev-only          # Just development tools
 ./install.sh --dry-run           # Preview without installing
 ./install.sh --force             # Overwrite existing configs
@@ -64,6 +64,11 @@ This is the Ultimate Development Setup - a comprehensive dotfiles repository tha
 ./install.sh --fix-shell         # Fix detected shell issues
 ./install.sh --migrate-shell=bash  # Migrate to Bash
 ./install.sh --migrate-shell=zsh   # Migrate to Zsh
+
+# Claude Code agent management
+./install.sh --agents            # Install Claude Code agents (default)
+./install.sh --no-agents         # Skip installing agents
+./install.sh --list-agents       # List available agents
 ```
 
 ### Maintenance
@@ -133,6 +138,7 @@ The repository uses a modular architecture with sourced utility scripts:
 - **tmux**: `config/tmux/.tmux.conf`, `.tmux.clipboard.conf` with TPM plugins
 - **Neovim**: `config/nvim/` with Lua-based configuration and lazy.nvim
 - **Git**: `config/git/.gitconfig`, `.gitignore_global`
+- **Claude Code Agents**: `config/claude/agents/` - Custom agent definitions
 
 ### Distribution Support
 The system detects and supports multiple distribution families:
@@ -184,6 +190,48 @@ The installer includes comprehensive shell management features:
 - `~/.config/nvim/lua/user/` - Neovim customizations
 - `~/.bashrc.$(hostname)` / `~/.zshrc.$(hostname)` - Machine-specific configs
 
+### Claude Code Agent Management
+The setup includes support for custom Claude Code agents that provide specialized assistance for development tasks. Agents are **symlinked** between the repository and your home directory for automatic synchronization.
+
+**How It Works:**
+- **Repository**: `config/claude/agents/` - Agent definitions tracked in Git
+- **Home Directory**: `~/.claude/agents/` - **Symlinked** to repository
+- **Automatic Sync**: Changes in either location are instantly reflected in both
+- **No Redeployment**: Edit agents and save - they're immediately available!
+
+**Agent File Format:**
+```markdown
+---
+name: agent-slug-name
+description: Use this agent when... (with examples)
+model: sonnet
+color: red
+---
+
+[Agent instructions and system prompt]
+```
+
+**CLI Commands:**
+```bash
+./install.sh --list-agents    # List available agents
+./install.sh --agents          # Set up agent symlink (first time)
+./install.sh --no-agents       # Skip agent setup
+```
+
+**Creating Custom Agents:**
+1. Create a `.md` file in **either** location:
+   - `config/claude/agents/my-agent.md` (repository - recommended)
+   - `~/.claude/agents/my-agent.md` (home directory)
+2. Follow the format with YAML frontmatter (see `config/claude/agents/README.md`)
+3. Agents are **instantly available** - no deployment needed!
+
+**Key Features:**
+- **Symlinked**: `~/.claude/agents` → `config/claude/agents` (bidirectional sync)
+- **Version controlled**: All agents tracked in Git
+- **Migration support**: Existing agents automatically migrated to repository on first install
+- **Automatic backup**: Existing agent directories backed up before symlinking
+- **Global availability**: Agents available across all projects
+
 ## Key Bindings and Cheatsheet
 
 **IMPORTANT**: All keybindings and command references are maintained in `config/tmux/ultimate-cheatsheet.md`. This is the single source of truth for all keybindings, commands, and shortcuts across the entire setup.
@@ -201,7 +249,7 @@ To access the cheatsheet:
   - Modern CLI tools usage
   - System management commands
 
-**Note**: The old `docs/cheatsheet.md` file is deprecated. Do not update it. All updates should be made to `config/tmux/ultimate-cheatsheet.md`.
+Every time a change is made, new features are added, the cheatsheet should be updated with the new information.
 
 ## Known Issues and Solutions
 

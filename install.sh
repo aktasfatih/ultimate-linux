@@ -13,6 +13,7 @@ NO_BACKUP=false
 SKIP_GIT_CONFIG=false
 ACTION="install"
 VERSION_FILE="${HOME}/.config/ultimate-linux/version.json"
+INSTALL_AGENTS=true
 
 BOLD='\033[1m'
 RED='\033[0;31m'
@@ -57,11 +58,18 @@ Options:
     --non-interactive   Run without user prompts
     --skip-git-config   Skip Git configuration (keeps existing .gitconfig)
 
+Claude Code Agent Options:
+    --agents            Install Claude Code agents (default)
+    --no-agents         Skip installing Claude Code agents
+    --list-agents       List available agents without installing
+
 Examples:
     ./install.sh                    # Full interactive installation
     ./install.sh --minimal --force  # Minimal setup, overwrite existing
     ./install.sh --dry-run          # Preview installation
     ./install.sh --no-backup       # Skip creating backup of existing configs
+    ./install.sh --list-agents     # Show available Claude Code agents
+    ./install.sh --no-agents       # Install without agents
 
 EOF
 }
@@ -105,6 +113,15 @@ parse_arguments() {
                 ;;
             --skip-git-config)
                 SKIP_GIT_CONFIG=true
+                ;;
+            --agents)
+                INSTALL_AGENTS=true
+                ;;
+            --no-agents)
+                INSTALL_AGENTS=false
+                ;;
+            --list-agents)
+                ACTION="list-agents"
                 ;;
             *)
                 log ERROR "Unknown option: $1"
@@ -1034,6 +1051,156 @@ install_fonts() {
     log SUCCESS "Fonts installed"
 }
 
+list_claude_agents() {
+    local agents_source="${DOTFILES_DIR}/config/claude/agents"
+
+    echo -e "${BOLD}${BLUE}Available Claude Code Agents${NC}"
+    echo -e "${BLUE}============================${NC}"
+    echo
+
+    if [[ ! -d "$agents_source" ]]; then
+        echo -e "${YELLOW}No agents directory found.${NC}"
+        echo -e "Create agents in: ${CYAN}config/claude/agents/${NC}"
+        return
+    fi
+
+    local agent_count=0
+    while IFS= read -r -d '' agent_file; do
+        local agent_name=$(basename "$agent_file")
+
+        # Skip README
+        if [[ "$agent_name" == "README.md" ]]; then
+            continue
+        fi
+
+        # Extract agent name from frontmatter
+        local yaml_name=$(grep -m 1 "^name:" "$agent_file" 2>/dev/null | cut -d':' -f2- | sed 's/^[[:space:]]*//')
+        local yaml_desc=$(grep -m 1 "^description:" "$agent_file" 2>/dev/null | cut -d':' -f2- | sed 's/^[[:space:]]*//' | head -c 100)
+
+        echo -e "${GREEN}●${NC} ${BOLD}${agent_name}${NC}"
+        if [[ -n "$yaml_name" ]]; then
+            echo -e "  Name: ${CYAN}$yaml_name${NC}"
+        fi
+        if [[ -n "$yaml_desc" ]]; then
+            echo -e "  ${yaml_desc}..."
+        fi
+        echo
+
+        ((agent_count++))
+    done < <(find "$agents_source" -maxdepth 1 -type f -name "*.md" -print0 2>/dev/null)
+
+    if [[ "$agent_count" -eq 0 ]]; then
+        echo -e "${YELLOW}No agent files found.${NC}"
+        echo
+        echo -e "To create an agent, add a .md file to: ${CYAN}config/claude/agents/${NC}"
+        echo -e "See ${CYAN}config/claude/agents/README.md${NC} for format details."
+    else
+        echo -e "${GREEN}Total: $agent_count agent(s)${NC}"
+        echo
+        echo -e "To install: ${CYAN}./install.sh --agents${NC}"
+    fi
+}
+
+install_claude_agents() {
+    if [[ "$INSTALL_AGENTS" == "false" ]]; then
+        log INFO "Skipping Claude Code agents (--no-agents specified)"
+        return
+    fi
+
+    log INFO "Setting up Claude Code agents..."
+
+    local agents_source="${DOTFILES_DIR}/config/claude/agents"
+    local agents_dest="${HOME}/.claude/agents"
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log INFO "[DRY RUN] Would create symlink: $agents_dest -> $agents_source"
+        if [[ -d "$agents_dest" ]] && [[ ! -L "$agents_dest" ]]; then
+            local existing_count=$(find "$agents_dest" -maxdepth 1 -type f -name "*.md" 2>/dev/null | wc -l)
+            if [[ "$existing_count" -gt 0 ]]; then
+                log INFO "[DRY RUN] Would migrate $existing_count existing agent(s) to repository"
+            fi
+        fi
+        return
+    fi
+
+    # Check if source directory exists
+    if [[ ! -d "$agents_source" ]]; then
+        log WARN "No agents directory found at $agents_source"
+        return
+    fi
+
+    # Ensure parent directory exists
+    mkdir -p "${HOME}/.claude"
+
+    # Handle existing agents directory/symlink
+    if [[ -L "$agents_dest" ]]; then
+        # It's already a symlink - check where it points
+        local current_target=$(readlink "$agents_dest")
+        if [[ "$current_target" == "$agents_source" ]]; then
+            log INFO "Agent symlink already correctly configured"
+            log INFO "Edit agents in either location: $agents_dest or $agents_source"
+            return
+        else
+            log INFO "Updating existing symlink from $current_target to $agents_source"
+            rm "$agents_dest"
+        fi
+    elif [[ -d "$agents_dest" ]]; then
+        # It's a real directory - check for existing agent files to migrate
+        local agent_files=$(find "$agents_dest" -maxdepth 1 -type f -name "*.md" 2>/dev/null | wc -l)
+
+        if [[ "$agent_files" -gt 0 ]]; then
+            log INFO "Found $agent_files existing agent(s) in $agents_dest"
+            log INFO "These will be migrated to the repository for version control"
+
+            # Ask for confirmation in interactive mode
+            if [[ "$FORCE_INSTALL" == "false" ]] && [[ "$NON_INTERACTIVE" == "false" ]]; then
+                read -p "Migrate existing agents to repository at $agents_source? [Y/n] " -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Nn]$ ]]; then
+                    log WARN "Skipping agent setup. Existing agents directory preserved."
+                    return
+                fi
+            fi
+
+            # Migrate files to repository
+            while IFS= read -r -d '' agent_file; do
+                local agent_name=$(basename "$agent_file")
+                local dest_file="$agents_source/$agent_name"
+
+                if [[ -f "$dest_file" ]]; then
+                    # File exists in repo - create backup
+                    cp "$dest_file" "$dest_file.backup.$(date +%Y%m%d_%H%M%S)"
+                    log INFO "Backed up existing $agent_name in repository"
+                fi
+
+                cp "$agent_file" "$dest_file"
+                log SUCCESS "Migrated: $agent_name → repository"
+            done < <(find "$agents_dest" -maxdepth 1 -type f -name "*.md" -print0 2>/dev/null)
+
+            log SUCCESS "Migrated $agent_files agent(s) to $agents_source"
+        fi
+
+        # Backup and remove existing directory
+        local backup_path="$agents_dest.backup.$(date +%Y%m%d_%H%M%S)"
+        mv "$agents_dest" "$backup_path"
+        log INFO "Backed up existing directory to $backup_path"
+    elif [[ -e "$agents_dest" ]]; then
+        # It's a file or something else (unusual case)
+        log WARN "$agents_dest exists but is not a directory or symlink"
+        local backup_path="$agents_dest.backup.$(date +%Y%m%d_%H%M%S)"
+        mv "$agents_dest" "$backup_path"
+        log INFO "Backed up to $backup_path"
+    fi
+
+    # Create the symlink
+    ln -s "$agents_source" "$agents_dest"
+    log SUCCESS "Created symlink: $agents_dest -> $agents_source"
+    log INFO "Agents are now synced! Edit in either location:"
+    log INFO "  - Repository: $agents_source"
+    log INFO "  - Home: $agents_dest"
+    log INFO "Changes in either location are automatically reflected in both"
+}
+
 run_verification() {
     log INFO "Running verification..."
 
@@ -1287,6 +1454,7 @@ main() {
             install_neovim
             install_development_tools
             install_fonts
+            install_claude_agents
 
             # Run verification
             run_verification
@@ -1299,6 +1467,9 @@ main() {
             ;;
         version)
             show_installed_version
+            ;;
+        list-agents)
+            list_claude_agents
             ;;
     esac
 }
