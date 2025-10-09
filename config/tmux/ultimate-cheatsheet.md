@@ -8,6 +8,7 @@
 - [Git Commands](#git-commands)
 - [Modern CLI Tools](#modern-cli-tools)
 - [System Management](#system-management)
+- [AB Method Workflow System](#ab-method-workflow-system)
 - [Development Tools](#development-tools)
 
 ---
@@ -933,6 +934,304 @@ If you prefer normal shell behavior (emacs mode):
 | `curl -I https://example.com` | Check headers |
 | `wget -c url` | Download with resume |
 | `rsync -avz src/ dest/` | Sync directories |
+
+---
+
+# AB Method Workflow System
+
+## Overview
+AB Method is an AI-powered workflow management system for Claude Code that transforms complex development projects into focused, incremental "missions". It provides specialized agents and slash commands to manage the complete development lifecycle with automatic documentation.
+
+## Installation
+
+**IMPORTANT:** AB Method is installed **per-project**, not globally. You must run the setup in each project where you want to use it.
+
+### Setup in Your Project
+```bash
+# Navigate to your project
+cd /path/to/your/project
+
+# Run AB Method setup (interactive)
+npx ab-method
+
+# Or non-interactive
+npx ab-method --yes
+```
+
+This will:
+- Install slash commands in `.claude/commands/`
+- Create workflow structure in `.claude/`
+- Set up specialized agents
+- Initialize project configuration
+
+### Verify Installation
+```bash
+# Check if commands were installed
+ls .claude/commands/
+
+# You should see:
+# create-task.md, resume-task.md, create-mission.md, etc.
+```
+
+**Note:** The slash commands will only appear in Claude Code sessions within that specific project directory.
+
+## Core Concepts
+
+### Task Stages
+Tasks progress through these stages:
+- **Brainstormed** - Initial ideas and requirements
+- **Validated** - Requirements validated and refined
+- **In Development** - Active implementation
+- **Testing** - Comprehensive testing phase
+- **Completed** - Finished and deployed
+
+### Missions
+Missions are focused, incremental work units that represent a specific piece of development work. They follow these principles:
+- **One task at a time** - Focus on single objective
+- **Incremental progression** - Small, manageable steps
+- **Backend-first approach** - API before UI
+- **Continuous documentation** - Auto-generated architecture docs
+- **Context conservation** - Maintains full project context
+
+## Slash Commands (10 Total)
+
+### Task Management
+| Command | Purpose | Usage |
+|---------|---------|-------|
+| `/create-task` | Create new task with technical details | Start new feature or bug fix |
+| `/resume-task` | Resume paused or incomplete tasks | Continue previous work |
+
+### Mission Operations
+| Command | Purpose | Usage |
+|---------|---------|-------|
+| `/create-mission` | Transform task into focused mission | Convert validated task to actionable mission |
+| `/resume-mission` | Continue incomplete missions | Resume work on existing mission |
+| `/test-mission` | Create comprehensive test suite | Add tests for completed mission |
+
+### Project Analysis
+| Command | Purpose | Usage |
+|---------|---------|-------|
+| `/analyze-project` | Complete project analysis | Get full codebase overview |
+| `/analyze-frontend` | Frontend architecture analysis | Review UI/UX structure |
+| `/analyze-backend` | Backend services analysis | Review API and services |
+| `/update-architecture` | Maintain architecture docs | Sync docs with code changes |
+
+### Workflow Control
+| Command | Purpose | Usage |
+|---------|---------|-------|
+| `/ab-master` | Traditional master controller | Guided workflow for beginners |
+
+## Workflow Styles
+
+### 1. Quick Access Style (Experienced Users)
+Direct, targeted commands for maximum control:
+```bash
+# Create and start working
+/create-task
+# ... describe feature ...
+/create-mission
+# ... implement ...
+/test-mission
+```
+
+**Advantages:**
+- Faster execution
+- Granular control over each step
+- Targeted for specific needs
+- More flexible workflow
+
+### 2. Traditional Controller Style (Beginners)
+Guided workflow with `/ab-master`:
+```bash
+# Start guided workflow
+/ab-master create-new-feature
+# System provides step-by-step guidance
+# System explains each decision point
+```
+
+**Advantages:**
+- Step-by-step guidance
+- Explains each stage
+- Better for learning
+- Ensures best practices
+
+## Specialized Agents
+
+AB Method includes built-in specialized agents:
+
+| Agent | Purpose | Use When |
+|-------|---------|----------|
+| `shadcn-ui-adapter` | Component library integration | Building UI with shadcn/ui |
+| `nextjs-backend-architect` | Next.js API design | Creating Next.js backends |
+| `vitest-component-tester` | Component testing | Testing React components |
+| `playwright-e2e-tester` | End-to-end testing | Full user flow testing |
+
+**Note:** These agents work seamlessly with Claude Code's native agents.
+
+## Typical Workflows
+
+### Creating a New Feature
+```bash
+# 1. Create the task
+/create-task
+# Describe: "Add user authentication with email/password"
+
+# 2. System validates and refines requirements
+# (Automatic validation stage)
+
+# 3. Create mission for backend
+/create-mission
+# Mission: "Implement authentication API endpoints"
+
+# 4. Work completes automatically with specialized agents
+
+# 5. Test the implementation
+/test-mission
+
+# 6. Create mission for frontend
+/create-mission
+# Mission: "Build login/signup UI components"
+
+# 7. Update documentation
+/update-architecture
+```
+
+### Resuming Work
+```bash
+# Resume paused task
+/resume-task
+# Shows list of incomplete tasks, select one
+
+# Or resume specific mission
+/resume-mission
+# Shows list of incomplete missions, select one
+```
+
+### Project Analysis
+```bash
+# Get full project overview
+/analyze-project
+# Generates comprehensive architecture documentation
+
+# Focus on specific areas
+/analyze-frontend  # UI/UX structure
+/analyze-backend   # API services
+
+# Keep docs current
+/update-architecture  # After major changes
+```
+
+## Automatic Documentation
+
+AB Method automatically generates and maintains:
+- **Architecture documents** - Overall system design
+- **Agent usage logs** - Which agents were used and why
+- **Mission history** - Complete development timeline
+- **Technical context** - Comprehensive codebase understanding
+
+**Location:** Documentation is stored in `.claude/` directory within your project.
+
+## Best Practices
+
+### 1. Task Creation
+- Be specific about requirements
+- Include acceptance criteria
+- Consider edge cases upfront
+- Think about testing needs
+
+### 2. Mission Planning
+- Keep missions small and focused
+- Follow backend-first approach
+- One mission per feature/fix
+- Complete before starting next
+
+### 3. Testing Strategy
+- Use `/test-mission` after implementation
+- Include unit, integration, and e2e tests
+- Test happy path and edge cases
+- Validate with real scenarios
+
+### 4. Documentation Hygiene
+- Run `/update-architecture` after major changes
+- Review generated docs periodically
+- Keep architecture current with code
+- Use analysis commands for new team members
+
+### 5. Context Management
+- Complete one mission before starting another
+- Use `/resume-task` instead of creating duplicates
+- Leverage automatic documentation
+- Review mission history before resuming
+
+## Integration with Development Setup
+
+AB Method integrates seamlessly with this setup:
+
+| Feature | Integration |
+|---------|-------------|
+| **Neovim** | Edit generated docs in Neovim |
+| **Git** | Commit mission changes incrementally |
+| **tmux** | Run missions in dedicated panes |
+| **Claude Agents** | Works with custom agents in `~/.claude/agents/` |
+
+### Example tmux + AB Method Workflow
+```bash
+# Window 1: Development (Neovim)
+nvim .
+
+# Window 2: Mission execution
+/create-mission
+
+# Window 3: Testing
+npm test --watch
+
+# Window 4: Git tracking
+lazygit
+```
+
+## Troubleshooting
+
+### Mission Won't Start
+- Ensure task is in "Validated" stage
+- Check for incomplete previous missions
+- Verify project structure is recognized
+
+### Documentation Not Updating
+- Run `/update-architecture` manually
+- Check `.claude/` directory permissions
+- Verify git repository is initialized
+
+### Agent Not Responding
+- Restart Claude Code
+- Check network connection
+- Verify Node.js/npx installation
+
+## Quick Reference
+
+### Most Common Commands
+```bash
+/create-task       # Start new work
+/create-mission    # Begin implementation
+/test-mission      # Add comprehensive tests
+/update-architecture  # Sync documentation
+```
+
+### Complete Feature Development
+```bash
+/create-task → /create-mission → /test-mission → /update-architecture
+```
+
+### Resume Previous Work
+```bash
+/resume-task  # Or /resume-mission
+```
+
+### Project Onboarding
+```bash
+/analyze-project  # Full overview
+/analyze-backend  # API review
+/analyze-frontend # UI review
+```
 
 ---
 

@@ -933,6 +933,21 @@ install_development_tools() {
         log SUCCESS "happy-coder is already installed"
     fi
 
+    # Install AB Method (Claude Code workflow management)
+    log INFO "Installing AB Method workflow management system..."
+    if command -v npm &> /dev/null && command -v npx &> /dev/null; then
+        # AB Method is installed via npx, which sets up the workflow
+        # Run it in the dotfiles directory to set up the workflow here
+        (cd "$DOTFILES_DIR" && npx ab-method --yes 2>&1) || {
+            log WARNING "Failed to install AB Method"
+            log INFO "You can install it manually by running: npx ab-method"
+        }
+        log SUCCESS "AB Method workflow installed"
+    else
+        log WARNING "npm/npx not found. AB Method requires Node.js"
+        log INFO "Install Node.js first, then run: npx ab-method"
+    fi
+
     # Install language version managers
     # fnm (Fast Node Manager)
     if ! command -v fnm &> /dev/null; then
