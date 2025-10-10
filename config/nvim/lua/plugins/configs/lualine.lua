@@ -146,6 +146,11 @@ lualine.setup({
     disabled_filetypes = { "alpha", "dashboard", "NvimTree", "Outline" },
     always_divide_middle = true,
     globalstatus = true,
+    refresh = {
+      statusline = 1000,  -- Reduced update frequency from default (improves performance)
+      tabline = 1000,
+      winbar = 1000,
+    },
   },
   sections = {
     lualine_a = { mode },

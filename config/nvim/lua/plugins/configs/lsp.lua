@@ -150,7 +150,7 @@ vim.defer_fn(function()
     -- Custom configuration for gopls (Go language server)
     ["gopls"] = function()
       local lspconfig = require("lspconfig")
-      
+
       lspconfig.gopls.setup({
         capabilities = capabilities,
         on_attach = on_attach,
@@ -158,19 +158,29 @@ vim.defer_fn(function()
           gopls = {
             analyses = {
               unusedparams = true,
-              shadow = true,
+              shadow = false, -- Disabled for performance
             },
             staticcheck = true,
             gofumpt = true,
-            semanticTokens = false, -- Disable semantic tokens for performance
-            -- Semantic highlighting disabled for better performance
+            semanticTokens = false, -- Disabled for performance
+            -- All hints disabled for better performance
             hints = {
-              assignVariableTypes = true,
-              compositeLiteralFields = true,
-              constantValues = true,
-              functionTypeParameters = true,
-              parameterNames = true,
-              rangeVariableTypes = true,
+              assignVariableTypes = false,
+              compositeLiteralFields = false,
+              constantValues = false,
+              functionTypeParameters = false,
+              parameterNames = false,
+              rangeVariableTypes = false,
+            },
+            -- Reduce memory usage
+            codelenses = {
+              gc_details = false,
+              generate = false,
+              regenerate_cgo = false,
+              test = false,
+              tidy = false,
+              upgrade_dependency = false,
+              vendor = false,
             },
           },
         },
@@ -223,23 +233,46 @@ local none_ls = require("null-ls")
 
 none_ls.setup({
   sources = {
-    -- Formatting
+    -- Formatting - with conditional loading to reduce overhead
     none_ls.builtins.formatting.prettier.with({
       filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact", "json", "css", "scss", "html", "markdown" },
+      prefer_local = "node_modules/.bin",
     }),
-    none_ls.builtins.formatting.stylua,
-    none_ls.builtins.formatting.black,
-    none_ls.builtins.formatting.isort,
+    none_ls.builtins.formatting.stylua.with({
+      condition = function(utils)
+        return utils.root_has_file({ "stylua.toml", ".stylua.toml" })
+      end,
+    }),
+    none_ls.builtins.formatting.black.with({
+      condition = function(utils)
+        return utils.root_has_file({ "pyproject.toml", "setup.py" })
+      end,
+    }),
+    none_ls.builtins.formatting.isort.with({
+      condition = function(utils)
+        return utils.root_has_file({ "pyproject.toml", "setup.py" })
+      end,
+    }),
     none_ls.builtins.formatting.shfmt,
-    none_ls.builtins.formatting.gofmt,       -- Go formatting
-    none_ls.builtins.formatting.goimports,   -- Go imports
-    
-    -- Diagnostics
+    none_ls.builtins.formatting.gofmt,
+    none_ls.builtins.formatting.goimports,
+
+    -- Diagnostics - with conditional loading
     none_ls.builtins.diagnostics.shellcheck,
-    none_ls.builtins.diagnostics.hadolint,
-    none_ls.builtins.diagnostics.eslint,     -- JavaScript/TypeScript linting
-    none_ls.builtins.diagnostics.flake8,     -- Python linting
-    none_ls.builtins.diagnostics.golangci_lint, -- Go linting
+    none_ls.builtins.diagnostics.hadolint.with({
+      condition = function(utils)
+        return utils.root_has_file({ "Dockerfile" })
+      end,
+    }),
+    none_ls.builtins.diagnostics.eslint.with({
+      condition = function(utils)
+        return utils.root_has_file({ ".eslintrc", ".eslintrc.js", ".eslintrc.json", "eslint.config.js" })
+      end,
+      prefer_local = "node_modules/.bin",
+    }),
+    -- Disabled heavy linters that slow down editing
+    -- none_ls.builtins.diagnostics.flake8,
+    -- none_ls.builtins.diagnostics.golangci_lint,
   },
   on_attach = function(client, bufnr)
     on_attach(client, bufnr)
@@ -250,5 +283,16 @@ none_ls.setup({
         navic.attach(client, bufnr)
       end
     end
+  end,
+  -- Performance optimizations
+  debounce = 250,
+  debug = false,
+  should_attach = function(bufnr)
+    local max_filesize = 100 * 1024 -- 100 KB
+    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(bufnr))
+    if ok and stats and stats.size > max_filesize then
+      return false
+    end
+    return true
   end,
 })

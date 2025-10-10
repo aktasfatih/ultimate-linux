@@ -52,18 +52,21 @@ opt.smartcase = true
 
 -- Performance optimizations for cursor responsiveness
 opt.lazyredraw = false -- Disabled for Noice compatibility
-opt.updatetime = 100   -- Reduced for better responsiveness (was 300)
+opt.updatetime = 250   -- Balanced for responsiveness and performance
 opt.timeoutlen = 300
 opt.redrawtime = 1500  -- Reduce redraw time
 opt.ttyfast = true     -- Indicate fast terminal connection
-opt.synmaxcol = 200    -- Limit syntax highlighting to 200 columns for performance
+opt.synmaxcol = 240    -- Limit syntax highlighting to 240 columns for performance
 
 -- Fix for cursor flickering/responsiveness issues
-vim.g.cursorhold_updatetime = 100
+vim.g.cursorhold_updatetime = 250
 
 -- Terminal/tmux cursor flickering fixes
 vim.opt.guicursor = ""  -- Disable cursor styling to prevent flickering
-vim.opt.ttimeoutlen = 0 -- Reduce key sequence timeout for better responsiveness
+vim.opt.ttimeoutlen = 10 -- Reduce key sequence timeout for better responsiveness
+
+-- LSP performance tuning
+vim.lsp.set_log_level("error") -- Reduce LSP logging overhead
 
 -- Neovim specific
 opt.shadafile = vim.fn.stdpath("data") .. "/shada/main.shada"

@@ -15,7 +15,6 @@ return {
           gitsigns = true,
           nvimtree = true,
           treesitter = true,
-          notify = true,
           mason = true,
           telescope = true,
           which_key = true,
@@ -150,7 +149,6 @@ return {
     },
     dependencies = {
       "MunifTanjim/nui.nvim",
-      "rcarriga/nvim-notify",
     }
   },
 
@@ -241,21 +239,10 @@ return {
     end,
   },
 
-  -- Highlight matching words (optimized)
+  -- Highlight matching words (DISABLED - causes significant lag)
   {
     "RRethy/vim-illuminate",
-    event = { "BufReadPost", "BufNewFile" },
-    enabled = true,
-    config = function()
-      require("illuminate").configure({
-        delay = 200,              -- Increased delay to reduce CPU usage
-        large_file_cutoff = 1500, -- Reduced cutoff for better performance
-        large_file_overrides = {
-          providers = { "lsp" },
-        },
-        max_file_lines = 1000,    -- Don't illuminate very large files
-      })
-    end,
+    enabled = false, -- Disabled due to performance impact on cursor movement
   },
 
   -- Treesitter
@@ -306,23 +293,31 @@ return {
 
   -- Enhanced Go syntax highlighting (lazy loaded)
   {
-    "ray-x/go.nvim", 
+    "ray-x/go.nvim",
     dependencies = {
       "ray-x/guihua.lua",
       "nvim-treesitter/nvim-treesitter",
     },
+    ft = { "go", "gomod" }, -- Lazy load only for Go files
+    build = ':lua require("go.install").update_all_sync()',
     config = function()
       require("go").setup({
-        goimports = "gopls", -- use gopls for imports
+        goimports = "gopls",
         fillstruct = "gopls",
-        dap_debug = false,    -- Disable to improve performance
+        dap_debug = false,
         dap_debug_gui = false,
-        trouble = false,      -- Disable to improve performance
-        luasnip = true,       -- enable snippet
-        icons = {breakpoint = '🧘', currentpos = '🏃'},
+        trouble = false,
+        luasnip = true,
+        lsp_cfg = false, -- Do not override LSP config
+        lsp_gofumpt = false,
+        lsp_on_attach = false,
+        lsp_keymaps = false,
+        lsp_codelens = false,
+        lsp_diag_hdlr = false,
+        lsp_inlay_hints = { enable = false },
+        icons = { breakpoint = '🧘', currentpos = '🏃' },
       })
     end,
-    ft = {"go", 'gomod'},  -- Only load for Go files
   },
 
   -- Mason (load early for commands)
@@ -413,7 +408,13 @@ return {
   -- Telescope
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.5",
+    cmd = "Telescope",
+    keys = {
+      { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
+      { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
+      { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
+      { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
+    },
     dependencies = {
       "nvim-lua/plenary.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
@@ -687,60 +688,6 @@ return {
     end,
   },
 
-  {
-    "rcarriga/nvim-notify",
-    event = "VeryLazy",
-    config = function()
-      local notify = require("notify")
-      notify.setup({
-        -- Animation style
-        stages = "fade_in_slide_out",
-        -- Timeout for notifications
-        timeout = 3000,
-        -- Other options
-        background_colour = "#000000",
-        fps = 30,
-        icons = {
-          DEBUG = "",
-          ERROR = "",
-          INFO = "",
-          TRACE = "✎",
-          WARN = ""
-        },
-      })
-      
-      -- Create a wrapper to handle both old and new API
-      local banned_messages = { "No information available" }
-      vim.notify = function(msg, level, opts)
-        -- Filter out banned messages
-        for _, banned in ipairs(banned_messages) do
-          if msg == banned then
-            return
-          end
-        end
-        
-        -- Handle string levels (old API)
-        if type(level) == "string" then
-          level = vim.log.levels[level:upper()] or vim.log.levels.INFO
-        end
-        
-        -- Handle missing level
-        if type(level) ~= "number" then
-          opts = level
-          level = vim.log.levels.INFO
-        end
-        
-        -- Ensure opts is a table
-        if type(opts) == "string" then
-          opts = { title = opts }
-        elseif type(opts) ~= "table" then
-          opts = {}
-        end
-        
-        notify(msg, level, opts)
-      end
-    end,
-  },
 
   {
     "folke/zen-mode.nvim",
