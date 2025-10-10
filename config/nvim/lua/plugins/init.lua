@@ -113,44 +113,44 @@ return {
   --   end,
   -- },
 
-  -- Better UI for messages, cmdline and popupmenu (only for Neovim 0.10+)
-  {
-    "folke/noice.nvim",
-    event = "VeryLazy",
-    enabled = vim.fn.has('nvim-0.10') == 1,
-    opts = {
-      lsp = {
-        override = {
-          ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-          ["vim.lsp.util.stylize_markdown"] = true,
-          ["cmp.entry.get_documentation"] = true,
-        },
-      },
-      routes = {
-        {
-          filter = {
-            event = "msg_show",
-            any = {
-              { find = "%d+L, %d+B" },
-              { find = "; after #%d+" },
-              { find = "; before #%d+" },
-            },
-          },
-          view = "mini",
-        },
-      },
-      presets = {
-        bottom_search = true,
-        command_palette = true,
-        long_message_to_split = true,
-        inc_rename = false,
-        lsp_doc_border = false,
-      },
-    },
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-    }
-  },
+  -- Better UI for messages, cmdline and popupmenu (DISABLED - causes performance issues)
+  -- {
+  --   "folke/noice.nvim",
+  --   event = "VeryLazy",
+  --   enabled = false, -- Disabled due to performance impact with notifications
+  --   opts = {
+  --     lsp = {
+  --       override = {
+  --         ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+  --         ["vim.lsp.util.stylize_markdown"] = true,
+  --         ["cmp.entry.get_documentation"] = true,
+  --       },
+  --     },
+  --     routes = {
+  --       {
+  --         filter = {
+  --           event = "msg_show",
+  --           any = {
+  --             { find = "%d+L, %d+B" },
+  --             { find = "; after #%d+" },
+  --             { find = "; before #%d+" },
+  --           },
+  --         },
+  --         view = "mini",
+  --       },
+  --     },
+  --     presets = {
+  --       bottom_search = true,
+  --       command_palette = true,
+  --       long_message_to_split = true,
+  --       inc_rename = false,
+  --       lsp_doc_border = false,
+  --     },
+  --   },
+  --   dependencies = {
+  --     "MunifTanjim/nui.nvim",
+  --   }
+  -- },
 
   -- Winbar with context (requires Neovim 0.10+ for proper winbar support)
   {
@@ -338,7 +338,8 @@ return {
     end,
   },
 
-  -- Mason-LSPConfig (bridge between mason and lspconfig)
+  -- Mason-LSPConfig (bridge between mason and native vim.lsp.config)
+  -- Updated for Mason 2.0 + Neovim 0.11+ compatibility
   {
     "williamboman/mason-lspconfig.nvim",
     dependencies = {
@@ -349,7 +350,7 @@ return {
       require("mason-lspconfig").setup({
         ensure_installed = {
           "lua_ls",
-          "ts_ls", 
+          "ts_ls",
           "pyright",
           "rust_analyzer",
           "gopls",
@@ -364,14 +365,16 @@ return {
           "eslint",
           "prismals",
         },
-        automatic_installation = false,  -- Disabled for better performance
+        -- Mason 2.0: automatic_enable is now default (true)
+        -- This automatically calls vim.lsp.enable() for installed servers
+        -- No need for setup_handlers or automatic_installation anymore
       })
-      
-      -- setup_handlers will be called in the LSP config file
     end,
   },
 
-  -- LSP (updated for compatibility with modern gopls)
+  -- LSP (Neovim 0.11+ native vim.lsp.config)
+  -- nvim-lspconfig is still used as a data source for server configs
+  -- but we use the native vim.lsp.config() and vim.lsp.enable() APIs
   {
     "neovim/nvim-lspconfig",
     dependencies = {

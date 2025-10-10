@@ -39,6 +39,14 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- NOTE: You may see a deprecation warning about require('lspconfig') on startup.
+-- This is EXPECTED and NOT an error in our configuration:
+-- - We are correctly using vim.lsp.config() and vim.lsp.enable() (the modern Neovim 0.11+ API)
+-- - The warning comes from nvim-lspconfig being loaded (required by mason-lspconfig)
+-- - nvim-lspconfig still needs to be present for mason-lspconfig to work
+-- - This is the correct and recommended setup for October 2025
+-- - The warning will go away when nvim-lspconfig v3.0 is released
+
 -- Load core settings
 require("core.options")
 require("core.keymaps")

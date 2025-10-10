@@ -1,11 +1,8 @@
--- LSP Configuration
+-- LSP Configuration - Neovim 0.11+ Native API
+-- Using vim.lsp.config() and vim.lsp.enable() instead of deprecated lspconfig framework
 
 -- Setup neodev for Neovim Lua development
 require("neodev").setup()
-
--- Mason setup (now handled in plugins/init.lua)
-
--- Mason LSP config (now handled in plugins/init.lua)
 
 -- Mason DAP (Debug Adapter Protocol) config
 require("mason-nvim-dap").setup({
@@ -36,7 +33,7 @@ require("mason-nvim-dap").setup({
           mode = "test",
           program = "${file}",
         },
-        -- works with go.mod packages and sub packages 
+        -- works with go.mod packages and sub packages
         {
           type = "delve",
           name = "Debug test (go.mod)",
@@ -50,18 +47,13 @@ require("mason-nvim-dap").setup({
   },
 })
 
--- LSP capabilities
+-- LSP capabilities for autocompletion
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
--- LSP on_attach
+-- LSP on_attach function for keymaps
 local on_attach = function(client, bufnr)
   local opts = { noremap = true, silent = true, buffer = bufnr }
-  
-  -- Disable semantic highlighting to improve performance (causes cursor lag)
-  -- if client.server_capabilities.semanticTokensProvider then
-  --   vim.lsp.semantic_tokens.start(bufnr, client.id)
-  -- end
-  
+
   -- Attach navic if available and Neovim is 0.10+
   if vim.fn.has('nvim-0.10') == 1 and client.server_capabilities.documentSymbolProvider then
     local navic_ok, navic = pcall(require, "nvim-navic")
@@ -90,106 +82,84 @@ local on_attach = function(client, bufnr)
   vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, opts)
 end
 
--- LSP settings (servers are now auto-configured by mason-lspconfig)
--- Setup handlers for automatic server configuration
--- Use vim.defer_fn to ensure mason-lspconfig is fully loaded
-vim.defer_fn(function()
-  local mason_lspconfig = require("mason-lspconfig")
-  mason_lspconfig.setup_handlers({
-    -- Default handler for all servers
-    function(server_name)
-      local lspconfig = require("lspconfig")
-      
-      lspconfig[server_name].setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-    end,
-    
-    -- Custom configuration for lua_ls
-    ["lua_ls"] = function()
-      local lspconfig = require("lspconfig")
-      
-      lspconfig.lua_ls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = { "vim" },
-            },
-            workspace = {
-              library = vim.api.nvim_get_runtime_file("", true),
-              checkThirdParty = false,
-            },
-            telemetry = {
-              enable = false,
-            },
-          },
-        },
-      })
-    end,
-    
-    -- Custom configuration for rust_analyzer
-    ["rust_analyzer"] = function()
-      local lspconfig = require("lspconfig")
-      
-      lspconfig.rust_analyzer.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-        settings = {
-          ["rust-analyzer"] = {
-            checkOnSave = {
-              command = "clippy",
-            },
-          },
-        },
-      })
-    end,
-    
-    -- Custom configuration for gopls (Go language server)
-    ["gopls"] = function()
-      local lspconfig = require("lspconfig")
+-- Global LSP configuration defaults using vim.lsp.config()
+-- This applies to all servers unless overridden
+vim.lsp.config('*', {
+  capabilities = capabilities,
+  on_attach = on_attach,
+})
 
-      lspconfig.gopls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-        settings = {
-          gopls = {
-            analyses = {
-              unusedparams = true,
-              shadow = false, -- Disabled for performance
-            },
-            staticcheck = true,
-            gofumpt = true,
-            semanticTokens = false, -- Disabled for performance
-            -- All hints disabled for better performance
-            hints = {
-              assignVariableTypes = false,
-              compositeLiteralFields = false,
-              constantValues = false,
-              functionTypeParameters = false,
-              parameterNames = false,
-              rangeVariableTypes = false,
-            },
-            -- Reduce memory usage
-            codelenses = {
-              gc_details = false,
-              generate = false,
-              regenerate_cgo = false,
-              test = false,
-              tidy = false,
-              upgrade_dependency = false,
-              vendor = false,
-            },
-          },
-        },
-      })
-    end,
-  })
-end, 0)
+-- Configure specific LSP servers with custom settings using vim.lsp.config()
+-- These configurations override the global defaults for specific servers
 
--- Diagnostic config
+-- Lua Language Server
+vim.lsp.config('lua_ls', {
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { "vim" },
+      },
+      workspace = {
+        library = vim.api.nvim_get_runtime_file("", true),
+        checkThirdParty = false,
+      },
+      telemetry = {
+        enable = false,
+      },
+    },
+  },
+})
+
+-- Rust Analyzer
+vim.lsp.config('rust_analyzer', {
+  settings = {
+    ["rust-analyzer"] = {
+      checkOnSave = {
+        command = "clippy",
+      },
+    },
+  },
+})
+
+-- Go Language Server (gopls) - Performance optimized
+vim.lsp.config('gopls', {
+  settings = {
+    gopls = {
+      analyses = {
+        unusedparams = true,
+        shadow = false, -- Disabled for performance
+      },
+      staticcheck = true,
+      gofumpt = true,
+      semanticTokens = false, -- Disabled for performance
+      -- All hints disabled for better performance
+      hints = {
+        assignVariableTypes = false,
+        compositeLiteralFields = false,
+        constantValues = false,
+        functionTypeParameters = false,
+        parameterNames = false,
+        rangeVariableTypes = false,
+      },
+      -- Reduce memory usage
+      codelenses = {
+        gc_details = false,
+        generate = false,
+        regenerate_cgo = false,
+        test = false,
+        tidy = false,
+        upgrade_dependency = false,
+        vendor = false,
+      },
+    },
+  },
+})
+
+-- Enable LSP servers automatically when installed by Mason
+-- This is handled by mason-lspconfig with automatic_enable = true (default in v2.0+)
+-- No need for manual vim.lsp.enable() calls - servers will auto-start when installed
+
+-- Diagnostic configuration
 local diag_config = {
   virtual_text = true,
   signs = true,
@@ -217,19 +187,6 @@ end
 
 -- None-ls setup (successor to null-ls)
 local none_ls = require("null-ls")
--- Commented out mason-null-ls auto-setup to improve performance
--- require("mason-null-ls").setup({
---   ensure_installed = {
---     "prettier",
---     "stylua", 
---     "black",
---     "isort",
---     "shfmt",
---     "shellcheck",
---     "hadolint",
---   },
---   automatic_installation = false,
--- })
 
 none_ls.setup({
   sources = {
