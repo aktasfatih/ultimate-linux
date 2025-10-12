@@ -917,22 +917,6 @@ install_development_tools() {
         log SUCCESS "Claude Code CLI is already installed"
     fi
 
-    # Install happy-coder (Claude Code wrapper)
-    if ! command -v happy &> /dev/null; then
-        log INFO "Installing happy-coder..."
-        if command -v npm &> /dev/null; then
-            npm install -g happy-coder || {
-                log WARNING "Failed to install happy-coder via npm"
-                log INFO "You can install it manually with: npm install -g happy-coder"
-            }
-        else
-            log WARNING "npm not found. happy-coder requires Node.js"
-            log INFO "Install Node.js first, then run: npm install -g happy-coder"
-        fi
-    else
-        log SUCCESS "happy-coder is already installed"
-    fi
-
     # Install AB Method (Claude Code workflow management)
     log INFO "Installing AB Method workflow management system..."
     if command -v npm &> /dev/null && command -v npx &> /dev/null; then
