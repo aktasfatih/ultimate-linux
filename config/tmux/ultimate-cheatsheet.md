@@ -672,6 +672,24 @@ function greet(name) {
 
 # Zsh/Shell Shortcuts
 
+## Plugin Manager: zinit
+**This setup uses zinit with turbo mode for fast, async plugin loading**
+
+### Powerlevel10k Configuration
+| Command | Action | Usage |
+|---------|--------|-------|
+| `p10k configure` | Configure prompt | Run configuration wizard |
+| `p10k segment` | Test segment | Debug prompt segments |
+
+### zinit Plugin Management
+| Command | Action | Usage |
+|---------|--------|-------|
+| `zinit update` | Update all plugins | Keep plugins current |
+| `zinit update --all` | Update zinit + plugins | Full update |
+| `zinit list` | List installed plugins | See what's loaded |
+| `zinit status` | Check plugin status | Debug loading |
+| `zinit self-update` | Update zinit itself | Update manager |
+
 ### Navigation
 | Key | Action | Context |
 |-----|--------|---------|
@@ -697,13 +715,16 @@ function greet(name) {
 ### History
 | Key | Action | Description |
 |-----|--------|-------------|
-| `Ctrl+r` | Search history | Interactive search |
+| `Ctrl+r` | Search history | Interactive search (fzf-powered) |
+| `↑` / `↓` | History substring search | Search as you type (partial matches) |
 | `Ctrl+p` | Previous command | Up arrow alternative |
 | `Ctrl+n` | Next command | Down arrow alternative |
 | `!!` | Last command | Repeat last |
 | `!$` | Last argument | Reuse argument |
 | `!*` | All arguments | From last command |
 | `sudo !!` | Last command as root | Quick sudo |
+
+**Note:** With history-substring-search, typing part of a command and pressing `↑` will search through history for matching commands.
 
 ### FZF Integration
 | Key | Action | What it does |
@@ -1400,7 +1421,8 @@ git log --oneline | fzf | awk '{print $1}' | xargs git show
 | Tmux | `~/.tmux.conf` | `~/.tmux.conf.local` |
 | Neovim | `~/.config/nvim/` | `~/.config/nvim/lua/user/` |
 | Git | `~/.gitconfig` | Project `.git/config` |
-| Starship | `~/.config/starship.toml` | - |
+| Powerlevel10k | `~/.p10k.zsh` | - |
+| zinit | `~/.local/share/zinit/` | - |
 | Claude Agents | `~/.claude/agents/` | Symlinked to repo |
 
 ### Claude Code Agent Management
