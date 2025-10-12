@@ -1,4 +1,4 @@
-# Ultimate Linux Development Setup - Zsh Configuration
+# Ultimate Linux Development Setup - Zsh Configuration (zinit + Powerlevel10k)
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
@@ -13,56 +13,23 @@ fi
 # Performance profiling (uncomment to debug slow startup)
 # zmodload zsh/zprof
 
-# Oh My Zsh Configuration
-export ZSH="$HOME/.oh-my-zsh"
+### zinit installation and setup ###
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
-# Theme - Using Starship prompt instead of Oh My Zsh theme
-ZSH_THEME=""
+# Install zinit if not already installed
+if [[ ! -d $ZINIT_HOME ]]; then
+   mkdir -p "$(dirname $ZINIT_HOME)"
+   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+fi
 
-# Plugin configuration before loading
-zstyle ':omz:plugins:nvm' lazy yes
-zstyle ':omz:plugins:nvm' autoload yes
+# Load zinit
+source "${ZINIT_HOME}/zinit.zsh"
 
-# Plugins - Optimized for performance
-plugins=(
-    # Core functionality
-    git
-    z
-    fzf
-    extract
-    sudo
-    command-not-found
-    colored-man-pages
-    
-    # Enhanced functionality (lazy loaded)
-    docker
-    docker-compose
-    kubectl
-    npm
-    pip
-    
-    # Must be last
-    zsh-autosuggestions
-    zsh-syntax-highlighting
-)
+### Powerlevel10k Theme (loaded first for instant prompt) ###
+zinit ice depth=1
+zinit light romkatv/powerlevel10k
 
-# Oh My Zsh settings
-CASE_SENSITIVE="false"
-HYPHEN_INSENSITIVE="true"
-DISABLE_AUTO_UPDATE="false"
-export UPDATE_ZSH_DAYS=7
-DISABLE_MAGIC_FUNCTIONS="false"
-DISABLE_LS_COLORS="false"
-DISABLE_AUTO_TITLE="false"
-ENABLE_CORRECTION="false"
-COMPLETION_WAITING_DOTS="true"
-DISABLE_UNTRACKED_FILES_DIRTY="false"
-HIST_STAMPS="yyyy-mm-dd"
-
-# Load Oh My Zsh
-source $ZSH/oh-my-zsh.sh
-
-# User configuration
+### Essential Zsh Configuration ###
 
 # Environment variables
 export LANG=en_US.UTF-8
@@ -100,7 +67,76 @@ setopt CDABLE_VARS
 setopt EXTENDED_GLOB
 setopt GLOB_DOTS
 
-# Load custom configurations
+# Completion configuration
+autoload -Uz compinit
+# Only check cache once per day for speed
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C
+fi
+
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.cache/zsh/completion
+zstyle ':completion:*' accept-exact '*(N)'
+zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+
+### Core Plugins (loaded immediately) ###
+
+# Oh My Zsh library (essential utilities)
+zinit snippet OMZL::git.zsh
+zinit snippet OMZL::directories.zsh
+zinit snippet OMZL::clipboard.zsh
+zinit snippet OMZL::key-bindings.zsh
+
+# Oh My Zsh plugins
+zinit snippet OMZP::git
+zinit snippet OMZP::sudo
+zinit snippet OMZP::extract
+
+### Turbo-loaded Plugins (lazy loaded for speed) ###
+# These load asynchronously after the prompt appears
+
+# Docker completions and aliases (turbo mode - load after 1 second)
+zinit ice wait'1' lucid as'completion'
+zinit snippet OMZP::docker
+
+# Completions
+zinit ice wait'0a' lucid blockf atpull'zinit creinstall -q .'
+zinit light zsh-users/zsh-completions
+
+# Syntax highlighting (must load before history-substring-search)
+zinit ice wait'0b' lucid atinit'zpcompinit; zpcdreplay'
+zinit light zdharma-continuum/fast-syntax-highlighting
+
+# History substring search (must load AFTER syntax highlighting)
+zinit ice wait'0c' lucid atload'
+    bindkey "^[[A" history-substring-search-up
+    bindkey "^[[B" history-substring-search-down
+'
+zinit light zsh-users/zsh-history-substring-search
+
+# Autosuggestions (load last)
+zinit ice wait'0d' lucid atload'_zsh_autosuggest_start'
+zinit light zsh-users/zsh-autosuggestions
+
+# Colored man pages
+zinit ice wait'0' lucid
+zinit snippet OMZP::colored-man-pages
+
+# z (directory jumper)
+zinit ice wait'0' lucid
+zinit snippet OMZP::z
+
+### Auto-suggestions configuration ###
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#666666"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+ZSH_AUTOSUGGEST_USE_ASYNC=true
+
+### Load custom configurations ###
 for config in functions completions key-bindings; do
     [[ -f "$HOME/.config/zsh/${config}.zsh" ]] && source "$HOME/.config/zsh/${config}.zsh"
 done
@@ -108,13 +144,10 @@ done
 # Load universal shell aliases (shared between bash and zsh)
 [[ -f "$HOME/.config/shell/aliases.sh" ]] && source "$HOME/.config/shell/aliases.sh"
 
-# Load zsh-specific aliases (these may override universal ones)
+# Load zsh-specific aliases (but delay pyenv-conflicting ones)
 [[ -f "$HOME/.config/zsh/aliases.zsh" ]] && source "$HOME/.config/zsh/aliases.zsh"
 
-# Note: Modern CLI tool aliases are loaded from config files above
-# Any zsh-specific overrides can be added here if needed
-
-# FZF configuration
+### FZF configuration ###
 if command -v fzf &> /dev/null; then
     export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
     export FZF_DEFAULT_OPTS='
@@ -129,10 +162,10 @@ if command -v fzf &> /dev/null; then
     '
     export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
     export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
-    
+
     # Load FZF key bindings and completion
     [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-    
+
     # Enhanced FZF functions
     # Git commit browser
     fshow() {
@@ -147,106 +180,89 @@ if command -v fzf &> /dev/null; then
     }
 fi
 
-# Zoxide (better cd)
+### Tool Initializations (lazy loaded) ###
+
+# Zoxide (better cd) - lazy load
 if command -v zoxide &> /dev/null; then
     eval "$(zoxide init zsh)"
 fi
 
-# Starship prompt
-if command -v starship &> /dev/null; then
-    eval "$(starship init zsh)"
-fi
-
-# fnm (Fast Node Manager)
-if command -v fnm &> /dev/null; then
-    eval "$(fnm env --use-on-cd)"
-fi
-
-# pyenv
+# Pyenv (lazy load) - only initialize when python/pip/pyenv is called
+# MUST come after aliases are loaded to override pip='pip3' alias
 if command -v pyenv &> /dev/null; then
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)" 2>/dev/null || true
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+
+    # Remove any existing aliases that would conflict with our functions
+    unalias python 2>/dev/null || true
+    unalias pip 2>/dev/null || true
+    unalias pip3 2>/dev/null || true
+
+    # Function to initialize pyenv once
+    _lazy_load_pyenv() {
+        eval "$(command pyenv init -)"
+        if command -v pyenv virtualenv-init &> /dev/null; then
+            eval "$(command pyenv virtualenv-init -)"
+        fi
+    }
+
+    # Lazy load pyenv - removes all three functions and initializes
+    pyenv() {
+        unfunction pyenv python pip 2>/dev/null || true
+        _lazy_load_pyenv
+        pyenv "$@"
+    }
+
+    # Also lazy load for python
+    python() {
+        unfunction pyenv python pip 2>/dev/null || true
+        _lazy_load_pyenv
+        python "$@"
+    }
+
+    # Also lazy load for pip
+    pip() {
+        unfunction pyenv python pip 2>/dev/null || true
+        _lazy_load_pyenv
+        pip "$@"
+    }
 fi
 
 # Rust
 [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 
-# direnv
-if command -v direnv &> /dev/null; then
-    eval "$(direnv hook zsh)"
-fi
-
-# atuin (better history)
-if command -v atuin &> /dev/null; then
-    eval "$(atuin init zsh --disable-up-arrow)"
-fi
-
-# mcfly (smart history search)
-if command -v mcfly &> /dev/null; then
-    eval "$(mcfly init zsh)"
-fi
-
-# Auto-suggestions configuration
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#666666"
-ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-ZSH_AUTOSUGGEST_USE_ASYNC=true
-
-# Syntax highlighting configuration
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
-typeset -A ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[command]='fg=blue,bold'
-ZSH_HIGHLIGHT_STYLES[alias]='fg=cyan,bold'
-ZSH_HIGHLIGHT_STYLES[function]='fg=green,bold'
-ZSH_HIGHLIGHT_STYLES[path]='fg=yellow'
-ZSH_HIGHLIGHT_STYLES[globbing]='fg=magenta'
-
-# Performance optimizations
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path ~/.cache/zsh/completion
-zstyle ':completion:*' accept-exact '*(N)'
-zstyle ':completion:*' use-compctl false
-
-# Auto-notify for long running commands
-# Check for notification command (Linux: notify-send, macOS: osascript)
+### Auto-notify for long running commands ###
 if command -v notify-send &> /dev/null || [[ "$(uname)" == "Darwin" ]]; then
     bgnotify_threshold=10
-    
+
     function bgnotify_begin {
         bgnotify_timestamp=$EPOCHSECONDS
         bgnotify_lastcmd="$1"
         bgnotify_appid="$TERM_SESSION_ID"
     }
-    
+
     function bgnotify_end {
         elapsed=$(( EPOCHSECONDS - bgnotify_timestamp ))
         past_threshold=$(( elapsed >= bgnotify_threshold ))
         if [[ $bgnotify_appid == "$TERM_SESSION_ID" ]] && [[ $past_threshold -eq 1 ]]; then
             if [[ "$(uname)" == "Darwin" ]]; then
-                # macOS notification
                 osascript -e "display notification \"$bgnotify_lastcmd\" with title \"Command completed in ${elapsed}s\""
             else
-                # Linux notification
                 notify-send "Command completed in ${elapsed}s" "$bgnotify_lastcmd"
             fi
         fi
     }
-    
+
     autoload -Uz add-zsh-hook
     add-zsh-hook preexec bgnotify_begin
     add-zsh-hook precmd bgnotify_end
 fi
 
-# Note: Most aliases are loaded from config files above
-# Any additional zsh-specific aliases can be added here
+### Powerlevel10k Configuration ###
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-# Welcome message
-if command -v fastfetch &> /dev/null; then
-    fastfetch
-elif command -v neofetch &> /dev/null; then
-    neofetch
-fi
-
+### Local Configurations ###
 # Load local configuration if exists
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 

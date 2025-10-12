@@ -206,7 +206,9 @@ alias dclean='docker system prune -af'
 
 # Python
 alias py='python3'
-alias pip='pip3'
+# Note: pip='pip3' alias is commented out because it conflicts with pyenv lazy loading
+# If you don't use pyenv, you can uncomment this:
+# alias pip='pip3'
 alias venv='python3 -m venv venv'
 alias activate='source venv/bin/activate'
 alias pipreq='pip freeze > requirements.txt'
