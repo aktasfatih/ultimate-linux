@@ -107,16 +107,18 @@ zinit snippet OMZP::docker
 zinit ice wait'0a' lucid blockf atpull'zinit creinstall -q .'
 zinit light zsh-users/zsh-completions
 
-# Syntax highlighting (must load before history-substring-search)
-zinit ice wait'0b' lucid atinit'zpcompinit; zpcdreplay'
-zinit light zdharma-continuum/fast-syntax-highlighting
-
-# History substring search (must load AFTER syntax highlighting)
-zinit ice wait'0c' lucid atload'
+# History substring search (load first, before syntax highlighting wraps widgets)
+zinit ice wait'0b' lucid atload'
     bindkey "^[[A" history-substring-search-up
     bindkey "^[[B" history-substring-search-down
+    bindkey -M vicmd "k" history-substring-search-up
+    bindkey -M vicmd "j" history-substring-search-down
 '
 zinit light zsh-users/zsh-history-substring-search
+
+# Syntax highlighting (must load AFTER history-substring-search to properly wrap widgets)
+zinit ice wait'0c' lucid atinit'zpcompinit; zpcdreplay'
+zinit light zdharma-continuum/fast-syntax-highlighting
 
 # Autosuggestions (load last)
 zinit ice wait'0d' lucid atload'_zsh_autosuggest_start'

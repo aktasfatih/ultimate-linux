@@ -31,22 +31,10 @@ bindkey '^r' history-incremental-search-backward
 bindkey '^s' history-incremental-search-forward
 
 # Better history search with arrow keys
-autoload -U up-line-or-beginning-search
-autoload -U down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
-bindkey "^[[A" up-line-or-beginning-search
-bindkey "^[[B" down-line-or-beginning-search
+# Note: Arrow key bindings are configured in .zshrc when history-substring-search plugin loads
+# This ensures proper initialization order with syntax highlighting
 bindkey "^P" up-line-or-beginning-search
 bindkey "^N" down-line-or-beginning-search
-
-# Substring search (if plugin is loaded)
-if [[ -n "$ZSH_CUSTOM/plugins/zsh-history-substring-search" ]]; then
-    bindkey '^[[A' history-substring-search-up
-    bindkey '^[[B' history-substring-search-down
-    bindkey -M vicmd 'k' history-substring-search-up
-    bindkey -M vicmd 'j' history-substring-search-down
-fi
 
 # FZF key bindings
 if command -v fzf &> /dev/null; then

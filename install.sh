@@ -234,7 +234,7 @@ create_backup() {
 
     # List of files/dirs to backup
     local items_to_backup=(
-        ".zshrc" ".zshenv" ".zshrc.local"
+        ".zshrc" ".zshenv" ".zshrc.local" ".p10k.zsh"
         ".bashrc" ".bash_profile" ".bashrc.local"
         ".tmux.conf" ".tmux.clipboard.conf" ".tmux"
         ".config/nvim" ".config/zsh" ".config/shell" ".config/tmux"
@@ -366,7 +366,8 @@ install_shell_environment() {
     log INFO "Deploying Zsh configuration..."
     deploy_config "config/zsh/.zshrc" "$HOME/.zshrc"
     deploy_config "config/zsh/.zshenv" "$HOME/.zshenv"
-    
+    deploy_config "config/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
+
     # Deploy Zsh-specific configurations
     mkdir -p "$HOME/.config/zsh"
     mkdir -p "$HOME/.config/zsh/completions"  # Create completions directory
